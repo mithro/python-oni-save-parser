@@ -1,10 +1,9 @@
 """Tests for parser error types."""
 
-import pytest
 from oni_save_parser.parser.errors import (
+    CorruptionError,
     ParseError,
     VersionMismatchError,
-    CorruptionError,
 )
 
 

@@ -1,6 +1,7 @@
 """Binary parsing primitives for reading ONI save files."""
 
 import struct
+
 from .errors import CorruptionError
 
 

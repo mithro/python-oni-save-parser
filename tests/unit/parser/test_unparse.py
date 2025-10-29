@@ -62,7 +62,7 @@ def test_write_klei_string():
     """Should write length-prefixed UTF-8 string."""
     writer = BinaryWriter()
     writer.write_klei_string("Hello")
-    expected = struct.pack("<i", 5) + "Hello".encode("utf-8")
+    expected = struct.pack("<i", 5) + b"Hello"
     assert writer.data == expected
 
 

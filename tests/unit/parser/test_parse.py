@@ -1,9 +1,11 @@
 """Tests for binary parsing primitives."""
 
 import struct
+
 import pytest
-from oni_save_parser.parser.parse import BinaryParser
+
 from oni_save_parser.parser.errors import CorruptionError
+from oni_save_parser.parser.parse import BinaryParser
 
 
 def test_read_uint32():
@@ -69,7 +71,7 @@ def test_offset_tracking():
 def test_read_klei_string():
     """Should read length-prefixed UTF-8 string."""
     # String "Hello" = 5 bytes
-    data = struct.pack("<i", 5) + "Hello".encode("utf-8")
+    data = struct.pack("<i", 5) + b"Hello"
     parser = BinaryParser(data)
     assert parser.read_klei_string() == "Hello"
     assert parser.offset == 9  # 4 (length) + 5 (data)
