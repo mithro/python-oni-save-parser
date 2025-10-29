@@ -100,8 +100,8 @@ def create_test_save_game(compressed: bool = True) -> SaveGame:
         sim_data=sim_data,
         version_major=7,
         version_minor=35,
-        game_objects_data=b"\x00\x00\x00\x00",  # Placeholder
-        game_data_data=b"",  # Empty for now
+        game_objects=[],  # Empty game objects list
+        game_data=b"",  # Empty game data
     )
 
 
@@ -324,7 +324,8 @@ def test_round_trip_save_game_compressed():
     assert parsed.sim_data == original.sim_data
     assert parsed.version_major == original.version_major
     assert parsed.version_minor == original.version_minor
-    assert parsed.game_objects_data == original.game_objects_data
+    assert len(parsed.game_objects) == len(original.game_objects)
+    assert parsed.game_data == original.game_data
 
 
 def test_round_trip_save_game_uncompressed():

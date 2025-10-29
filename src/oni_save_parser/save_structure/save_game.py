@@ -7,6 +7,11 @@ from typing import Any
 from oni_save_parser.parser.errors import CorruptionError, VersionMismatchError
 from oni_save_parser.parser.parse import BinaryParser
 from oni_save_parser.parser.unparse import BinaryWriter
+from oni_save_parser.save_structure.game_objects import (
+    GameObjectGroup,
+    parse_game_objects,
+    unparse_game_objects,
+)
 from oni_save_parser.save_structure.header import SaveGameHeader, parse_header, unparse_header
 from oni_save_parser.save_structure.type_templates import (
     TypeTemplate,
@@ -31,8 +36,8 @@ class SaveGame:
     sim_data: bytes  # Simulation data (binary blob)
     version_major: int
     version_minor: int
-    game_objects_data: bytes  # Raw game objects data (to be parsed later)
-    game_data_data: bytes  # Raw game data (to be parsed later)
+    game_objects: list[GameObjectGroup]  # Game entities organized by prefab
+    game_data: bytes  # Additional game state (format TBD)
 
 
 def parse_save_game(
@@ -92,8 +97,8 @@ def parse_save_game(
         sim_data,
         version_major,
         version_minor,
-        game_objects_data,
-        game_data_data,
+        game_objects,
+        game_data,
     ) = _parse_save_body(body_parser, templates)
 
     return SaveGame(
@@ -104,19 +109,19 @@ def parse_save_game(
         sim_data=sim_data,
         version_major=version_major,
         version_minor=version_minor,
-        game_objects_data=game_objects_data,
-        game_data_data=game_data_data,
+        game_objects=game_objects,
+        game_data=game_data,
     )
 
 
 def _parse_save_body(
     parser: BinaryParser, templates: list[TypeTemplate]
-) -> tuple[dict[str, Any], dict[str, Any], bytes, int, int, bytes, bytes]:
+) -> tuple[dict[str, Any], dict[str, Any], bytes, int, int, list[GameObjectGroup], bytes]:
     """Parse save game body.
 
     Returns:
         Tuple of (world, settings, sim_data, version_major, version_minor,
-                  game_objects_data, game_data_data)
+                  game_objects, game_data)
     """
     # Expect "world" marker
     world_marker = parser.read_klei_string()
@@ -164,12 +169,12 @@ def _parse_save_body(
     version_major = parser.read_int32()
     version_minor = parser.read_int32()
 
-    # Game objects - remaining data for now
-    # TODO: Implement game objects parser
-    remaining_start = parser.offset
-    # For now, just capture all remaining data
-    game_objects_data = parser.data[remaining_start:]
-    game_data_data = b""
+    # Parse game objects
+    game_objects = parse_game_objects(parser, templates)
+
+    # Game data - remaining data
+    # TODO: Implement game data parser (Phase 4.3)
+    game_data = parser.data[parser.offset :]
 
     return (
         world,
@@ -177,8 +182,8 @@ def _parse_save_body(
         sim_data,
         version_major,
         version_minor,
-        game_objects_data,
-        game_data_data,
+        game_objects,
+        game_data,
     )
 
 
@@ -238,7 +243,7 @@ def _unparse_save_body(writer: BinaryWriter, save_game: SaveGame) -> None:
     writer.write_int32(save_game.version_minor)
 
     # Game objects
-    writer.write_bytes(save_game.game_objects_data)
+    unparse_game_objects(writer, save_game.templates, save_game.game_objects)
 
     # Game data
-    writer.write_bytes(save_game.game_data_data)
+    writer.write_bytes(save_game.game_data)
