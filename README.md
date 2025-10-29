@@ -252,6 +252,9 @@ uv run pytest tests/ -v
 # Run tests with coverage
 uv run pytest tests/ --cov=src/oni_save_parser --cov-report=term-missing
 
+# Run performance benchmarks
+uv run pytest tests/benchmark --benchmark-only
+
 # Type checking
 uv run mypy src/oni_save_parser
 
@@ -260,6 +263,20 @@ uv run ruff format src/ tests/
 
 # Lint
 uv run ruff check src/ tests/
+```
+
+### Performance Benchmarks
+
+The project includes comprehensive performance benchmarks to track performance over time:
+
+- **API operations**: ~400-700ns (colony info, prefab counts)
+- **Small saves** (125 objects): ~600μs parse, ~850μs serialize
+- **Medium saves** (1,110 objects): ~5.5ms parse, ~3.2ms serialize
+- **Large saves** (5,520 objects): ~30ms parse, ~15ms serialize
+
+Run benchmarks with statistics:
+```bash
+uv run pytest tests/benchmark --benchmark-only --benchmark-columns=min,mean,max,stddev
 ```
 
 ## Project Status
