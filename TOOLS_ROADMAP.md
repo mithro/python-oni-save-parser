@@ -30,35 +30,30 @@ python examples/geyser_info.py MySave.sav --list-prefabs
 python examples/geyser_info.py MySave.sav --json
 ```
 
+### ✅ Duplicant Analyzer (COMPLETE)
+**File**: `examples/duplicant_info.py`
+**Status**: Complete
+**Description**: Analyze duplicant data including name, traits, skills, stress, health, location, and current task
+
+**Implemented Features**:
+- List all duplicants with names
+- Display gender and personality types
+- Show duplicant positions
+- List behavior components
+- JSON output support
+- 6 tests, 100% coverage
+
+**Usage**:
+```bash
+python examples/duplicant_info.py MySave.sav
+python examples/duplicant_info.py MySave.sav --json
+```
+
+**Note**: Currently extracts MinionIdentity data. Future enhancements can add traits, skills, stress, health parsing as needed.
+
 ---
 
 ## Planned Tools (Priority Order)
-
-### 📋 1. Duplicant Analyzer
-**File**: `examples/duplicant_info.py`
-**Priority**: High
-**Status**: Planned
-**Description**: Analyze duplicant data including name, traits, skills, stress, health, location, and current task
-
-**Planned Features**:
-- List all duplicants with basic info
-- Show detailed traits and skills
-- Display stress levels and morale
-- Show health status and conditions
-- Display current location
-- Show current task/activity
-- Filter by trait, skill, or status
-- JSON output support
-
-**Behavior Components to Parse**:
-- `MinionIdentity` - Name and personality
-- `AttributeLevels` - Skills and attributes
-- `Traits` - Duplicant traits
-- `Health` - Health status
-- `MinionModifiers` - Active effects
-- `ChoreConsumer` - Current task
-
-**Estimated Complexity**: Medium
 
 ---
 
@@ -277,7 +272,7 @@ All tools should include:
 | Tool | Status | Tests | Coverage | Priority |
 |------|--------|-------|----------|----------|
 | Geyser Info | ✅ Complete | 7 | 100% | - |
-| Duplicant Analyzer | 📋 Planned | - | - | High |
+| Duplicant Analyzer | ✅ Complete | 6 | 100% | - |
 | Resource Counter | 📋 Planned | - | - | High |
 | Power Grid Analyzer | 📋 Planned | - | - | High |
 | Colony Dashboard | 📋 Planned | - | - | High |

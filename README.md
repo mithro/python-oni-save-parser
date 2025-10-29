@@ -97,6 +97,15 @@ python examples/geyser_info.py MyBase.sav --prefab GeyserGeneric_steam
 python examples/geyser_info.py MyBase.sav --json
 ```
 
+**Duplicant Analyzer** - Extract duplicant data:
+```bash
+# Show all duplicants with details
+python examples/duplicant_info.py MyBase.sav
+
+# JSON output
+python examples/duplicant_info.py MyBase.sav --json
+```
+
 See [examples/README.md](examples/README.md) for more scripts and usage examples.
 
 ## API Reference

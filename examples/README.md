@@ -52,6 +52,29 @@ JSON output:
 uv run python examples/geyser_info.py MySave.sav --json
 ```
 
+### duplicant_info.py
+
+Extract and display detailed duplicant information.
+
+**Features:**
+- List all duplicants with names
+- Display gender and personality types
+- Show duplicant positions
+- List behavior components
+- JSON output support
+
+**Usage:**
+
+Show all duplicants:
+```bash
+uv run python examples/duplicant_info.py MySave.sav
+```
+
+JSON output:
+```bash
+uv run python examples/duplicant_info.py MySave.sav --json
+```
+
 ## Creating Your Own Scripts
 
 Basic template:
