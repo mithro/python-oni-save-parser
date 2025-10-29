@@ -279,7 +279,7 @@ def test_main_version(capsys):
         assert exc_info.value.code == 0
 
     captured = capsys.readouterr()
-    assert "0.4.0" in captured.out
+    assert "1.0.0" in captured.out
 
 
 def test_main_help(capsys):
