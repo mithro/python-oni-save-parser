@@ -78,6 +78,27 @@ python -m oni_save_parser prefabs MyBase.sav
 python -m oni_save_parser prefabs MyBase.sav --counts
 ```
 
+### Example Scripts
+
+Additional tools in the `examples/` directory:
+
+**Geyser Information Tool** - Extract and display geyser data:
+```bash
+# List all geyser types in save
+python examples/geyser_info.py MyBase.sav --list-prefabs
+
+# Show all geysers with details
+python examples/geyser_info.py MyBase.sav
+
+# Filter to specific geyser type
+python examples/geyser_info.py MyBase.sav --prefab GeyserGeneric_steam
+
+# JSON output
+python examples/geyser_info.py MyBase.sav --json
+```
+
+See [examples/README.md](examples/README.md) for more scripts and usage examples.
+
 ## API Reference
 
 ### High-Level Functions
