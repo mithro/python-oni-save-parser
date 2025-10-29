@@ -64,3 +64,54 @@ def test_offset_tracking():
     assert parser.offset == 1
     parser.read_uint32()
     assert parser.offset == 5
+
+
+def test_read_klei_string():
+    """Should read length-prefixed UTF-8 string."""
+    # String "Hello" = 5 bytes
+    data = struct.pack("<i", 5) + "Hello".encode("utf-8")
+    parser = BinaryParser(data)
+    assert parser.read_klei_string() == "Hello"
+    assert parser.offset == 9  # 4 (length) + 5 (data)
+
+
+def test_read_klei_string_empty():
+    """Should handle empty string."""
+    data = struct.pack("<i", 0)
+    parser = BinaryParser(data)
+    assert parser.read_klei_string() == ""
+    assert parser.offset == 4
+
+
+def test_read_klei_string_unicode():
+    """Should handle unicode characters."""
+    text = "Hello 世界"
+    encoded = text.encode("utf-8")
+    data = struct.pack("<i", len(encoded)) + encoded
+    parser = BinaryParser(data)
+    assert parser.read_klei_string() == text
+
+
+def test_read_klei_string_null():
+    """Should return None for null marker (-1)."""
+    data = struct.pack("<i", -1)
+    parser = BinaryParser(data)
+    assert parser.read_klei_string() is None
+    assert parser.offset == 4
+
+
+def test_read_klei_string_invalid_negative():
+    """Should raise CorruptionError for invalid negative lengths."""
+    data = struct.pack("<i", -2)
+    parser = BinaryParser(data)
+    with pytest.raises(CorruptionError, match="Invalid string length -2"):
+        parser.read_klei_string()
+
+
+def test_read_klei_string_truncated():
+    """Should raise CorruptionError when string data is truncated."""
+    # Length says 10 bytes but only 5 are available
+    data = struct.pack("<i", 10) + b"Hello"
+    parser = BinaryParser(data)
+    with pytest.raises(CorruptionError, match="Unexpected end"):
+        parser.read_klei_string()

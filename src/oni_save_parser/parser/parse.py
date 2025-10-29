@@ -81,3 +81,27 @@ class BinaryParser:
             ASCII string
         """
         return self.read_bytes(count).decode("ascii")
+
+    def read_klei_string(self) -> str | None:
+        """Read length-prefixed UTF-8 string (ONI format).
+
+        Format: [int32 length][UTF-8 bytes]
+        Special: length of -1 indicates null string
+
+        Returns:
+            Decoded UTF-8 string, or None if null marker (-1)
+
+        Raises:
+            CorruptionError: If length is invalid (< -1)
+        """
+        length = self.read_int32()
+        if length == -1:
+            return None
+        if length == 0:
+            return ""
+        if length < 0:
+            raise CorruptionError(
+                f"Invalid string length {length} (must be >= -1)",
+                offset=self.offset - 4,
+            )
+        return self.read_bytes(length).decode("utf-8")
