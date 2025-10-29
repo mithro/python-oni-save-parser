@@ -15,6 +15,11 @@ class BinaryWriter:
         """Get accumulated binary data."""
         return b"".join(self._buffer)
 
+    @property
+    def position(self) -> int:
+        """Get current write position (total bytes written)."""
+        return len(self.data)
+
     def write_uint32(self, value: int) -> None:
         """Write unsigned 32-bit integer (little-endian)."""
         self._buffer.append(struct.pack("<I", value))
@@ -26,6 +31,10 @@ class BinaryWriter:
     def write_byte(self, value: int) -> None:
         """Write single unsigned byte."""
         self._buffer.append(struct.pack("B", value))
+
+    def write_sbyte(self, value: int) -> None:
+        """Write single signed byte."""
+        self._buffer.append(struct.pack("b", value))
 
     def write_bytes(self, value: bytes) -> None:
         """Write raw bytes."""
@@ -77,3 +86,13 @@ class BinaryWriter:
     def write_boolean(self, value: bool) -> None:
         """Write boolean as single byte."""
         self.write_byte(1 if value else 0)
+
+    def write_with_length(self, data: bytes) -> None:
+        """Write data with int32 length prefix.
+
+        Format: [int32 length][data bytes]
+        This is used for object serialization with data-length tracking.
+        """
+        self.write_int32(len(data))
+        if data:
+            self.write_bytes(data)

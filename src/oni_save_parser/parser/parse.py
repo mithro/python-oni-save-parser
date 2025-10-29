@@ -75,6 +75,10 @@ class BinaryParser:
         """Read single unsigned byte."""
         return self._read_struct("B", 1)[0]
 
+    def read_sbyte(self) -> int:
+        """Read single signed byte."""
+        return self._read_struct("b", 1)[0]
+
     def read_bytes(self, count: int) -> bytes:
         """Read raw bytes.
 
