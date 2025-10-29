@@ -34,3 +34,46 @@ class BinaryWriter:
     def write_chars(self, value: str) -> None:
         """Write ASCII string (no length prefix)."""
         self._buffer.append(value.encode("ascii"))
+
+    def write_klei_string(self, value: str | None) -> None:
+        """Write length-prefixed UTF-8 string (ONI format).
+
+        Format: [int32 length][UTF-8 bytes]
+        Special: None writes -1 marker for null string
+        """
+        if value is None:
+            self.write_int32(-1)
+            return
+
+        encoded = value.encode("utf-8")
+        self.write_int32(len(encoded))
+        if encoded:
+            self.write_bytes(encoded)
+
+    def write_uint16(self, value: int) -> None:
+        """Write unsigned 16-bit integer (little-endian)."""
+        self._buffer.append(struct.pack("<H", value))
+
+    def write_int16(self, value: int) -> None:
+        """Write signed 16-bit integer (little-endian)."""
+        self._buffer.append(struct.pack("<h", value))
+
+    def write_uint64(self, value: int) -> None:
+        """Write unsigned 64-bit integer (little-endian)."""
+        self._buffer.append(struct.pack("<Q", value))
+
+    def write_int64(self, value: int) -> None:
+        """Write signed 64-bit integer (little-endian)."""
+        self._buffer.append(struct.pack("<q", value))
+
+    def write_single(self, value: float) -> None:
+        """Write 32-bit floating point (little-endian)."""
+        self._buffer.append(struct.pack("<f", value))
+
+    def write_double(self, value: float) -> None:
+        """Write 64-bit floating point (little-endian)."""
+        self._buffer.append(struct.pack("<d", value))
+
+    def write_boolean(self, value: bool) -> None:
+        """Write boolean as single byte."""
+        self.write_byte(1 if value else 0)
