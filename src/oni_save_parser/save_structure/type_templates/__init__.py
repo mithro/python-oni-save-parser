@@ -1,5 +1,12 @@
 """KSerialization type template system."""
 
+from .template_parser import (
+    parse_template,
+    parse_templates,
+    unparse_template,
+    unparse_templates,
+    validate_dotnet_identifier_name,
+)
 from .type_info_parser import parse_type_info, unparse_type_info
 from .types import (
     GENERIC_TYPES,
@@ -25,4 +32,9 @@ __all__ = [
     "GENERIC_TYPES",
     "parse_type_info",
     "unparse_type_info",
+    "parse_template",
+    "parse_templates",
+    "unparse_template",
+    "unparse_templates",
+    "validate_dotnet_identifier_name",
 ]
