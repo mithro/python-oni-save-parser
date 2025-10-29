@@ -1,20 +1,26 @@
 [project]
 name = "oni-save-parser"
-version = "0.1.0"
+version = "1.0.0"
 description = "Parser for Oxygen Not Included save files"
 authors = [{name = "ONI Save Parser Contributors"}]
 readme = "README.md"
 requires-python = ">=3.12"
 license = {text = "MIT"}
-keywords = ["oni", "oxygen-not-included", "save-parser"]
+keywords = ["oni", "oxygen-not-included", "save-parser", "game", "parser"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Games/Entertainment",
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
 dependencies = []
+
+[project.scripts]
+oni-save-parser = "oni_save_parser.__main__:main"
 
 [project.optional-dependencies]
 dev = [
