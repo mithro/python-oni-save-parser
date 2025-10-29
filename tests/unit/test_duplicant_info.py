@@ -50,23 +50,99 @@ def create_save_with_duplicants(path: Path) -> None:
             fields=[TypeTemplateMember(name="difficulty", type=TypeInfo(info=6))],
             properties=[],
         ),
+        TypeTemplate(
+            name="MinionIdentity",
+            fields=[
+                TypeTemplateMember(name="name", type=TypeInfo(info=12)),
+                TypeTemplateMember(name="nameStringKey", type=TypeInfo(info=12)),
+                TypeTemplateMember(name="gender", type=TypeInfo(info=12)),
+                TypeTemplateMember(name="genderStringKey", type=TypeInfo(info=12)),
+                TypeTemplateMember(name="personalityResourceId", type=TypeInfo(info=12)),
+                TypeTemplateMember(name="voicePitch", type=TypeInfo(info=10)),
+            ],
+            properties=[],
+        ),
     ]
 
     world = {"buildVersion": 555555}
     settings = {"difficulty": 2}
 
-    # Create duplicant object with behaviors
-    dup_obj = GameObject(
+    # Create duplicants with MinionIdentity behavior
+    dup1 = GameObject(
         position=Vector3(x=100.0, y=50.0, z=0.0),
         rotation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
         scale=Vector3(x=1.0, y=1.0, z=1.0),
         folder=0,
-        behaviors=[],
+        behaviors=[
+            GameObjectBehavior(
+                name="MinionIdentity",
+                template_data={
+                    "name": "Meep",
+                    "nameStringKey": "STRINGS.DUPLICANTS.NAME.MEEP",
+                    "gender": "NB",
+                    "genderStringKey": "STRINGS.DUPLICANTS.GENDER.NB",
+                    "personalityResourceId": "DUPLICANT_PERSONALITY_LONER",
+                    "voicePitch": 1.0,
+                },
+                extra_data=None,
+                extra_raw=b"",
+            )
+        ],
+    )
+
+    dup2 = GameObject(
+        position=Vector3(x=110.0, y=50.0, z=0.0),
+        rotation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
+        scale=Vector3(x=1.0, y=1.0, z=1.0),
+        folder=0,
+        behaviors=[
+            GameObjectBehavior(
+                name="MinionIdentity",
+                template_data={
+                    "name": "Devon",
+                    "nameStringKey": "STRINGS.DUPLICANTS.NAME.DEVON",
+                    "gender": "M",
+                    "genderStringKey": "STRINGS.DUPLICANTS.GENDER.M",
+                    "personalityResourceId": "DUPLICANT_PERSONALITY_BUILDER",
+                    "voicePitch": 0.8,
+                },
+                extra_data=None,
+                extra_raw=b"",
+            )
+        ],
+    )
+
+    dup3 = GameObject(
+        position=Vector3(x=120.0, y=50.0, z=0.0),
+        rotation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
+        scale=Vector3(x=1.0, y=1.0, z=1.0),
+        folder=0,
+        behaviors=[
+            GameObjectBehavior(
+                name="MinionIdentity",
+                template_data={
+                    "name": "Catalina",
+                    "nameStringKey": "STRINGS.DUPLICANTS.NAME.CATALINA",
+                    "gender": "F",
+                    "genderStringKey": "STRINGS.DUPLICANTS.GENDER.F",
+                    "personalityResourceId": "DUPLICANT_PERSONALITY_RESEARCHER",
+                    "voicePitch": 1.2,
+                },
+                extra_data=None,
+                extra_raw=b"",
+            )
+        ],
     )
 
     game_objects = [
-        GameObjectGroup(prefab_name="Minion", objects=[dup_obj] * 3),
-        GameObjectGroup(prefab_name="Tile", objects=[dup_obj] * 10),
+        GameObjectGroup(prefab_name="Minion", objects=[dup1, dup2, dup3]),
+        GameObjectGroup(prefab_name="Tile", objects=[GameObject(
+            position=Vector3(x=0.0, y=0.0, z=0.0),
+            rotation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
+            scale=Vector3(x=1.0, y=1.0, z=1.0),
+            folder=0,
+            behaviors=[],
+        )] * 10),
     ]
 
     save_game = SaveGame(
@@ -110,3 +186,20 @@ def test_duplicant_info_list_duplicants(tmp_path: Path):
 
     assert result.returncode == 0
     assert "Found 3 duplicants" in result.stdout or "3 duplicants" in result.stdout.lower()
+
+
+def test_duplicant_info_shows_names(tmp_path: Path):
+    """Should show duplicant names."""
+    save_path = tmp_path / "test.sav"
+    create_save_with_duplicants(save_path)
+
+    result = subprocess.run(
+        [sys.executable, "examples/duplicant_info.py", str(save_path)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    assert "Meep" in result.stdout
+    assert "Devon" in result.stdout
+    assert "Catalina" in result.stdout
