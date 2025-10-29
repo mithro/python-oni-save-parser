@@ -95,3 +95,18 @@ def test_duplicant_info_help():
 
     assert result.returncode == 0
     assert "Extract duplicant information" in result.stdout
+
+
+def test_duplicant_info_list_duplicants(tmp_path: Path):
+    """Should list all duplicants."""
+    save_path = tmp_path / "test.sav"
+    create_save_with_duplicants(save_path)
+
+    result = subprocess.run(
+        [sys.executable, "examples/duplicant_info.py", str(save_path)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    assert "Found 3 duplicants" in result.stdout or "3 duplicants" in result.stdout.lower()
