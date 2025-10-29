@@ -115,3 +115,55 @@ def test_read_klei_string_truncated():
     parser = BinaryParser(data)
     with pytest.raises(CorruptionError, match="Unexpected end"):
         parser.read_klei_string()
+
+
+def test_read_uint16():
+    """Should read unsigned 16-bit integer."""
+    data = struct.pack("<H", 0x1234)
+    parser = BinaryParser(data)
+    assert parser.read_uint16() == 0x1234
+
+
+def test_read_int16():
+    """Should read signed 16-bit integer."""
+    data = struct.pack("<h", -1000)
+    parser = BinaryParser(data)
+    assert parser.read_int16() == -1000
+
+
+def test_read_uint64():
+    """Should read unsigned 64-bit integer."""
+    data = struct.pack("<Q", 0x123456789ABCDEF0)
+    parser = BinaryParser(data)
+    assert parser.read_uint64() == 0x123456789ABCDEF0
+
+
+def test_read_int64():
+    """Should read signed 64-bit integer."""
+    data = struct.pack("<q", -9876543210)
+    parser = BinaryParser(data)
+    assert parser.read_int64() == -9876543210
+
+
+def test_read_single():
+    """Should read 32-bit float."""
+    data = struct.pack("<f", 3.14159)
+    parser = BinaryParser(data)
+    result = parser.read_single()
+    assert abs(result - 3.14159) < 0.00001
+
+
+def test_read_double():
+    """Should read 64-bit double."""
+    data = struct.pack("<d", 3.141592653589793)
+    parser = BinaryParser(data)
+    result = parser.read_double()
+    assert abs(result - 3.141592653589793) < 0.0000000000001
+
+
+def test_read_boolean():
+    """Should read boolean as byte."""
+    data = b"\x01\x00"
+    parser = BinaryParser(data)
+    assert parser.read_boolean() is True
+    assert parser.read_boolean() is False

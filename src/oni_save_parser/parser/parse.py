@@ -46,6 +46,30 @@ class BinaryParser:
         """Read signed 32-bit integer (little-endian)."""
         return self._read_struct("<i", 4)[0]
 
+    def read_uint16(self) -> int:
+        """Read unsigned 16-bit integer (little-endian)."""
+        return self._read_struct("<H", 2)[0]
+
+    def read_int16(self) -> int:
+        """Read signed 16-bit integer (little-endian)."""
+        return self._read_struct("<h", 2)[0]
+
+    def read_uint64(self) -> int:
+        """Read unsigned 64-bit integer (little-endian)."""
+        return self._read_struct("<Q", 8)[0]
+
+    def read_int64(self) -> int:
+        """Read signed 64-bit integer (little-endian)."""
+        return self._read_struct("<q", 8)[0]
+
+    def read_single(self) -> float:
+        """Read 32-bit floating point (little-endian)."""
+        return self._read_struct("<f", 4)[0]
+
+    def read_double(self) -> float:
+        """Read 64-bit floating point (little-endian)."""
+        return self._read_struct("<d", 8)[0]
+
     def read_byte(self) -> int:
         """Read single unsigned byte."""
         return self._read_struct("B", 1)[0]
@@ -81,6 +105,10 @@ class BinaryParser:
             ASCII string
         """
         return self.read_bytes(count).decode("ascii")
+
+    def read_boolean(self) -> bool:
+        """Read boolean as single byte."""
+        return self.read_byte() != 0
 
     def read_klei_string(self) -> str | None:
         """Read length-prefixed UTF-8 string (ONI format).
