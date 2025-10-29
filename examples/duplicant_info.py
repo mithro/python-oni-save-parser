@@ -5,6 +5,7 @@ including their name, traits, skills, stress, health, and current activities.
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -49,6 +50,7 @@ def main() -> int:
         description="Extract duplicant information from ONI save files"
     )
     parser.add_argument("save_file", type=Path, help="Path to .sav file")
+    parser.add_argument("--json", action="store_true", help="Output as JSON")
 
     args = parser.parse_args()
 
@@ -61,17 +63,23 @@ def main() -> int:
         save = load_save_file(args.save_file)
         duplicants = get_game_objects_by_prefab(save, "Minion")
 
-        print(f"Found {len(duplicants)} duplicants\n")
+        # Extract info for all duplicants
+        dup_info_list = [extract_duplicant_info(dup) for dup in duplicants]
 
-        for idx, dup in enumerate(duplicants, 1):
-            info = extract_duplicant_info(dup)
+        if args.json:
+            # JSON output
+            print(json.dumps(dup_info_list, indent=2, default=str))
+        else:
+            # Text output
+            print(f"Found {len(duplicants)} duplicants\n")
 
-            print(f"=== Duplicant #{idx}: {info['name']} ===")
-            print(f"Gender: {info['gender']}")
-            print(f"Personality: {info['personality'].replace('DUPLICANT_PERSONALITY_', '')}")
-            print(f"Position: ({info['position'][0]:.1f}, {info['position'][1]:.1f})")
-            print(f"Behaviors: {', '.join(info['behaviors'])}")
-            print()
+            for idx, info in enumerate(dup_info_list, 1):
+                print(f"=== Duplicant #{idx}: {info['name']} ===")
+                print(f"Gender: {info['gender']}")
+                print(f"Personality: {info['personality'].replace('DUPLICANT_PERSONALITY_', '')}")
+                print(f"Position: ({info['position'][0]:.1f}, {info['position'][1]:.1f})")
+                print(f"Behaviors: {', '.join(info['behaviors'])}")
+                print()
 
         return 0
 

@@ -203,3 +203,26 @@ def test_duplicant_info_shows_names(tmp_path: Path):
     assert "Meep" in result.stdout
     assert "Devon" in result.stdout
     assert "Catalina" in result.stdout
+
+
+def test_duplicant_info_json_output(tmp_path: Path):
+    """Should output duplicant info as JSON."""
+    save_path = tmp_path / "test.sav"
+    create_save_with_duplicants(save_path)
+
+    result = subprocess.run(
+        [sys.executable, "examples/duplicant_info.py", str(save_path), "--json"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+
+    import json
+    data = json.loads(result.stdout)
+
+    assert isinstance(data, list)
+    assert len(data) == 3
+    assert data[0]["name"] == "Meep"
+    assert data[1]["name"] == "Devon"
+    assert data[2]["name"] == "Catalina"
