@@ -7,7 +7,6 @@ including their name, traits, skills, stress, health, and current activities.
 import argparse
 import sys
 from pathlib import Path
-from typing import Any
 
 from oni_save_parser import get_game_objects_by_prefab, load_save_file
 
