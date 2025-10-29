@@ -226,3 +226,78 @@ def test_duplicant_info_json_output(tmp_path: Path):
     assert data[0]["name"] == "Meep"
     assert data[1]["name"] == "Devon"
     assert data[2]["name"] == "Catalina"
+
+
+def test_duplicant_info_file_not_found():
+    """Should handle missing file gracefully."""
+    result = subprocess.run(
+        [sys.executable, "examples/duplicant_info.py", "nonexistent.sav"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "Error" in result.stderr
+
+
+def test_duplicant_info_no_duplicants(tmp_path: Path):
+    """Should handle save with no duplicants."""
+    save_path = tmp_path / "test.sav"
+
+    # Create save without duplicants
+    game_info = SaveGameInfo(
+        number_of_cycles=1,
+        number_of_duplicants=0,
+        base_name="Empty",
+        is_auto_save=False,
+        original_save_name="Empty",
+        save_major_version=7,
+        save_minor_version=35,
+        cluster_id="vanilla",
+        sandbox_enabled=False,
+        colony_guid="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+        dlc_id="",
+    )
+    header = SaveGameHeader(
+        build_version=555555,
+        header_version=1,
+        is_compressed=True,
+        game_info=game_info,
+    )
+
+    templates = [
+        TypeTemplate(
+            name="Klei.SaveFileRoot",
+            fields=[TypeTemplateMember(name="buildVersion", type=TypeInfo(info=6))],
+            properties=[],
+        ),
+        TypeTemplate(
+            name="Game+Settings",
+            fields=[TypeTemplateMember(name="difficulty", type=TypeInfo(info=6))],
+            properties=[],
+        ),
+    ]
+
+    save_game = SaveGame(
+        header=header,
+        templates=templates,
+        world={"buildVersion": 555555},
+        settings={"difficulty": 2},
+        sim_data=b"\\x00" * 100,
+        version_major=7,
+        version_minor=35,
+        game_objects=[],
+        game_data=b"",
+    )
+
+    data = unparse_save_game(save_game)
+    save_path.write_bytes(data)
+
+    result = subprocess.run(
+        [sys.executable, "examples/duplicant_info.py", str(save_path)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    assert "Found 0 duplicants" in result.stdout or "No duplicants found" in result.stdout
