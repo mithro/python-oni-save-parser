@@ -112,6 +112,21 @@ uv run python examples/duplicant_info.py MyBase.sav
 uv run python examples/duplicant_info.py MyBase.sav --json
 ```
 
+#### Colony Scanner (`colony_scanner.py`)
+
+Scan directories for save files and display colony status overview table.
+
+```bash
+# Scan default ONI save directory
+uv run python examples/colony_scanner.py
+
+# Scan custom directory
+uv run python examples/colony_scanner.py /path/to/saves
+
+# JSON output
+uv run python examples/colony_scanner.py --json
+```
+
 #### Basic Usage Examples (`basic_usage.py`)
 
 Comprehensive examples demonstrating all major library features.

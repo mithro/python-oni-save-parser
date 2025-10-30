@@ -75,6 +75,34 @@ JSON output:
 uv run python examples/duplicant_info.py MySave.sav --json
 ```
 
+### colony_scanner.py
+
+Scan directories for ONI save files and display colony status overview.
+
+**Features:**
+- Automatically scans default ONI save directory
+- Displays table of all colonies with key stats
+- Shows colony name, cycle, duplicant count, last modified date
+- Supports custom directory scanning
+- JSON output for integration with other tools
+
+**Usage:**
+
+Scan default ONI save directory:
+```bash
+uv run python examples/colony_scanner.py
+```
+
+Scan custom directory:
+```bash
+uv run python examples/colony_scanner.py /path/to/save/directory
+```
+
+JSON output:
+```bash
+uv run python examples/colony_scanner.py --json
+```
+
 ## Creating Your Own Scripts
 
 Basic template:
