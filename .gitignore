@@ -1,6 +1,12 @@
 # Worktrees directory
 .worktrees/
 
+# Claude Code local settings
+.claude/
+
+# TypeScript implementation (this is Python port)
+oni-save-parser/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
