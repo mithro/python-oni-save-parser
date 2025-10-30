@@ -66,47 +66,62 @@ for minion in minions:
 
 ```bash
 # Display colony information
-python -m oni_save_parser info MyBase.sav
+uv run python -m oni_save_parser info MyBase.sav
 
 # Output as JSON
-python -m oni_save_parser info MyBase.sav --json
+uv run python -m oni_save_parser info MyBase.sav --json
 
 # List all prefab types
-python -m oni_save_parser prefabs MyBase.sav
+uv run python -m oni_save_parser prefabs MyBase.sav
 
 # Show object counts by prefab
-python -m oni_save_parser prefabs MyBase.sav --counts
+uv run python -m oni_save_parser prefabs MyBase.sav --counts
 ```
 
 ### Example Scripts
 
-Additional tools in the `examples/` directory:
+Additional analysis tools in the `examples/` directory:
 
-**Geyser Information Tool** - Extract and display geyser data:
+#### Geyser Information Tool (`geyser_info.py`)
+
+Extract and display detailed geyser information including positions, emission rates, and dormancy cycles.
+
 ```bash
 # List all geyser types in save
-python examples/geyser_info.py MyBase.sav --list-prefabs
+uv run python examples/geyser_info.py MyBase.sav --list-prefabs
 
 # Show all geysers with details
-python examples/geyser_info.py MyBase.sav
+uv run python examples/geyser_info.py MyBase.sav
 
 # Filter to specific geyser type
-python examples/geyser_info.py MyBase.sav --prefab GeyserGeneric_steam
+uv run python examples/geyser_info.py MyBase.sav --prefab GeyserGeneric_steam
 
 # JSON output
-python examples/geyser_info.py MyBase.sav --json
+uv run python examples/geyser_info.py MyBase.sav --json
 ```
 
-**Duplicant Analyzer** - Extract duplicant data:
+#### Duplicant Analyzer (`duplicant_info.py`)
+
+Extract duplicant information including names, personalities, gender, and positions.
+
 ```bash
 # Show all duplicants with details
-python examples/duplicant_info.py MyBase.sav
+uv run python examples/duplicant_info.py MyBase.sav
 
-# JSON output
-python examples/duplicant_info.py MyBase.sav --json
+# JSON output for integration with other tools
+uv run python examples/duplicant_info.py MyBase.sav --json
 ```
 
-See [examples/README.md](examples/README.md) for more scripts and usage examples.
+#### Basic Usage Examples (`basic_usage.py`)
+
+Comprehensive examples demonstrating all major library features.
+
+```bash
+# Run all examples
+uv run python examples/basic_usage.py path/to/save.sav
+```
+
+See [examples/README.md](examples/README.md) for detailed documentation and more usage examples.
 
 ## API Reference
 

@@ -11,7 +11,7 @@ from .api import (
 from .save_structure import SaveGame
 from .utils import get_sdbm32_lower_hash
 
-__version__ = "0.4.0"
+__version__ = "1.0.0"
 
 __all__ = [
     # High-level API

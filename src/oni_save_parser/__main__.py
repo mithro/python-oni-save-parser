@@ -69,7 +69,7 @@ def main() -> int:
         prog="oni-save-parser",
         description="Parse and analyze Oxygen Not Included save files",
     )
-    parser.add_argument("--version", action="version", version="%(prog)s 0.4.0")
+    parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
