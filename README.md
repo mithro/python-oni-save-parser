@@ -352,7 +352,7 @@ Contributions are welcome! Please:
 
 ## License
 
-MIT
+Apache License 2.0 - See [LICENSE](LICENSE) for details.
 
 ## Credits
 
