@@ -28,13 +28,14 @@ def get_default_save_directory() -> Path:
     return Path.home() / ".config/unity3d/Klei/Oxygen Not Included/cloud_save_files"
 
 
-def scan_save_files(directory: Path, recursive: bool = True, stream_output: bool = False) -> list[dict[str, Any]]:
+def scan_save_files(directory: Path, recursive: bool = True, stream_output: bool = False, limit: int | None = None) -> list[dict[str, Any]]:
     """Scan directory for save files and extract colony info.
 
     Args:
         directory: Directory to scan
         recursive: If True, scan subdirectories recursively
         stream_output: If True, print results as they're found
+        limit: If set, only process this many save files (for testing)
 
     Returns:
         List of dictionaries with colony information
@@ -53,6 +54,10 @@ def scan_save_files(directory: Path, recursive: bool = True, stream_output: bool
     all_save_paths = sorted(all_save_paths)
     total_files = len(all_save_paths)
 
+    # Apply limit if specified
+    if limit is not None and limit > 0:
+        all_save_paths = all_save_paths[:limit]
+
     # Count files per colony directory
     colony_file_counts: dict[str, int] = Counter()
     for p in all_save_paths:
@@ -62,6 +67,11 @@ def scan_save_files(directory: Path, recursive: bool = True, stream_output: bool
             colony_file_counts[colony_dir] += 1
         except ValueError:
             colony_file_counts[str(p.parent)] += 1
+
+    # Calculate width for progress display (based on max values)
+    max_colony_count = max(colony_file_counts.values()) if colony_file_counts else 0
+    total_width = len(str(total_files))
+    colony_width = len(str(max_colony_count))
 
     # Print header if streaming
     if stream_output:
@@ -108,9 +118,10 @@ def scan_save_files(directory: Path, recursive: bool = True, stream_output: bool
             # Print immediately if streaming
             if stream_output:
                 path_display = colony_info['path'] if colony_info['path'] else "."
-                # Progress string: "8/2804, 4/150 in colony"
-                colony_progress = f"{current_colony_counts[path_str]}/{colony_file_counts[path_str]}"
-                progress_str = f"{idx}/{total_files}, {colony_progress}"
+                # Fixed-width progress string: "   9/2804,  8/48" -> "1802/2804, 40/48"
+                colony_current = current_colony_counts[path_str]
+                colony_total = colony_file_counts[path_str]
+                progress_str = f"{idx:>{total_width}}/{total_files}, {colony_current:>{colony_width}}/{colony_total}"
 
                 print(
                     f"{colony_info['colony_name']:<30} "
@@ -183,6 +194,12 @@ def main() -> int:
         action="store_true",
         help="Do not scan subdirectories (default: recursive)",
     )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help=argparse.SUPPRESS,  # Hidden argument for testing
+    )
 
     args = parser.parse_args()
 
@@ -198,10 +215,10 @@ def main() -> int:
 
     # Use streaming output for text mode, buffered for JSON
     if args.json:
-        colonies = scan_save_files(save_dir, recursive=recursive, stream_output=False)
+        colonies = scan_save_files(save_dir, recursive=recursive, stream_output=False, limit=args.limit)
         print(json.dumps(colonies, indent=2))
     else:
-        colonies = scan_save_files(save_dir, recursive=recursive, stream_output=True)
+        colonies = scan_save_files(save_dir, recursive=recursive, stream_output=True, limit=args.limit)
         print(f"\nTotal: {len(colonies)} save files")
 
     return 0
