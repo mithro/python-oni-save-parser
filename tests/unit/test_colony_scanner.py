@@ -171,4 +171,4 @@ def test_colony_scanner_empty_directory(tmp_path: Path) -> None:
     )
 
     assert result.returncode == 0
-    assert "No save files found" in result.stdout
+    assert "Total: 0 save files" in result.stdout
