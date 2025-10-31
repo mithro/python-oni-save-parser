@@ -3,6 +3,7 @@ import pytest
 from oni_save_parser.extractors import extract_duplicant_skills
 from oni_save_parser.extractors import extract_duplicant_traits
 from oni_save_parser.extractors import extract_health_status
+from oni_save_parser.extractors import extract_attribute_levels
 
 
 def test_extract_duplicant_skills_returns_dict():
@@ -71,3 +72,32 @@ def test_extract_health_status_returns_dict():
     assert "state" in result
     assert result["state"] == "Alive"
     assert result["can_be_incapacitated"] is True
+
+
+def test_extract_attribute_levels_returns_dict():
+    """Test that extract_attribute_levels extracts health/stress values."""
+    # Mock Klei.AI.AttributeLevels behavior
+    class MockAttribute:
+        def __init__(self, attribute_id, value, max_value):
+            self.AttributeId = attribute_id
+            self.experience = value
+            self.experienceMax = max_value
+
+    class MockBehavior:
+        def __init__(self):
+            self.name = "Klei.AI.AttributeLevels"
+            self.template_data = {
+                "saveLoadLevels": [
+                    MockAttribute("HitPoints", 85.0, 100.0),
+                    MockAttribute("Stress", 12.0, 100.0),
+                    MockAttribute("QualityOfLife", 5.0, 100.0)
+                ]
+            }
+
+    behavior = MockBehavior()
+    result = extract_attribute_levels(behavior)
+
+    assert isinstance(result, dict)
+    assert result["HitPoints"]["current"] == 85.0
+    assert result["HitPoints"]["max"] == 100.0
+    assert result["Stress"]["current"] == 12.0
