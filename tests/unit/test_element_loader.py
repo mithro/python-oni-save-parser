@@ -1,5 +1,6 @@
 """Tests for element_loader module."""
 
+import logging
 from pathlib import Path
 from unittest.mock import mock_open, patch
 
@@ -39,3 +40,13 @@ def test_find_elements_path_returns_valid_path():
     # Function should return either a Path or None
     result = find_elements_path()
     assert result is None or isinstance(result, Path)
+
+
+def test_element_loader_handles_missing_files(caplog):
+    """Test graceful handling when YAML files don't exist."""
+    with caplog.at_level(logging.WARNING):
+        loader = ElementLoader(Path("/nonexistent/path"))
+        element = loader.get_element("Steam")
+
+    assert element is None
+    assert "Element data files not found" in caplog.text or len(loader._elements_cache) == 0

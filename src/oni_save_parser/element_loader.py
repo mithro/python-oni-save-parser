@@ -1,10 +1,13 @@
 """Load and cache element properties from ONI game data files."""
 
+import logging
 import os
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+logger = logging.getLogger(__name__)
 
 
 class ElementLoader:
@@ -22,21 +25,33 @@ class ElementLoader:
 
     def _load_elements(self) -> None:
         """Load all element data from YAML files."""
+        files_loaded = 0
+
         for filename in ["gas.yaml", "liquid.yaml"]:
             filepath = self._elements_path / filename
             if filepath.exists():
-                with open(filepath) as f:
-                    data = yaml.safe_load(f)
-                    if data and "elements" in data:
-                        for element in data["elements"]:
-                            element_id = element.get("elementId")
-                            if element_id:
-                                self._elements_cache[element_id] = {
-                                    "element_id": element_id,
-                                    "state": element.get("state"),
-                                    "specific_heat_capacity": element.get("specificHeatCapacity"),
-                                    "max_mass": element.get("maxMass"),
-                                }
+                try:
+                    with open(filepath, "r") as f:
+                        data = yaml.safe_load(f)
+                        if data and "elements" in data:
+                            for element in data["elements"]:
+                                element_id = element.get("elementId")
+                                if element_id:
+                                    self._elements_cache[element_id] = {
+                                        "element_id": element_id,
+                                        "state": element.get("state"),
+                                        "specific_heat_capacity": element.get("specificHeatCapacity"),
+                                        "max_mass": element.get("maxMass"),
+                                    }
+                    files_loaded += 1
+                except Exception as e:
+                    logger.warning(f"Failed to load {filename}: {e}")
+
+        if files_loaded == 0:
+            logger.warning(
+                f"Element data files not found at {self._elements_path}. "
+                "Thermal calculations will be unavailable."
+            )
 
     def get_element(self, element_id: str) -> dict[str, Any] | None:
         """Get element properties by ID.
