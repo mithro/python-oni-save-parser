@@ -1,5 +1,6 @@
 """Tests for resource_counter example script."""
 
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -216,3 +217,27 @@ def test_resource_counter_duplicant_detection(tmp_path: Path) -> None:
     assert result.returncode == 0
     # Fixture has no duplicants, so should show "0 duplicants"
     assert "duplicants" in result.stdout.lower()
+
+
+def test_resource_counter_json_output(tmp_path: Path) -> None:
+    """Should output resources as JSON."""
+    save_path = tmp_path / "test.sav"
+    create_save_with_resources(save_path)
+
+    result = subprocess.run(
+        [sys.executable, "examples/resource_counter.py", str(save_path), "--json"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+
+    data = json.loads(result.stdout)
+
+    # Should have storage, debris, and duplicants sections
+    assert "storage" in data
+    assert "debris" in data
+    assert "duplicants" in data
+
+    # Verify storage has 2 containers
+    assert len(data["storage"]) == 2

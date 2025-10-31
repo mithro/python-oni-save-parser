@@ -5,6 +5,7 @@ to provide a comprehensive inventory of all resources in your colony.
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -118,12 +119,30 @@ def find_duplicant_inventories(save: Any) -> list[dict[str, Any]]:
     return duplicant_items
 
 
+def format_json_output(containers: list[dict[str, Any]],
+                      debris: list[dict[str, Any]],
+                      duplicants: list[dict[str, Any]]) -> str:
+    """Format resources as JSON with comprehensive details."""
+    output = {
+        "storage": containers,
+        "debris": debris,
+        "duplicants": duplicants,
+        "summary": {
+            "total_storage_containers": len(containers),
+            "total_debris_items": len(debris),
+            "total_duplicants_carrying": len(duplicants)
+        }
+    }
+    return json.dumps(output, indent=2)
+
+
 def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Count resources in ONI save files by location and element type"
     )
     parser.add_argument("save_file", type=Path, help="Path to .sav file")
+    parser.add_argument("--json", action="store_true", help="Output as JSON")
 
     args = parser.parse_args()
 
@@ -137,17 +156,20 @@ def main() -> int:
         debris = find_debris(save)
         duplicants = find_duplicant_inventories(save)
 
-        print(f"Found {len(containers)} storage containers")
-        for container in containers:
-            print(f"  {container['prefab']}: {container['mass']:.1f} kg at {container['position']}")
+        if args.json:
+            print(format_json_output(containers, debris, duplicants))
+        else:
+            print(f"Found {len(containers)} storage containers")
+            for container in containers:
+                print(f"  {container['prefab']}: {container['mass']:.1f} kg at {container['position']}")
 
-        print(f"\nFound {len(debris)} debris items")
-        for item in debris:
-            print(f"  {item['prefab']}: {item['mass']:.1f} kg at {item['position']}")
+            print(f"\nFound {len(debris)} debris items")
+            for item in debris:
+                print(f"  {item['prefab']}: {item['mass']:.1f} kg at {item['position']}")
 
-        print(f"\nFound {len(duplicants)} duplicants carrying items")
-        for dup in duplicants:
-            print(f"  {dup['duplicant']}: {dup['mass']:.1f} kg at {dup['position']}")
+            print(f"\nFound {len(duplicants)} duplicants carrying items")
+            for dup in duplicants:
+                print(f"  {dup['duplicant']}: {dup['mass']:.1f} kg at {dup['position']}")
 
         return 0
     except Exception as e:
