@@ -189,7 +189,7 @@ def test_duplicant_info_list_duplicants(tmp_path: Path):
 
 
 def test_duplicant_info_shows_names(tmp_path: Path):
-    """Should show duplicant names."""
+    """Should show duplicant names in new compact format."""
     save_path = tmp_path / "test.sav"
     create_save_with_duplicants(save_path)
 
@@ -204,6 +204,34 @@ def test_duplicant_info_shows_names(tmp_path: Path):
     assert "Devon" in result.stdout
     assert "Catalina" in result.stdout
 
+    # Check for new compact format elements
+    assert "=== Duplicant:" in result.stdout
+    assert "Gender:" in result.stdout
+
+    # Behaviors should NOT be in default output
+    assert "Behaviors:" not in result.stdout
+
+
+def test_duplicant_info_debug_mode(tmp_path: Path):
+    """Should show behaviors when --debug flag is used."""
+    save_path = tmp_path / "test.sav"
+    create_save_with_duplicants(save_path)
+
+    result = subprocess.run(
+        [sys.executable, "examples/duplicant_info.py", str(save_path), "--debug"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+
+    # Debug mode should show behaviors
+    assert "DEBUG - Behaviors:" in result.stdout
+
+    # Should still show normal output
+    assert "=== Duplicant:" in result.stdout
+    assert "Meep" in result.stdout
+
 
 def test_duplicant_info_json_output(tmp_path: Path):
     """Should output duplicant info as JSON."""
@@ -211,7 +239,7 @@ def test_duplicant_info_json_output(tmp_path: Path):
     create_save_with_duplicants(save_path)
 
     result = subprocess.run(
-        [sys.executable, "examples/duplicant_info.py", str(save_path), "--json"],
+        [sys.executable, "examples/duplicant_info.py", str(save_path), "--format", "json"],
         capture_output=True,
         text=True,
     )
@@ -226,6 +254,9 @@ def test_duplicant_info_json_output(tmp_path: Path):
     assert data[0]["name"] == "Meep"
     assert data[1]["name"] == "Devon"
     assert data[2]["name"] == "Catalina"
+
+    # Behaviors should NOT be in JSON output (unless debug mode)
+    assert "behaviors" not in data[0]
 
 
 def test_duplicant_info_file_not_found():
