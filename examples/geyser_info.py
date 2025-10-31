@@ -68,20 +68,24 @@ def extract_geyser_info(geyser_object: Any) -> dict[str, Any]:
     return info
 
 
-def format_geyser_output(prefab_name: str, index: int, info: dict[str, Any]) -> str:
+def format_geyser_output(prefab_name: str, index: int, info: dict[str, Any], debug: bool = False) -> str:
     """Format geyser information for display.
 
     Args:
         prefab_name: Prefab type name
         index: Geyser index
         info: Geyser information dictionary
+        debug: Whether to show behavior lists
 
     Returns:
         Formatted string
     """
     output = [f"\n=== {prefab_name} #{index + 1} ==="]
     output.append(f"Position: {info['position']}")
-    output.append(f"Behaviors: {', '.join(info['behaviors'])}")
+
+    # Only show behaviors in debug mode
+    if debug:
+        output.append(f"DEBUG - Behaviors: {', '.join(info['behaviors'])}")
 
     if "geyser_state" in info:
         output.append("\nGeyser State:")
@@ -124,6 +128,16 @@ def main() -> int:
         action="store_true",
         help="Output as JSON",
     )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Show internal behavior lists",
+    )
+    parser.add_argument(
+        "--skip-vents",
+        action="store_true",
+        help="Only show actual geysers, not vents",
+    )
 
     args = parser.parse_args()
 
@@ -138,6 +152,10 @@ def main() -> int:
         if not geyser_prefabs:
             print("No geysers found in save file.")
             return 0
+
+        # Filter out vents if --skip-vents is set
+        if args.skip_vents:
+            geyser_prefabs = [p for p in geyser_prefabs if "vent" not in p.lower()]
 
         if args.list_prefabs:
             print("Geyser prefabs found:")
@@ -178,7 +196,7 @@ def main() -> int:
 
                 for idx, obj in enumerate(objects):
                     info = extract_geyser_info(obj)
-                    print(format_geyser_output(prefab, idx, info))
+                    print(format_geyser_output(prefab, idx, info, debug=args.debug))
 
                 total_count += len(objects)
 
