@@ -18,27 +18,33 @@ STORAGE_PREFABS = {"StorageLocker", "LiquidReservoir", "GasReservoir",
 
 
 def find_storage_containers(save: Any) -> list[dict[str, Any]]:
-    """Find all storage containers in save file."""
-    containers = []
+    """Find all items stored in storage containers."""
+    stored_items = []
 
     for group in save.game_objects:
         if group.prefab_name in STORAGE_PREFABS:
             for obj in group.objects:
-                # Look for PrimaryElement to get mass data
+                # Look for Storage behavior with stored items
                 for behavior in obj.behaviors:
-                    if behavior.name == "PrimaryElement":
-                        # Real saves use "Units", test fixtures use "Mass"
-                        mass = (
-                            behavior.template_data.get("Units")
-                            or behavior.template_data.get("Mass", 0.0)
-                        )
-                        if mass > 0:
-                            containers.append({
-                                "prefab": group.prefab_name,
-                                "mass": mass,
-                                "position": (obj.position.x, obj.position.y)
-                            })
-    return containers
+                    if behavior.name == "Storage" and behavior.extra_data:
+                        # extra_data is list of stored GameObjects
+                        for stored_obj in behavior.extra_data:
+                            # Extract mass from stored item's PrimaryElement
+                            for stored_behavior in stored_obj.get("behaviors", []):
+                                if stored_behavior.name == "PrimaryElement":
+                                    # Real saves use "Units", test fixtures use "Mass"
+                                    mass = (
+                                        stored_behavior.template_data.get("Units")
+                                        or stored_behavior.template_data.get("Mass", 0.0)
+                                    )
+                                    if mass > 0:
+                                        stored_items.append({
+                                            "prefab": stored_obj.get("name", "Unknown"),
+                                            "mass": mass,
+                                            "position": (obj.position.x, obj.position.y),
+                                            "container": group.prefab_name,
+                                        })
+    return stored_items
 
 
 def find_debris(save: Any) -> list[dict[str, Any]]:

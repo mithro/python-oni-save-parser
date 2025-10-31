@@ -10,12 +10,17 @@ from oni_save_parser.save_structure.type_templates import TypeTemplate, parse_by
 from oni_save_parser.save_structure.type_templates.template_parser import validate_dotnet_identifier_name
 
 
-# Forward reference to avoid circular import
-# Actual import happens in parse_storage_extra_data
+# Forward references to avoid circular import
 def _get_parse_game_object():
     """Get parse_game_object function (lazy import to avoid circular dependency)."""
     from oni_save_parser.save_structure.game_objects.object_parser import parse_game_object
     return parse_game_object
+
+
+def _get_unparse_game_object():
+    """Get unparse_game_object function (lazy import to avoid circular dependency)."""
+    from oni_save_parser.save_structure.game_objects.object_parser import unparse_game_object
+    return unparse_game_object
 
 
 def parse_behavior(parser: BinaryParser, templates: list[TypeTemplate]) -> GameObjectBehavior:
@@ -126,7 +131,24 @@ def unparse_behavior(
     if behavior.template_data is not None:
         unparse_by_template(data_writer, templates, behavior.name, behavior.template_data)
 
-    # TODO: Write extra data for specific behavior types
+    # Write extra data for specific behavior types
+    if behavior.name == "Storage" and behavior.extra_data is not None:
+        # Storage extra_data is list of stored GameObjects
+        unparse_game_object = _get_unparse_game_object()
+        data_writer.write_int32(len(behavior.extra_data))  # Item count
+        for stored_obj in behavior.extra_data:
+            # Write prefab name
+            data_writer.write_klei_string(stored_obj["name"])
+            # Write GameObject (reconstruct from dict)
+            from oni_save_parser.save_structure.game_objects.types import GameObject
+            game_obj = GameObject(
+                position=stored_obj["position"],
+                rotation=stored_obj["rotation"],
+                scale=stored_obj["scale"],
+                folder=stored_obj["folder"],
+                behaviors=stored_obj["behaviors"],
+            )
+            unparse_game_object(data_writer, templates, game_obj)
 
     # Write extra raw data
     if behavior.extra_raw:
