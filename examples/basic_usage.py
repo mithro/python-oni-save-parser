@@ -18,6 +18,10 @@ from oni_save_parser import (
     load_save_file,
     save_to_file,
 )
+from oni_save_parser.extractors import (
+    extract_duplicant_skills,
+    extract_duplicant_traits,
+)
 
 
 def example_load_and_display_info(save_path: str) -> None:
@@ -58,9 +62,9 @@ def example_list_prefabs(save_path: str) -> None:
 
 
 def example_analyze_duplicants(save_path: str) -> None:
-    """Analyze duplicant information."""
+    """Analyze duplicant information using extractors module."""
     print("\n" + "=" * 60)
-    print("Example 3: Analyze Duplicants")
+    print("Example 3: Analyze Duplicants (using extractors)")
     print("=" * 60)
 
     save = load_save_file(save_path)
@@ -72,20 +76,26 @@ def example_analyze_duplicants(save_path: str) -> None:
         print(f"\nDuplicant #{i}:")
         print(f"  Position: ({minion.position.x:.1f}, {minion.position.y:.1f}, {minion.position.z:.1f})")
 
-        # Find MinionIdentity behavior
+        # Extract duplicant data using extractors module
         for behavior in minion.behaviors:
             if behavior.name == "MinionIdentity" and behavior.template_data:
                 name = behavior.template_data.get("name", "Unknown")
                 print(f"  Name: {name}")
 
-            if behavior.name == "Health" and behavior.template_data:
-                hp = behavior.template_data.get("hitpoints", 0)
-                max_hp = behavior.template_data.get("maxHitpoints", 100)
-                print(f"  Health: {hp:.1f}/{max_hp:.1f}")
+            if behavior.name == "MinionResume":
+                # Use extractor to get skills
+                skills_data = extract_duplicant_skills(behavior)
+                skills = skills_data.get("mastery_by_skill", {})
+                if skills:
+                    top_skills = sorted(skills.items(), key=lambda x: x[1], reverse=True)[:3]
+                    skills_str = ", ".join([f"{name} +{level}" for name, level in top_skills])
+                    print(f"  Skills: {skills_str}")
 
-            if behavior.name == "MinionResume" and behavior.template_data:
-                total_exp = behavior.template_data.get("totalExperienceGained", 0)
-                print(f"  Experience: {total_exp}")
+            if behavior.name == "Klei.AI.Traits":
+                # Use extractor to get traits
+                traits = extract_duplicant_traits(behavior)
+                if traits:
+                    print(f"  Traits: {', '.join(traits[:3])}")  # Show first 3 traits
 
 
 def example_modify_save(save_path: str) -> None:
