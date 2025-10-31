@@ -48,11 +48,19 @@ def parse_behavior(parser: BinaryParser, templates: list[TypeTemplate]) -> GameO
             name=name, template_data=None, extra_data=None, extra_raw=parser.data[start_offset : parser.offset]
         )
 
-    # TODO: Parse extra data for specific behavior types
-    # - Storage: Has special extra data for stored items
-    # - MinionModifiers: Has special minion modifier data
-    # - Modifiers: Has special modifier data
-    extra_data = None
+    # Parse extra data for specific behavior types
+    extra_data: Any = None
+
+    if name == "Storage":
+        # Storage has array of stored GameObjects
+        item_count = parser.read_int32()
+        if item_count == 0:
+            # Empty storage
+            extra_data = []
+        else:
+            # TODO: Parse stored items (full GameObjects)
+            # For now, put the count back in the stream to be captured as extra_raw
+            parser.offset -= 4
 
     # Capture remaining data as raw bytes
     bytes_consumed = parser.offset - start_offset
