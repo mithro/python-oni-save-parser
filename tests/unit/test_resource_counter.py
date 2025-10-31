@@ -2,9 +2,7 @@
 
 import subprocess
 import sys
-from pathlib import Path
 
-import pytest
 
 
 def test_resource_counter_help():
