@@ -184,3 +184,19 @@ def test_resource_counter_finds_storage(tmp_path: Path) -> None:
     assert result.returncode == 0
     # Should find the StorageLocker and LiquidReservoir from fixture
     assert "Storage" in result.stdout or "storage" in result.stdout
+
+
+def test_resource_counter_finds_debris(tmp_path: Path) -> None:
+    """Should find loose debris."""
+    save_path = tmp_path / "test.sav"
+    create_save_with_resources(save_path)
+
+    result = subprocess.run(
+        [sys.executable, "examples/resource_counter.py", str(save_path)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    # Should find the IronOre debris from fixture (25.5kg)
+    assert "debris" in result.stdout.lower() or "IronOre" in result.stdout
