@@ -2,7 +2,7 @@
 
 A Python library for parsing and manipulating Oxygen Not Included save files.
 
-[![Tests](https://img.shields.io/badge/tests-156%20passing-success)](tests/)
+[![Tests](https://img.shields.io/badge/tests-231%20passing-success)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-91.79%25-success)](tests/)
 [![Type Checking](https://img.shields.io/badge/mypy-passing-success)](src/)
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue)](pyproject.toml)
@@ -14,7 +14,7 @@ A Python library for parsing and manipulating Oxygen Not Included save files.
 - 📦 **Easy to Use**: Simple high-level API for common tasks
 - 🛠️ **CLI Tool**: Command-line interface for quick analysis
 - 🔄 **Round-Trip**: Parse and write back with byte-identical results
-- 🧪 **Well Tested**: 156 tests with 91.79% coverage
+- 🧪 **Well Tested**: 231 tests with 91.79% coverage
 - 📚 **Documented**: Comprehensive docstrings and examples
 
 ## Installation
@@ -125,6 +125,30 @@ uv run python examples/colony_scanner.py /path/to/saves
 
 # JSON output
 uv run python examples/colony_scanner.py --json
+```
+
+#### Resource Counter (`resource_counter.py`)
+
+Count and track all materials in storage containers, loose debris, and duplicant inventories.
+
+```bash
+# Show all resources with details
+uv run python examples/resource_counter.py MyBase.sav
+
+# JSON output
+uv run python examples/resource_counter.py MyBase.sav --json
+
+# Filter to specific resource type
+uv run python examples/resource_counter.py MyBase.sav --element IronOre
+
+# Filter by minimum mass (show only resources >= 100kg)
+uv run python examples/resource_counter.py MyBase.sav --min-mass 100
+
+# List all resource types found
+uv run python examples/resource_counter.py MyBase.sav --list-elements
+
+# Combined filters
+uv run python examples/resource_counter.py MyBase.sav --element StorageLocker --min-mass 500 --json
 ```
 
 #### Basic Usage Examples (`basic_usage.py`)
@@ -292,7 +316,7 @@ The parser is organized into several layers:
 ### Design Principles
 
 - **Type Safety**: Full type hints with mypy validation
-- **Test-Driven**: Comprehensive test coverage (156 tests)
+- **Test-Driven**: Comprehensive test coverage (231 tests)
 - **Idempotent**: Round-trip parsing produces byte-identical results
 - **Error Handling**: Custom exception types with offset tracking
 - **Preservation**: Unknown data is kept as raw bytes
