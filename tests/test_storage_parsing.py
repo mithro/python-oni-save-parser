@@ -95,20 +95,20 @@ def test_parse_storage_with_items() -> None:
 
     # GameObject data
     # Position
-    data_writer.write_float(10.5)  # x
-    data_writer.write_float(20.5)  # y
-    data_writer.write_float(0.0)  # z
+    data_writer.write_single(10.5)  # x
+    data_writer.write_single(20.5)  # y
+    data_writer.write_single(0.0)  # z
 
     # Rotation (quaternion)
-    data_writer.write_float(0.0)
-    data_writer.write_float(0.0)
-    data_writer.write_float(0.0)
-    data_writer.write_float(1.0)
+    data_writer.write_single(0.0)
+    data_writer.write_single(0.0)
+    data_writer.write_single(0.0)
+    data_writer.write_single(1.0)
 
     # Scale
-    data_writer.write_float(1.0)
-    data_writer.write_float(1.0)
-    data_writer.write_float(1.0)
+    data_writer.write_single(1.0)
+    data_writer.write_single(1.0)
+    data_writer.write_single(1.0)
 
     # Folder
     data_writer.write_byte(0)
@@ -119,8 +119,8 @@ def test_parse_storage_with_items() -> None:
     # Behavior: PrimaryElement (build in temp buffer)
     behavior_writer = BinaryWriter()
     behavior_writer.write_int32(-1369750864)  # ElementID for IronOre
-    behavior_writer.write_float(100.0)  # Mass
-    behavior_writer.write_float(293.15)  # Temperature
+    behavior_writer.write_single(100.0)  # Mass
+    behavior_writer.write_single(293.15)  # Temperature
 
     # Write behavior to data_writer
     data_writer.write_klei_string("PrimaryElement")

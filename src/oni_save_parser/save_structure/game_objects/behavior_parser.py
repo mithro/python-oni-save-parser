@@ -10,6 +10,14 @@ from oni_save_parser.save_structure.type_templates import TypeTemplate, parse_by
 from oni_save_parser.save_structure.type_templates.template_parser import validate_dotnet_identifier_name
 
 
+# Forward reference to avoid circular import
+# Actual import happens in parse_storage_extra_data
+def _get_parse_game_object():
+    """Get parse_game_object function (lazy import to avoid circular dependency)."""
+    from oni_save_parser.save_structure.game_objects.object_parser import parse_game_object
+    return parse_game_object
+
+
 def parse_behavior(parser: BinaryParser, templates: list[TypeTemplate]) -> GameObjectBehavior:
     """Parse a single game object behavior (component).
 
@@ -58,9 +66,29 @@ def parse_behavior(parser: BinaryParser, templates: list[TypeTemplate]) -> GameO
             # Empty storage
             extra_data = []
         else:
-            # TODO: Parse stored items (full GameObjects)
-            # For now, put the count back in the stream to be captured as extra_raw
-            parser.offset -= 4
+            # Parse stored items (each is a prefab name + GameObject)
+            parse_game_object = _get_parse_game_object()
+            items = []
+            for _ in range(item_count):
+                # Read prefab name
+                prefab_name = parser.read_klei_string()
+                if prefab_name is None:
+                    raise CorruptionError("Expected prefab name for stored item, got null", offset=parser.offset)
+                prefab_name = validate_dotnet_identifier_name(prefab_name)
+
+                # Parse GameObject
+                game_obj = parse_game_object(parser, templates)
+
+                # Store as dict with name and GameObject fields
+                items.append({
+                    "name": prefab_name,
+                    "position": game_obj.position,
+                    "rotation": game_obj.rotation,
+                    "scale": game_obj.scale,
+                    "folder": game_obj.folder,
+                    "behaviors": game_obj.behaviors,
+                })
+            extra_data = items
 
     # Capture remaining data as raw bytes
     bytes_consumed = parser.offset - start_offset
