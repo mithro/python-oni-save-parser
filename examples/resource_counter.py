@@ -12,7 +12,6 @@ from typing import Any
 
 from oni_save_parser import load_save_file
 
-
 # Storage container prefab names
 STORAGE_PREFABS = {"StorageLocker", "LiquidReservoir", "GasReservoir",
                    "StorageLockerSmart", "LiquidReservoirSmart", "GasReservoirSmart"}
@@ -73,7 +72,11 @@ def find_debris(save: Any) -> list[dict[str, Any]]:
                         "position": (obj.position.x, obj.position.y)
                     })
             # Fallback for our simplified test fixture (no Pickupable template)
-            elif not has_pickupable and primary_element and group.prefab_name not in STORAGE_PREFABS:
+            elif (
+                not has_pickupable
+                and primary_element
+                and group.prefab_name not in STORAGE_PREFABS
+            ):
                 # This handles our test fixture which doesn't have Pickupable behavior
                 mass = primary_element.template_data.get("Mass", 0.0)
                 if mass > 0:
@@ -119,11 +122,17 @@ def find_duplicant_inventories(save: Any) -> list[dict[str, Any]]:
     return duplicant_items
 
 
-def apply_filters(containers: list[dict[str, Any]],
-                 debris: list[dict[str, Any]],
-                 duplicants: list[dict[str, Any]],
-                 element_filter: str | None = None,
-                 min_mass: float | None = None) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+def apply_filters(
+    containers: list[dict[str, Any]],
+    debris: list[dict[str, Any]],
+    duplicants: list[dict[str, Any]],
+    element_filter: str | None = None,
+    min_mass: float | None = None,
+) -> tuple[
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+]:
     """Apply element and mass filters to resource lists."""
     filtered_containers = containers
     filtered_debris = debris
@@ -169,7 +178,10 @@ def format_table_output(containers: list[dict[str, Any]],
         for item in containers:
             pos_str = f"({item['position'][0]:.1f}, {item['position'][1]:.1f})"
             lines.append(f"{item['prefab']:<20} {item['mass']:>12.1f} {pos_str:>20}")
-        lines.append(f"\nTotal: {len(containers)} containers, {sum(c['mass'] for c in containers):.1f} kg")
+        total_mass = sum(c["mass"] for c in containers)
+        lines.append(
+            f"\nTotal: {len(containers)} containers, {total_mass:.1f} kg"
+        )
 
     # Debris section
     if debris:
@@ -189,7 +201,10 @@ def format_table_output(containers: list[dict[str, Any]],
         for item in duplicants:
             pos_str = f"({item['position'][0]:.1f}, {item['position'][1]:.1f})"
             lines.append(f"{item['duplicant']:<20} {item['mass']:>12.1f} {pos_str:>20}")
-        lines.append(f"\nTotal: {len(duplicants)} duplicants, {sum(d['mass'] for d in duplicants):.1f} kg")
+        total_mass = sum(d["mass"] for d in duplicants)
+        lines.append(
+            f"\nTotal: {len(duplicants)} duplicants, {total_mass:.1f} kg"
+        )
 
     if not containers and not debris and not duplicants:
         lines.append("\nNo resources found")
@@ -221,9 +236,17 @@ def main() -> int:
     )
     parser.add_argument("save_file", type=Path, help="Path to .sav file", nargs="?")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
-    parser.add_argument("--element", type=str, help="Filter by prefab name (e.g., IronOre, StorageLocker)")
+    parser.add_argument(
+        "--element",
+        type=str,
+        help="Filter by prefab name (e.g., IronOre, StorageLocker)",
+    )
     parser.add_argument("--min-mass", type=float, help="Filter out items below this mass (kg)")
-    parser.add_argument("--list-elements", action="store_true", help="List all prefab types found and exit")
+    parser.add_argument(
+        "--list-elements",
+        action="store_true",
+        help="List all prefab types found and exit",
+    )
 
     args = parser.parse_args()
 
