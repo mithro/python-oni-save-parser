@@ -63,6 +63,11 @@ def create_save_with_resources(path: Path) -> None:
             fields=[],
             properties=[],
         ),
+        TypeTemplate(
+            name="Pickupable",
+            fields=[],
+            properties=[],
+        ),
     ]
 
     world = {"buildVersion": 555555}
@@ -145,6 +150,12 @@ def create_save_with_resources(path: Path) -> None:
         scale=Vector3(x=1.0, y=1.0, z=1.0),
         folder=0,
         behaviors=[
+            GameObjectBehavior(
+                name="Pickupable",
+                template_data={},
+                extra_data=None,
+                extra_raw=b"",
+            ),
             GameObjectBehavior(
                 name="PrimaryElement",
                 template_data={
