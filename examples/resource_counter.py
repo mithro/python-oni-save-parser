@@ -85,6 +85,39 @@ def find_debris(save: Any) -> list[dict[str, Any]]:
     return debris_items
 
 
+def find_duplicant_inventories(save: Any) -> list[dict[str, Any]]:
+    """Find resources carried by duplicants.
+
+    Scans Minion objects for carried items with PrimaryElement data.
+    """
+    duplicant_items = []
+
+    for group in save.game_objects:
+        if group.prefab_name == "Minion":
+            for obj in group.objects:
+                # Find MinionIdentity for duplicant name and PrimaryElement for carried items
+                minion_name = "Unknown"
+                primary_element = None
+
+                for behavior in obj.behaviors:
+                    if behavior.name == "MinionIdentity":
+                        minion_name = behavior.template_data.get("name", "Unknown")
+                    elif behavior.name == "PrimaryElement":
+                        primary_element = behavior
+
+                # If duplicant is carrying something
+                if primary_element:
+                    mass = primary_element.template_data.get("Mass", 0.0)
+                    if mass > 0:
+                        duplicant_items.append({
+                            "duplicant": minion_name,
+                            "mass": mass,
+                            "position": (obj.position.x, obj.position.y)
+                        })
+
+    return duplicant_items
+
+
 def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(
@@ -102,6 +135,7 @@ def main() -> int:
         save = load_save_file(args.save_file)
         containers = find_storage_containers(save)
         debris = find_debris(save)
+        duplicants = find_duplicant_inventories(save)
 
         print(f"Found {len(containers)} storage containers")
         for container in containers:
@@ -110,6 +144,10 @@ def main() -> int:
         print(f"\nFound {len(debris)} debris items")
         for item in debris:
             print(f"  {item['prefab']}: {item['mass']:.1f} kg at {item['position']}")
+
+        print(f"\nFound {len(duplicants)} duplicants carrying items")
+        for dup in duplicants:
+            print(f"  {dup['duplicant']}: {dup['mass']:.1f} kg at {dup['position']}")
 
         return 0
     except Exception as e:
