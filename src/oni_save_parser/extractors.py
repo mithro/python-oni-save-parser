@@ -26,7 +26,7 @@ def extract_duplicant_skills(minion_resume_behavior: Any) -> dict[str, Any]:
     # MasteryBySkillID is a list of tuples like [('Mining1', True), ('Mining2', True)]
     # Convert to dict with skill levels extracted from number suffix
     mastery_raw = template_data.get("MasteryBySkillID", [])
-    mastery_by_skill = {}
+    mastery_by_skill: dict[str, int] = {}
     if isinstance(mastery_raw, list):
         for item in mastery_raw:
             if isinstance(item, tuple) and len(item) == 2:
@@ -62,7 +62,7 @@ def extract_duplicant_traits(traits_behavior: Any) -> list[str]:
     template_data = traits_behavior.template_data or {}
 
     # Try TraitIds first (used in actual save files)
-    trait_ids = template_data.get("TraitIds", [])
+    trait_ids: list[str] = template_data.get("TraitIds", [])
     if trait_ids:
         return trait_ids
 
@@ -166,7 +166,7 @@ def extract_geyser_stats(
 
             # Eruption cycle
             'eruption_duration_s': float,          # Length of each eruption (seconds)
-            'idle_duration_s': float,              # Length of idle period between eruptions (seconds)
+            'idle_duration_s': float,              # Idle period between eruptions (seconds)
             'eruption_cycle_s': float,             # Total eruption cycle length (seconds)
             'eruption_uptime_percent': float,      # Percentage of eruption cycle spent erupting
 

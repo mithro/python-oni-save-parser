@@ -31,7 +31,7 @@ class ElementLoader:
             filepath = self._elements_path / filename
             if filepath.exists():
                 try:
-                    with open(filepath, "r") as f:
+                    with open(filepath) as f:
                         data = yaml.safe_load(f)
                         if data and "elements" in data:
                             for element in data["elements"]:
@@ -40,7 +40,9 @@ class ElementLoader:
                                     self._elements_cache[element_id] = {
                                         "element_id": element_id,
                                         "state": element.get("state"),
-                                        "specific_heat_capacity": element.get("specificHeatCapacity"),
+                                        "specific_heat_capacity": element.get(
+                                            "specificHeatCapacity"
+                                        ),
                                         "max_mass": element.get("maxMass"),
                                     }
                     files_loaded += 1
