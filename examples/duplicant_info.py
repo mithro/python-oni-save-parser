@@ -11,6 +11,13 @@ from pathlib import Path
 from typing import Any
 
 from oni_save_parser import get_game_objects_by_prefab, load_save_file
+from oni_save_parser.extractors import (
+    extract_duplicant_skills,
+    extract_duplicant_traits,
+    extract_health_status,
+    extract_attribute_levels,
+)
+from oni_save_parser.formatters import format_duplicant_compact
 
 
 def extract_duplicant_info(dup_object: Any) -> dict[str, Any]:
@@ -26,8 +33,10 @@ def extract_duplicant_info(dup_object: Any) -> dict[str, Any]:
         "position": (dup_object.position.x, dup_object.position.y),
         "name": "Unknown",
         "gender": "Unknown",
-        "personality": "Unknown",
-        "voice_pitch": 1.0,
+        "skills": {},
+        "traits": [],
+        "health": {},
+        "stress": {},
         "behaviors": [],
     }
 
@@ -38,8 +47,22 @@ def extract_duplicant_info(dup_object: Any) -> dict[str, Any]:
         if behavior.name == "MinionIdentity" and behavior.template_data:
             info["name"] = behavior.template_data.get("name", "Unknown")
             info["gender"] = behavior.template_data.get("gender", "Unknown")
-            info["personality"] = behavior.template_data.get("personalityResourceId", "Unknown")
-            info["voice_pitch"] = behavior.template_data.get("voicePitch", 1.0)
+
+        elif behavior.name == "MinionResume":
+            skills_data = extract_duplicant_skills(behavior)
+            info["skills"] = skills_data.get("mastery_by_skill", {})
+
+        elif behavior.name == "Klei.AI.Traits":
+            info["traits"] = extract_duplicant_traits(behavior)
+
+        elif behavior.name == "Health":
+            health_data = extract_health_status(behavior)
+            info["health_state"] = health_data.get("state", "Unknown")
+
+        elif behavior.name == "Klei.AI.AttributeLevels":
+            attrs = extract_attribute_levels(behavior)
+            info["health"] = attrs.get("HitPoints", {})
+            info["stress"] = attrs.get("Stress", {})
 
     return info
 
@@ -50,7 +73,17 @@ def main() -> int:
         description="Extract duplicant information from ONI save files"
     )
     parser.add_argument("save_file", type=Path, help="Path to .sav file")
-    parser.add_argument("--json", action="store_true", help="Output as JSON")
+    parser.add_argument(
+        "--format",
+        choices=["compact", "detailed", "json"],
+        default="compact",
+        help="Output format (default: compact)"
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Show internal behavior lists"
+    )
 
     args = parser.parse_args()
 
@@ -66,24 +99,26 @@ def main() -> int:
         # Extract info for all duplicants
         dup_info_list = [extract_duplicant_info(dup) for dup in duplicants]
 
-        if args.json:
-            # JSON output
+        if args.format == "json":
+            # Remove behaviors from JSON output unless debug mode
+            if not args.debug:
+                for info in dup_info_list:
+                    info.pop("behaviors", None)
             print(json.dumps(dup_info_list, indent=2, default=str))
-        else:
-            # Text output
-            print(f"Found {len(duplicants)} duplicants\n")
 
-            for idx, info in enumerate(dup_info_list, 1):
-                print(f"=== Duplicant #{idx}: {info['name']} ===")
-                print(f"Gender: {info['gender']}")
-                # Personality might be a string or dict - handle both
-                personality = info['personality']
-                if isinstance(personality, str):
-                    personality = personality.replace('DUPLICANT_PERSONALITY_', '')
-                print(f"Personality: {personality}")
-                print(f"Position: ({info['position'][0]:.1f}, {info['position'][1]:.1f})")
-                print(f"Behaviors: {', '.join(info['behaviors'])}")
+        elif args.format == "compact":
+            print(f"Found {len(duplicants)} duplicants\n")
+            for info in dup_info_list:
+                print(format_duplicant_compact(info))
+
+                # Show behaviors in debug mode
+                if args.debug:
+                    print(f"\nDEBUG - Behaviors: {', '.join(info['behaviors'])}")
                 print()
+
+        else:  # detailed format - not implemented yet
+            print("Detailed format not yet implemented", file=sys.stderr)
+            return 1
 
         return 0
 

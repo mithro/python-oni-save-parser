@@ -23,8 +23,28 @@ def extract_duplicant_skills(minion_resume_behavior: Any) -> dict[str, Any]:
     """
     template_data = minion_resume_behavior.template_data or {}
 
+    # MasteryBySkillID is a list of tuples like [('Mining1', True), ('Mining2', True)]
+    # Convert to dict with skill levels extracted from number suffix
+    mastery_raw = template_data.get("MasteryBySkillID", [])
+    mastery_by_skill = {}
+    if isinstance(mastery_raw, list):
+        for item in mastery_raw:
+            if isinstance(item, tuple) and len(item) == 2:
+                skill_name, has_skill = item
+                if has_skill:
+                    # Extract skill level from name (e.g., "Mining3" -> level 3)
+                    import re
+                    match = re.search(r'(\D+)(\d+)', skill_name)
+                    if match:
+                        base_name = match.group(1)
+                        level = int(match.group(2))
+                        # Keep highest level for each skill
+                        mastery_by_skill[base_name] = max(mastery_by_skill.get(base_name, 0), level)
+    elif isinstance(mastery_raw, dict):
+        mastery_by_skill = mastery_raw
+
     return {
-        "mastery_by_skill": template_data.get("MasteryBySkillID", {}),
+        "mastery_by_skill": mastery_by_skill,
         "aptitude_by_group": template_data.get("AptitudeBySkillGroup", {}),
         "current_role": template_data.get("currentRole", "None")
     }
@@ -40,9 +60,14 @@ def extract_duplicant_traits(traits_behavior: Any) -> list[str]:
         List of trait names: ['QuickLearner', 'Yokel', 'MouthBreather']
     """
     template_data = traits_behavior.template_data or {}
-    trait_list = template_data.get("TraitList", [])
 
-    # Extract trait names from trait objects
+    # Try TraitIds first (used in actual save files)
+    trait_ids = template_data.get("TraitIds", [])
+    if trait_ids:
+        return trait_ids
+
+    # Fall back to TraitList for older format or tests
+    trait_list = template_data.get("TraitList", [])
     trait_names = []
     for trait in trait_list:
         if hasattr(trait, "Name"):
@@ -102,9 +127,12 @@ def extract_attribute_levels(attribute_levels_behavior: Any) -> dict[str, dict[s
             current = getattr(attr, "experience", 0.0)
             max_val = getattr(attr, "experienceMax", 100.0)
         elif isinstance(attr, dict):
-            attr_id = attr.get("AttributeId", "Unknown")
+            # Handle lowercase field names (actual save file format)
+            attr_id = attr.get("attributeId") or attr.get("AttributeId", "Unknown")
             current = attr.get("experience", 0.0)
-            max_val = attr.get("experienceMax", 100.0)
+            # Calculate max from level (each level is 100 experience)
+            level = attr.get("level", 0)
+            max_val = (level + 1) * 100.0 if level >= 0 else 100.0
         else:
             continue
 
