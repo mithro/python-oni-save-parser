@@ -76,3 +76,41 @@ def extract_health_status(health_behavior: Any) -> dict[str, Any]:
         "state": state_map.get(state_value, "Unknown"),
         "can_be_incapacitated": template_data.get("CanBeIncapacitated", True)
     }
+
+
+def extract_attribute_levels(attribute_levels_behavior: Any) -> dict[str, dict[str, float]]:
+    """Extract current attribute levels (health, stress, etc.).
+
+    Args:
+        attribute_levels_behavior: Klei.AI.AttributeLevels behavior
+
+    Returns:
+        Dictionary mapping attribute names to current/max values:
+        {
+            'HitPoints': {'current': 85.0, 'max': 100.0},
+            'Stress': {'current': 12.0, 'max': 100.0},
+            ...
+        }
+    """
+    template_data = attribute_levels_behavior.template_data or {}
+    save_load_levels = template_data.get("saveLoadLevels", [])
+
+    attributes = {}
+    for attr in save_load_levels:
+        if hasattr(attr, "AttributeId"):
+            attr_id = attr.AttributeId
+            current = getattr(attr, "experience", 0.0)
+            max_val = getattr(attr, "experienceMax", 100.0)
+        elif isinstance(attr, dict):
+            attr_id = attr.get("AttributeId", "Unknown")
+            current = attr.get("experience", 0.0)
+            max_val = attr.get("experienceMax", 100.0)
+        else:
+            continue
+
+        attributes[attr_id] = {
+            "current": current,
+            "max": max_val
+        }
+
+    return attributes
