@@ -1,5 +1,7 @@
 """Tests for data extraction functions."""
 import pytest
+from pathlib import Path
+from oni_save_parser import load_save_file, get_game_objects_by_prefab
 from oni_save_parser.extractors import extract_duplicant_skills
 from oni_save_parser.extractors import extract_duplicant_traits
 from oni_save_parser.extractors import extract_health_status
@@ -101,3 +103,37 @@ def test_extract_attribute_levels_returns_dict():
     assert result["HitPoints"]["current"] == 85.0
     assert result["HitPoints"]["max"] == 100.0
     assert result["Stress"]["current"] == 12.0
+
+
+def test_extractors_with_real_save():
+    """Test extractors with actual save file data."""
+    save_path = Path("test_saves/01-early-game-cycle-010.sav")
+    if not save_path.exists():
+        pytest.skip("Test save file not available")
+
+    save = load_save_file(save_path)
+    duplicants = get_game_objects_by_prefab(save, "Minion")
+
+    assert len(duplicants) > 0, "No duplicants found in test save"
+
+    dup = duplicants[0]
+
+    # Find behaviors and extract data
+    for behavior in dup.behaviors:
+        if behavior.name == "MinionResume":
+            skills = extract_duplicant_skills(behavior)
+            assert isinstance(skills, dict)
+            assert "mastery_by_skill" in skills
+
+        elif behavior.name == "Klei.AI.Traits":
+            traits = extract_duplicant_traits(behavior)
+            assert isinstance(traits, list)
+
+        elif behavior.name == "Health":
+            health = extract_health_status(behavior)
+            assert isinstance(health, dict)
+            assert "state" in health
+
+        elif behavior.name == "Klei.AI.AttributeLevels":
+            attrs = extract_attribute_levels(behavior)
+            assert isinstance(attrs, dict)
