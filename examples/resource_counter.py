@@ -16,6 +16,9 @@ from oni_save_parser import load_save_file
 STORAGE_PREFABS = {"StorageLocker", "LiquidReservoir", "GasReservoir",
                    "StorageLockerSmart", "LiquidReservoirSmart", "GasReservoirSmart"}
 
+# Prefabs to exclude from debris detection (handled separately or not relevant)
+DEBRIS_EXCLUSIONS = STORAGE_PREFABS | {"Minion"}  # Minions handled by duplicant inventory function
+
 
 def find_storage_containers(save: Any) -> list[dict[str, Any]]:
     """Find all items stored in storage containers."""
@@ -51,13 +54,14 @@ def find_debris(save: Any) -> list[dict[str, Any]]:
     """Find loose debris (pickupable objects).
 
     Follows design spec: Find objects with Pickupable component,
-    extract PrimaryElement data. Filters out storage containers and tiles.
+    extract PrimaryElement data. Filters out storage containers.
+    Buildings/plants don't have Pickupable, so they're naturally excluded.
     """
     debris_items = []
 
     for group in save.game_objects:
-        # Skip storage containers and tiles
-        if group.prefab_name in STORAGE_PREFABS or group.prefab_name == "Tile":
+        # Skip excluded prefabs (storage containers, minions, etc.)
+        if group.prefab_name in DEBRIS_EXCLUSIONS:
             continue
 
         for obj in group.objects:
@@ -72,26 +76,10 @@ def find_debris(save: Any) -> list[dict[str, Any]]:
                 elif behavior.name == "PrimaryElement":
                     primary_element = behavior
 
-            # Only count if it has Pickupable AND PrimaryElement
+            # Only count if it has BOTH Pickupable AND PrimaryElement
+            # Real saves properly mark debris with Pickupable behavior
+            # Buildings/plants have PrimaryElement but NOT Pickupable
             if has_pickupable and primary_element:
-                # Real saves use "Units", test fixtures use "Mass"
-                mass = (
-                    primary_element.template_data.get("Units")
-                    or primary_element.template_data.get("Mass", 0.0)
-                )
-                if mass > 0:
-                    debris_items.append({
-                        "prefab": group.prefab_name,
-                        "mass": mass,
-                        "position": (obj.position.x, obj.position.y)
-                    })
-            # Fallback for our simplified test fixture (no Pickupable template)
-            elif (
-                not has_pickupable
-                and primary_element
-                and group.prefab_name not in STORAGE_PREFABS
-            ):
-                # This handles our test fixture which doesn't have Pickupable behavior
                 # Real saves use "Units", test fixtures use "Mass"
                 mass = (
                     primary_element.template_data.get("Units")
