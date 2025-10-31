@@ -4,7 +4,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
 from oni_save_parser.save_structure import SaveGame, unparse_save_game
 from oni_save_parser.save_structure.game_objects import (
     GameObject,
@@ -150,7 +149,7 @@ def create_save_with_resources(path: Path) -> None:
 
 
 
-def test_create_save_with_resources_fixture(tmp_path: Path):
+def test_create_save_with_resources_fixture(tmp_path: Path) -> None:
     """Verify fixture creates valid save file."""
     save_path = tmp_path / "test.sav"
     create_save_with_resources(save_path)
@@ -159,7 +158,7 @@ def test_create_save_with_resources_fixture(tmp_path: Path):
     assert save_path.stat().st_size > 0
 
 
-def test_resource_counter_help():
+def test_resource_counter_help() -> None:
     """Should display help message."""
     result = subprocess.run(
         [sys.executable, "examples/resource_counter.py", "--help"],
@@ -171,7 +170,7 @@ def test_resource_counter_help():
     assert "Count resources" in result.stdout or "resource" in result.stdout.lower()
 
 
-def test_resource_counter_finds_storage(tmp_path: Path):
+def test_resource_counter_finds_storage(tmp_path: Path) -> None:
     """Should find storage containers."""
     save_path = tmp_path / "test.sav"
     create_save_with_resources(save_path)

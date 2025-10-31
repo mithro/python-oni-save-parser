@@ -7,11 +7,12 @@ to provide a comprehensive inventory of all resources in your colony.
 import argparse
 import sys
 from pathlib import Path
+from typing import Any
 
 from oni_save_parser import load_save_file
 
 
-def find_storage_containers(save):
+def find_storage_containers(save: Any) -> list[dict[str, Any]]:
     """Find all storage containers in save file."""
     storage_prefabs = ["StorageLocker", "LiquidReservoir", "GasReservoir"]
     containers = []
