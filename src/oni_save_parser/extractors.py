@@ -28,3 +28,26 @@ def extract_duplicant_skills(minion_resume_behavior: Any) -> dict[str, Any]:
         "aptitude_by_group": template_data.get("AptitudeBySkillGroup", {}),
         "current_role": template_data.get("currentRole", "None")
     }
+
+
+def extract_duplicant_traits(traits_behavior: Any) -> list[str]:
+    """Extract personality traits from Klei.AI.Traits behavior.
+
+    Args:
+        traits_behavior: Klei.AI.Traits behavior from duplicant object
+
+    Returns:
+        List of trait names: ['QuickLearner', 'Yokel', 'MouthBreather']
+    """
+    template_data = traits_behavior.template_data or {}
+    trait_list = template_data.get("TraitList", [])
+
+    # Extract trait names from trait objects
+    trait_names = []
+    for trait in trait_list:
+        if hasattr(trait, "Name"):
+            trait_names.append(trait.Name)
+        elif isinstance(trait, dict):
+            trait_names.append(trait.get("Name", "Unknown"))
+
+    return trait_names
