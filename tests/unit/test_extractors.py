@@ -156,3 +156,27 @@ def test_extract_geyser_stats_calculates_rates():
     assert stats["emission_rate_kg_s"] == 5.4
     assert abs(stats["average_output_active_kg_s"] - 3.14) < 0.01  # 5.4 * 0.582
     assert abs(stats["average_output_lifetime_kg_s"] - 2.26) < 0.01  # 5.4 * 0.582 * 0.720
+
+
+def test_extract_geyser_stats_with_thermal():
+    """Test geyser thermal calculations with element data."""
+    config = {
+        "scaledRate": 5.4,
+        "scaledIterationLength": 401.1,
+        "scaledIterationPercent": 0.582,
+        "scaledYearLength": 81800.0,
+        "scaledYearPercent": 0.720,
+    }
+
+    element_data = {
+        "specific_heat_capacity": 4.179,  # Steam SHC
+    }
+
+    temperature = 410.0  # Kelvin
+
+    stats = extract_geyser_stats(config, element_data, temperature)
+
+    # DTU = mass * SHC * temp, then convert to kDTU
+    # Peak: 5.4 kg/s * 4.179 * 410 / 1000 = 9.25 kDTU/s (approximately)
+    assert "peak_thermal_power_kdtu_s" in stats
+    assert stats["peak_thermal_power_kdtu_s"] > 0

@@ -144,11 +144,17 @@ def extract_attribute_levels(attribute_levels_behavior: Any) -> dict[str, dict[s
     return attributes
 
 
-def extract_geyser_stats(config: dict[str, Any]) -> dict[str, Any]:
+def extract_geyser_stats(
+    config: dict[str, Any],
+    element_data: dict[str, Any] | None = None,
+    temperature_k: float | None = None,
+) -> dict[str, Any]:
     """Extract gameplay statistics from geyser configuration.
 
     Args:
         config: Geyser configuration dictionary from behavior template_data
+        element_data: Optional element properties (for thermal calculations)
+        temperature_k: Optional output temperature in Kelvin
 
     Returns:
         Dictionary with calculated geyser statistics:
@@ -216,7 +222,7 @@ def extract_geyser_stats(config: dict[str, Any]) -> dict[str, Any]:
     storage_dormancy = avg_lifetime * dormant_duration
     recommended_storage = max(storage_idle, storage_dormancy)
 
-    return {
+    result = {
         # Rates
         "emission_rate_kg_s": emission_rate,
         "average_output_active_kg_s": avg_active,
@@ -247,3 +253,20 @@ def extract_geyser_stats(config: dict[str, Any]) -> dict[str, Any]:
         "storage_for_dormancy_kg": storage_dormancy,
         "recommended_storage_kg": recommended_storage,
     }
+
+    # Add thermal calculations if data available
+    if element_data and temperature_k:
+        shc = element_data.get("specific_heat_capacity")
+        if shc:
+            # DTU = kg * SHC * temperature, convert to kDTU by dividing by 1000
+            peak_thermal = emission_rate * shc * temperature_k / 1000
+            avg_thermal = avg_lifetime * shc * temperature_k / 1000
+            thermal_per_eruption = kg_per_eruption * shc * temperature_k / 1000
+
+            result.update({
+                "peak_thermal_power_kdtu_s": peak_thermal,
+                "average_thermal_power_kdtu_s": avg_thermal,
+                "thermal_per_eruption_kdtu": thermal_per_eruption,
+            })
+
+    return result
