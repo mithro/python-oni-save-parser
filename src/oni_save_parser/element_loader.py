@@ -1,5 +1,6 @@
 """Load and cache element properties from ONI game data files."""
 
+import os
 from pathlib import Path
 from typing import Any
 
@@ -47,3 +48,47 @@ class ElementLoader:
             Element properties dictionary or None if not found
         """
         return self._elements_cache.get(element_id)
+
+
+def find_elements_path() -> Path | None:
+    """Find ONI elements directory automatically.
+
+    Searches common Steam installation locations.
+
+    Returns:
+        Path to elements directory or None if not found
+    """
+    search_paths = [
+        Path.home()
+        / ".local/share/Steam/steamapps/common/OxygenNotIncluded"
+        / "OxygenNotIncluded_Data/StreamingAssets/elements",
+        Path.home()
+        / ".steam/steam/steamapps/common/OxygenNotIncluded"
+        / "OxygenNotIncluded_Data/StreamingAssets/elements",
+    ]
+
+    # Check environment variable
+    if "ONI_INSTALL_PATH" in os.environ:
+        custom_path = (
+            Path(os.environ["ONI_INSTALL_PATH"])
+            / "OxygenNotIncluded_Data/StreamingAssets/elements"
+        )
+        search_paths.insert(0, custom_path)
+
+    for path in search_paths:
+        if path.exists() and (path / "gas.yaml").exists():
+            return path
+
+    return None
+
+
+def get_global_element_loader() -> ElementLoader | None:
+    """Get a global ElementLoader instance with auto-discovered path.
+
+    Returns:
+        ElementLoader instance or None if elements path not found
+    """
+    elements_path = find_elements_path()
+    if elements_path:
+        return ElementLoader(elements_path)
+    return None
