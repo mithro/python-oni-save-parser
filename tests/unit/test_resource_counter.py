@@ -215,8 +215,10 @@ def test_resource_counter_duplicant_detection(tmp_path: Path) -> None:
     )
 
     assert result.returncode == 0
-    # Fixture has no duplicants, so should show "0 duplicants"
-    assert "duplicants" in result.stdout.lower()
+    # Fixture has no duplicants, so duplicants section should not appear in table output
+    # But we should still see storage and debris sections
+    assert "STORAGE CONTAINERS:" in result.stdout or "Storage" in result.stdout
+    assert "DEBRIS" in result.stdout or "debris" in result.stdout.lower()
 
 
 def test_resource_counter_json_output(tmp_path: Path) -> None:
@@ -241,3 +243,21 @@ def test_resource_counter_json_output(tmp_path: Path) -> None:
 
     # Verify storage has 2 containers
     assert len(data["storage"]) == 2
+
+
+def test_resource_counter_table_output(tmp_path: Path) -> None:
+    """Should display resources in ASCII table format."""
+    save_path = tmp_path / "test.sav"
+    create_save_with_resources(save_path)
+
+    result = subprocess.run(
+        [sys.executable, "examples/resource_counter.py", str(save_path)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    # Check for table headers
+    assert "Type" in result.stdout or "Prefab" in result.stdout
+    assert "Mass" in result.stdout
+    assert "---" in result.stdout  # Table separator line

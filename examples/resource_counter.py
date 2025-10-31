@@ -119,6 +119,48 @@ def find_duplicant_inventories(save: Any) -> list[dict[str, Any]]:
     return duplicant_items
 
 
+def format_table_output(containers: list[dict[str, Any]],
+                       debris: list[dict[str, Any]],
+                       duplicants: list[dict[str, Any]]) -> str:
+    """Format resources as ASCII table."""
+    lines = []
+
+    # Storage section
+    if containers:
+        lines.append("\nSTORAGE CONTAINERS:")
+        lines.append(f"{'Prefab':<20} {'Mass (kg)':>12} {'Position':>20}")
+        lines.append("-" * 53)
+        for item in containers:
+            pos_str = f"({item['position'][0]:.1f}, {item['position'][1]:.1f})"
+            lines.append(f"{item['prefab']:<20} {item['mass']:>12.1f} {pos_str:>20}")
+        lines.append(f"\nTotal: {len(containers)} containers, {sum(c['mass'] for c in containers):.1f} kg")
+
+    # Debris section
+    if debris:
+        lines.append("\nDEBRIS ITEMS:")
+        lines.append(f"{'Prefab':<20} {'Mass (kg)':>12} {'Position':>20}")
+        lines.append("-" * 53)
+        for item in debris:
+            pos_str = f"({item['position'][0]:.1f}, {item['position'][1]:.1f})"
+            lines.append(f"{item['prefab']:<20} {item['mass']:>12.1f} {pos_str:>20}")
+        lines.append(f"\nTotal: {len(debris)} items, {sum(d['mass'] for d in debris):.1f} kg")
+
+    # Duplicants section
+    if duplicants:
+        lines.append("\nDUPLICANTS CARRYING ITEMS:")
+        lines.append(f"{'Name':<20} {'Mass (kg)':>12} {'Position':>20}")
+        lines.append("-" * 53)
+        for item in duplicants:
+            pos_str = f"({item['position'][0]:.1f}, {item['position'][1]:.1f})"
+            lines.append(f"{item['duplicant']:<20} {item['mass']:>12.1f} {pos_str:>20}")
+        lines.append(f"\nTotal: {len(duplicants)} duplicants, {sum(d['mass'] for d in duplicants):.1f} kg")
+
+    if not containers and not debris and not duplicants:
+        lines.append("\nNo resources found")
+
+    return "\n".join(lines)
+
+
 def format_json_output(containers: list[dict[str, Any]],
                       debris: list[dict[str, Any]],
                       duplicants: list[dict[str, Any]]) -> str:
@@ -159,17 +201,7 @@ def main() -> int:
         if args.json:
             print(format_json_output(containers, debris, duplicants))
         else:
-            print(f"Found {len(containers)} storage containers")
-            for container in containers:
-                print(f"  {container['prefab']}: {container['mass']:.1f} kg at {container['position']}")
-
-            print(f"\nFound {len(debris)} debris items")
-            for item in debris:
-                print(f"  {item['prefab']}: {item['mass']:.1f} kg at {item['position']}")
-
-            print(f"\nFound {len(duplicants)} duplicants carrying items")
-            for dup in duplicants:
-                print(f"  {dup['duplicant']}: {dup['mass']:.1f} kg at {dup['position']}")
+            print(format_table_output(containers, debris, duplicants))
 
         return 0
     except Exception as e:
