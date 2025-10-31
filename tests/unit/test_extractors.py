@@ -6,6 +6,7 @@ from oni_save_parser.extractors import extract_duplicant_skills
 from oni_save_parser.extractors import extract_duplicant_traits
 from oni_save_parser.extractors import extract_health_status
 from oni_save_parser.extractors import extract_attribute_levels
+from oni_save_parser.extractors import extract_geyser_stats
 
 
 def test_extract_duplicant_skills_returns_dict():
@@ -137,3 +138,21 @@ def test_extractors_with_real_save():
         elif behavior.name == "Klei.AI.AttributeLevels":
             attrs = extract_attribute_levels(behavior)
             assert isinstance(attrs, dict)
+
+
+def test_extract_geyser_stats_calculates_rates():
+    """Test geyser statistics extraction."""
+    # Mock geyser configuration data
+    config = {
+        "scaledRate": 5.4,  # kg/s when erupting
+        "scaledIterationLength": 401.1,  # total eruption cycle (s)
+        "scaledIterationPercent": 0.582,  # fraction erupting
+        "scaledYearLength": 81800.0,  # total dormancy cycle (s)
+        "scaledYearPercent": 0.720,  # fraction active
+    }
+
+    stats = extract_geyser_stats(config)
+
+    assert stats["emission_rate_kg_s"] == 5.4
+    assert abs(stats["average_output_active_kg_s"] - 3.14) < 0.01  # 5.4 * 0.582
+    assert abs(stats["average_output_lifetime_kg_s"] - 2.26) < 0.01  # 5.4 * 0.582 * 0.720

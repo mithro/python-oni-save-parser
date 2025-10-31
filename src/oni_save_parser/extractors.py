@@ -142,3 +142,108 @@ def extract_attribute_levels(attribute_levels_behavior: Any) -> dict[str, dict[s
         }
 
     return attributes
+
+
+def extract_geyser_stats(config: dict[str, Any]) -> dict[str, Any]:
+    """Extract gameplay statistics from geyser configuration.
+
+    Args:
+        config: Geyser configuration dictionary from behavior template_data
+
+    Returns:
+        Dictionary with calculated geyser statistics:
+        {
+            # Rates
+            'emission_rate_kg_s': float,           # Peak emission rate (kg/s)
+            'average_output_active_kg_s': float,   # Average during active periods (kg/s)
+            'average_output_lifetime_kg_s': float, # Average over entire lifetime (kg/s)
+
+            # Eruption cycle
+            'eruption_duration_s': float,          # Length of each eruption (seconds)
+            'idle_duration_s': float,              # Length of idle period between eruptions (seconds)
+            'eruption_cycle_s': float,             # Total eruption cycle length (seconds)
+            'eruption_uptime_percent': float,      # Percentage of eruption cycle spent erupting
+
+            # Dormancy cycle
+            'active_duration_s': float,            # Length of active period (seconds)
+            'dormant_duration_s': float,           # Length of dormant period (seconds)
+            'dormancy_cycle_s': float,             # Total dormancy cycle length (seconds)
+            'active_uptime_percent': float,        # Percentage of dormancy cycle spent active
+
+            # Overall
+            'overall_uptime_percent': float,       # Combined eruption and active uptime percentage
+
+            # Production
+            'kg_per_eruption': float,              # Total kg produced per single eruption
+            'kg_per_eruption_cycle': float,        # Total kg produced per eruption cycle
+            'kg_per_active_period': float,         # Total kg produced per active period
+
+            # Storage
+            'storage_for_idle_kg': float,          # Storage needed for idle periods (kg)
+            'storage_for_dormancy_kg': float,      # Storage needed for dormancy periods (kg)
+            'recommended_storage_kg': float,       # Recommended storage capacity (kg)
+        }
+    """
+    # Extract raw values
+    emission_rate = config.get("scaledRate", 0.0)
+    iteration_length = config.get("scaledIterationLength", 0.0)
+    iteration_percent = config.get("scaledIterationPercent", 0.0)
+    year_length = config.get("scaledYearLength", 0.0)
+    year_percent = config.get("scaledYearPercent", 0.0)
+
+    # Calculate rates
+    avg_active = emission_rate * iteration_percent
+    avg_lifetime = emission_rate * iteration_percent * year_percent
+
+    # Calculate durations
+    eruption_duration = iteration_length * iteration_percent
+    idle_duration = iteration_length * (1 - iteration_percent)
+    active_duration = year_length * year_percent
+    dormant_duration = year_length * (1 - year_percent)
+
+    # Calculate percentages
+    eruption_uptime_percent = iteration_percent * 100
+    active_uptime_percent = year_percent * 100
+    overall_uptime_percent = iteration_percent * year_percent * 100
+
+    # Calculate production amounts
+    kg_per_eruption = emission_rate * eruption_duration
+    kg_per_eruption_cycle = avg_active * iteration_length
+    kg_per_active_period = avg_active * active_duration
+
+    # Calculate storage requirements
+    storage_idle = avg_active * idle_duration
+    storage_dormancy = avg_lifetime * dormant_duration
+    recommended_storage = max(storage_idle, storage_dormancy)
+
+    return {
+        # Rates
+        "emission_rate_kg_s": emission_rate,
+        "average_output_active_kg_s": avg_active,
+        "average_output_lifetime_kg_s": avg_lifetime,
+
+        # Eruption cycle
+        "eruption_duration_s": eruption_duration,
+        "idle_duration_s": idle_duration,
+        "eruption_cycle_s": iteration_length,
+        "eruption_uptime_percent": eruption_uptime_percent,
+
+        # Dormancy cycle
+        "active_duration_s": active_duration,
+        "dormant_duration_s": dormant_duration,
+        "dormancy_cycle_s": year_length,
+        "active_uptime_percent": active_uptime_percent,
+
+        # Overall
+        "overall_uptime_percent": overall_uptime_percent,
+
+        # Production amounts
+        "kg_per_eruption": kg_per_eruption,
+        "kg_per_eruption_cycle": kg_per_eruption_cycle,
+        "kg_per_active_period": kg_per_active_period,
+
+        # Storage requirements
+        "storage_for_idle_kg": storage_idle,
+        "storage_for_dormancy_kg": storage_dormancy,
+        "recommended_storage_kg": recommended_storage,
+    }
