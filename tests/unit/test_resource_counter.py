@@ -51,39 +51,10 @@ def create_save_with_resources(path: Path) -> None:
             properties=[],
         ),
         TypeTemplate(
-            name="Storage",
-            fields=[
-                TypeTemplateMember(name="items", type=TypeInfo(info=23)),
-                TypeTemplateMember(name="capacityKg", type=TypeInfo(info=10)),
-            ],
-            properties=[],
-        ),
-        TypeTemplate(
             name="PrimaryElement",
             fields=[
-                TypeTemplateMember(name="ElementID", type=TypeInfo(info=7)),
                 TypeTemplateMember(name="Mass", type=TypeInfo(info=10)),
                 TypeTemplateMember(name="Temperature", type=TypeInfo(info=10)),
-            ],
-            properties=[],
-        ),
-        TypeTemplate(
-            name="Pickupable",
-            fields=[
-                TypeTemplateMember(name="absorbable", type=TypeInfo(info=3)),
-                TypeTemplateMember(name="isChoreAllowedCb", type=TypeInfo(info=12)),
-            ],
-            properties=[],
-        ),
-        TypeTemplate(
-            name="MinionIdentity",
-            fields=[
-                TypeTemplateMember(name="name", type=TypeInfo(info=12)),
-                TypeTemplateMember(name="nameStringKey", type=TypeInfo(info=12)),
-                TypeTemplateMember(name="gender", type=TypeInfo(info=12)),
-                TypeTemplateMember(name="genderStringKey", type=TypeInfo(info=12)),
-                TypeTemplateMember(name="personalityResourceId", type=TypeInfo(info=12)),
-                TypeTemplateMember(name="voicePitch", type=TypeInfo(info=10)),
             ],
             properties=[],
         ),
@@ -92,7 +63,7 @@ def create_save_with_resources(path: Path) -> None:
     world = {"buildVersion": 555555}
     settings = {"difficulty": 2}
 
-    # Storage container with Iron (StorageLocker prefab)
+    # Storage container with 500kg at 293.15K (StorageLocker prefab)
     storage_locker = GameObject(
         position=Vector3(x=10.0, y=5.0, z=0.0),
         rotation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
@@ -100,18 +71,8 @@ def create_save_with_resources(path: Path) -> None:
         folder=0,
         behaviors=[
             GameObjectBehavior(
-                name="Storage",
-                template_data={
-                    "items": [],
-                    "capacityKg": 20000.0,
-                },
-                extra_data=None,
-                extra_raw=b"",
-            ),
-            GameObjectBehavior(
                 name="PrimaryElement",
                 template_data={
-                    "ElementID": 1,  # Iron
                     "Mass": 500.0,
                     "Temperature": 293.15,
                 },
@@ -121,7 +82,7 @@ def create_save_with_resources(path: Path) -> None:
         ],
     )
 
-    # Storage container with Water (LiquidReservoir prefab)
+    # Liquid reservoir with 1000kg at 293.15K
     liquid_reservoir = GameObject(
         position=Vector3(x=15.0, y=5.0, z=0.0),
         rotation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
@@ -129,18 +90,8 @@ def create_save_with_resources(path: Path) -> None:
         folder=0,
         behaviors=[
             GameObjectBehavior(
-                name="Storage",
-                template_data={
-                    "items": [],
-                    "capacityKg": 5000.0,
-                },
-                extra_data=None,
-                extra_raw=b"",
-            ),
-            GameObjectBehavior(
                 name="PrimaryElement",
                 template_data={
-                    "ElementID": 2,  # Water
                     "Mass": 1000.0,
                     "Temperature": 293.15,
                 },
@@ -150,7 +101,7 @@ def create_save_with_resources(path: Path) -> None:
         ],
     )
 
-    # Loose debris - IronOre with Pickupable behavior
+    # Loose debris - 25.5kg at 293.15K
     iron_ore = GameObject(
         position=Vector3(x=20.0, y=8.0, z=0.0),
         rotation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
@@ -160,59 +111,7 @@ def create_save_with_resources(path: Path) -> None:
             GameObjectBehavior(
                 name="PrimaryElement",
                 template_data={
-                    "ElementID": 3,  # IronOre
                     "Mass": 25.5,
-                    "Temperature": 293.15,
-                },
-                extra_data=None,
-                extra_raw=b"",
-            ),
-            GameObjectBehavior(
-                name="Pickupable",
-                template_data={
-                    "absorbable": True,
-                    "isChoreAllowedCb": "",
-                },
-                extra_data=None,
-                extra_raw=b"",
-            ),
-        ],
-    )
-
-    # Duplicant "Meep" carrying Copper
-    duplicant = GameObject(
-        position=Vector3(x=100.0, y=50.0, z=0.0),
-        rotation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
-        scale=Vector3(x=1.0, y=1.0, z=1.0),
-        folder=0,
-        behaviors=[
-            GameObjectBehavior(
-                name="MinionIdentity",
-                template_data={
-                    "name": "Meep",
-                    "nameStringKey": "STRINGS.DUPLICANTS.NAME.MEEP",
-                    "gender": "NB",
-                    "genderStringKey": "STRINGS.DUPLICANTS.GENDER.NB",
-                    "personalityResourceId": "DUPLICANT_PERSONALITY_LONER",
-                    "voicePitch": 1.0,
-                },
-                extra_data=None,
-                extra_raw=b"",
-            ),
-            GameObjectBehavior(
-                name="Storage",
-                template_data={
-                    "items": [],
-                    "capacityKg": 400.0,
-                },
-                extra_data=None,
-                extra_raw=b"",
-            ),
-            GameObjectBehavior(
-                name="PrimaryElement",
-                template_data={
-                    "ElementID": 4,  # Copper
-                    "Mass": 10.0,
                     "Temperature": 293.15,
                 },
                 extra_data=None,
@@ -225,7 +124,13 @@ def create_save_with_resources(path: Path) -> None:
         GameObjectGroup(prefab_name="StorageLocker", objects=[storage_locker]),
         GameObjectGroup(prefab_name="LiquidReservoir", objects=[liquid_reservoir]),
         GameObjectGroup(prefab_name="IronOre", objects=[iron_ore]),
-        GameObjectGroup(prefab_name="Minion", objects=[duplicant]),
+        GameObjectGroup(prefab_name="Tile", objects=[GameObject(
+            position=Vector3(x=0.0, y=0.0, z=0.0),
+            rotation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
+            scale=Vector3(x=1.0, y=1.0, z=1.0),
+            folder=0,
+            behaviors=[],
+        )] * 10),
     ]
 
     save_game = SaveGame(
@@ -243,6 +148,15 @@ def create_save_with_resources(path: Path) -> None:
     data = unparse_save_game(save_game)
     path.write_bytes(data)
 
+
+
+def test_create_save_with_resources_fixture(tmp_path: Path):
+    """Verify fixture creates valid save file."""
+    save_path = tmp_path / "test.sav"
+    create_save_with_resources(save_path)
+
+    assert save_path.exists()
+    assert save_path.stat().st_size > 0
 
 
 def test_resource_counter_help():
