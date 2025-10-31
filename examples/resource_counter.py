@@ -110,36 +110,40 @@ def find_debris(save: Any) -> list[dict[str, Any]]:
 def find_duplicant_inventories(save: Any) -> list[dict[str, Any]]:
     """Find resources carried by duplicants.
 
-    Scans Minion objects for carried items with PrimaryElement data.
+    Scans Minion objects for Storage behavior with carried items.
     """
     duplicant_items = []
 
     for group in save.game_objects:
         if group.prefab_name == "Minion":
             for obj in group.objects:
-                # Find MinionIdentity for duplicant name and PrimaryElement for carried items
+                # Find MinionIdentity for duplicant name
                 minion_name = "Unknown"
-                primary_element = None
-
                 for behavior in obj.behaviors:
                     if behavior.name == "MinionIdentity":
                         minion_name = behavior.template_data.get("name", "Unknown")
-                    elif behavior.name == "PrimaryElement":
-                        primary_element = behavior
+                        break
 
-                # If duplicant is carrying something
-                if primary_element:
-                    # Real saves use "Units", test fixtures use "Mass"
-                    mass = (
-                        primary_element.template_data.get("Units")
-                        or primary_element.template_data.get("Mass", 0.0)
-                    )
-                    if mass > 0:
-                        duplicant_items.append({
-                            "duplicant": minion_name,
-                            "mass": mass,
-                            "position": (obj.position.x, obj.position.y)
-                        })
+                # Find Storage behavior for carried items
+                for behavior in obj.behaviors:
+                    if behavior.name == "Storage" and behavior.extra_data:
+                        # extra_data is list of carried GameObjects
+                        for carried_obj in behavior.extra_data:
+                            # Extract mass from carried item's PrimaryElement
+                            for carried_behavior in carried_obj.get("behaviors", []):
+                                if carried_behavior.name == "PrimaryElement":
+                                    # Real saves use "Units", test fixtures use "Mass"
+                                    mass = (
+                                        carried_behavior.template_data.get("Units")
+                                        or carried_behavior.template_data.get("Mass", 0.0)
+                                    )
+                                    if mass > 0:
+                                        duplicant_items.append({
+                                            "duplicant": minion_name,
+                                            "prefab": carried_obj.get("name", "Unknown"),
+                                            "mass": mass,
+                                            "position": (obj.position.x, obj.position.y)
+                                        })
 
     return duplicant_items
 
@@ -218,14 +222,15 @@ def format_table_output(containers: list[dict[str, Any]],
     # Duplicants section
     if duplicants:
         lines.append("\nDUPLICANTS CARRYING ITEMS:")
-        lines.append(f"{'Name':<20} {'Mass (kg)':>12} {'Position':>20}")
-        lines.append("-" * 53)
+        lines.append(f"{'Name':<20} {'Item':<20} {'Mass (kg)':>12} {'Position':>20}")
+        lines.append("-" * 73)
         for item in duplicants:
             pos_str = f"({item['position'][0]:.1f}, {item['position'][1]:.1f})"
-            lines.append(f"{item['duplicant']:<20} {item['mass']:>12.1f} {pos_str:>20}")
+            prefab = item.get('prefab', 'Unknown')
+            lines.append(f"{item['duplicant']:<20} {prefab:<20} {item['mass']:>12.1f} {pos_str:>20}")
         total_mass = sum(d["mass"] for d in duplicants)
         lines.append(
-            f"\nTotal: {len(duplicants)} duplicants, {total_mass:.1f} kg"
+            f"\nTotal: {len(duplicants)} items carried, {total_mass:.1f} kg"
         )
 
     if not containers and not debris and not duplicants:
