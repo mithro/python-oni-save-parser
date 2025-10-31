@@ -51,3 +51,28 @@ def extract_duplicant_traits(traits_behavior: Any) -> list[str]:
             trait_names.append(trait.get("Name", "Unknown"))
 
     return trait_names
+
+
+def extract_health_status(health_behavior: Any) -> dict[str, Any]:
+    """Extract health and status information from Health behavior.
+
+    Args:
+        health_behavior: Health behavior from duplicant object
+
+    Returns:
+        Dictionary with health status:
+        {
+            'state': str,  # 'Alive', 'Incapacitated', 'Dead'
+            'can_be_incapacitated': bool
+        }
+    """
+    template_data = health_behavior.template_data or {}
+
+    # State enum: 0=Alive, 1=Incapacitated, 2=Dead
+    state_map = {0: "Alive", 1: "Incapacitated", 2: "Dead"}
+    state_value = template_data.get("State", 0)
+
+    return {
+        "state": state_map.get(state_value, "Unknown"),
+        "can_be_incapacitated": template_data.get("CanBeIncapacitated", True)
+    }
