@@ -169,3 +169,19 @@ def test_resource_counter_help():
 
     assert result.returncode == 0
     assert "Count resources" in result.stdout or "resource" in result.stdout.lower()
+
+
+def test_resource_counter_finds_storage(tmp_path: Path):
+    """Should find storage containers."""
+    save_path = tmp_path / "test.sav"
+    create_save_with_resources(save_path)
+
+    result = subprocess.run(
+        [sys.executable, "examples/resource_counter.py", str(save_path)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    # Should find the StorageLocker and LiquidReservoir from fixture
+    assert "Storage" in result.stdout or "storage" in result.stdout
