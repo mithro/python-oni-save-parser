@@ -76,7 +76,11 @@ def main() -> int:
             for idx, info in enumerate(dup_info_list, 1):
                 print(f"=== Duplicant #{idx}: {info['name']} ===")
                 print(f"Gender: {info['gender']}")
-                print(f"Personality: {info['personality'].replace('DUPLICANT_PERSONALITY_', '')}")
+                # Personality might be a string or dict - handle both
+                personality = info['personality']
+                if isinstance(personality, str):
+                    personality = personality.replace('DUPLICANT_PERSONALITY_', '')
+                print(f"Personality: {personality}")
                 print(f"Position: ({info['position'][0]:.1f}, {info['position'][1]:.1f})")
                 print(f"Behaviors: {', '.join(info['behaviors'])}")
                 print()
