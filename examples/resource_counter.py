@@ -69,12 +69,19 @@ def find_debris(save: Any) -> list[dict[str, Any]]:
             # Extract mass from PrimaryElement
             has_pickupable = False
             primary_element = None
+            is_creature = False
 
             for behavior in obj.behaviors:
                 if behavior.name == "Pickupable":
                     has_pickupable = True
                 elif behavior.name == "PrimaryElement":
                     primary_element = behavior
+                elif behavior.name == "CreatureBrain":
+                    is_creature = True
+
+            # Skip creatures (WoodDeer, Hatch, etc.) - they're not debris
+            if is_creature:
+                continue
 
             # Only count if it has BOTH Pickupable AND PrimaryElement
             # Real saves properly mark debris with Pickupable behavior
