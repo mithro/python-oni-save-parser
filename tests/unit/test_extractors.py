@@ -2,6 +2,7 @@
 import pytest
 from oni_save_parser.extractors import extract_duplicant_skills
 from oni_save_parser.extractors import extract_duplicant_traits
+from oni_save_parser.extractors import extract_health_status
 
 
 def test_extract_duplicant_skills_returns_dict():
@@ -50,3 +51,23 @@ def test_extract_duplicant_traits_returns_list():
     assert "Yokel" in result
     assert "MouthBreather" in result
     assert len(result) == 3
+
+
+def test_extract_health_status_returns_dict():
+    """Test that extract_health_status returns health state."""
+    # Mock Health behavior
+    class MockBehavior:
+        def __init__(self):
+            self.name = "Health"
+            self.template_data = {
+                "State": 0,  # Alive
+                "CanBeIncapacitated": True
+            }
+
+    behavior = MockBehavior()
+    result = extract_health_status(behavior)
+
+    assert isinstance(result, dict)
+    assert "state" in result
+    assert result["state"] == "Alive"
+    assert result["can_be_incapacitated"] is True
