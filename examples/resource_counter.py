@@ -27,7 +27,11 @@ def find_storage_containers(save: Any) -> list[dict[str, Any]]:
                 # Look for PrimaryElement to get mass data
                 for behavior in obj.behaviors:
                     if behavior.name == "PrimaryElement":
-                        mass = behavior.template_data.get("Mass", 0.0)
+                        # Real saves use "Units", test fixtures use "Mass"
+                        mass = (
+                            behavior.template_data.get("Units")
+                            or behavior.template_data.get("Mass", 0.0)
+                        )
                         if mass > 0:
                             containers.append({
                                 "prefab": group.prefab_name,
@@ -64,7 +68,11 @@ def find_debris(save: Any) -> list[dict[str, Any]]:
 
             # Only count if it has Pickupable AND PrimaryElement
             if has_pickupable and primary_element:
-                mass = primary_element.template_data.get("Mass", 0.0)
+                # Real saves use "Units", test fixtures use "Mass"
+                mass = (
+                    primary_element.template_data.get("Units")
+                    or primary_element.template_data.get("Mass", 0.0)
+                )
                 if mass > 0:
                     debris_items.append({
                         "prefab": group.prefab_name,
@@ -78,7 +86,11 @@ def find_debris(save: Any) -> list[dict[str, Any]]:
                 and group.prefab_name not in STORAGE_PREFABS
             ):
                 # This handles our test fixture which doesn't have Pickupable behavior
-                mass = primary_element.template_data.get("Mass", 0.0)
+                # Real saves use "Units", test fixtures use "Mass"
+                mass = (
+                    primary_element.template_data.get("Units")
+                    or primary_element.template_data.get("Mass", 0.0)
+                )
                 if mass > 0:
                     debris_items.append({
                         "prefab": group.prefab_name,
@@ -111,7 +123,11 @@ def find_duplicant_inventories(save: Any) -> list[dict[str, Any]]:
 
                 # If duplicant is carrying something
                 if primary_element:
-                    mass = primary_element.template_data.get("Mass", 0.0)
+                    # Real saves use "Units", test fixtures use "Mass"
+                    mass = (
+                        primary_element.template_data.get("Units")
+                        or primary_element.template_data.get("Mass", 0.0)
+                    )
                     if mass > 0:
                         duplicant_items.append({
                             "duplicant": minion_name,
