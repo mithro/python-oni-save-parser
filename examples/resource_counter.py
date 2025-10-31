@@ -119,6 +119,42 @@ def find_duplicant_inventories(save: Any) -> list[dict[str, Any]]:
     return duplicant_items
 
 
+def apply_filters(containers: list[dict[str, Any]],
+                 debris: list[dict[str, Any]],
+                 duplicants: list[dict[str, Any]],
+                 element_filter: str | None = None,
+                 min_mass: float | None = None) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    """Apply element and mass filters to resource lists."""
+    filtered_containers = containers
+    filtered_debris = debris
+    filtered_duplicants = duplicants
+
+    # Apply element filter (filter by prefab name)
+    if element_filter:
+        filtered_containers = [c for c in filtered_containers if c["prefab"] == element_filter]
+        filtered_debris = [d for d in filtered_debris if d["prefab"] == element_filter]
+        # Duplicants don't have prefab field, so we skip filtering them by element
+
+    # Apply minimum mass filter
+    if min_mass is not None:
+        filtered_containers = [c for c in filtered_containers if c["mass"] >= min_mass]
+        filtered_debris = [d for d in filtered_debris if d["mass"] >= min_mass]
+        filtered_duplicants = [d for d in filtered_duplicants if d["mass"] >= min_mass]
+
+    return filtered_containers, filtered_debris, filtered_duplicants
+
+
+def get_all_element_names(containers: list[dict[str, Any]],
+                         debris: list[dict[str, Any]]) -> set[str]:
+    """Get all unique prefab names from containers and debris."""
+    element_names = set()
+    for item in containers:
+        element_names.add(item["prefab"])
+    for item in debris:
+        element_names.add(item["prefab"])
+    return element_names
+
+
 def format_table_output(containers: list[dict[str, Any]],
                        debris: list[dict[str, Any]],
                        duplicants: list[dict[str, Any]]) -> str:
@@ -183,12 +219,19 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Count resources in ONI save files by location and element type"
     )
-    parser.add_argument("save_file", type=Path, help="Path to .sav file")
+    parser.add_argument("save_file", type=Path, help="Path to .sav file", nargs="?")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
+    parser.add_argument("--element", type=str, help="Filter by prefab name (e.g., IronOre, StorageLocker)")
+    parser.add_argument("--min-mass", type=float, help="Filter out items below this mass (kg)")
+    parser.add_argument("--list-elements", action="store_true", help="List all prefab types found and exit")
 
     args = parser.parse_args()
 
-    if not args.save_file.exists():
+    # --list-elements doesn't require save_file, but everything else does
+    if not args.list_elements and not args.save_file:
+        parser.error("save_file is required unless using --list-elements")
+
+    if args.save_file and not args.save_file.exists():
         print(f"Error: File not found: {args.save_file}", file=sys.stderr)
         return 1
 
@@ -197,6 +240,25 @@ def main() -> int:
         containers = find_storage_containers(save)
         debris = find_debris(save)
         duplicants = find_duplicant_inventories(save)
+
+        # Handle --list-elements flag
+        if args.list_elements:
+            element_names = get_all_element_names(containers, debris)
+            if element_names:
+                print("\nPrefab types found:")
+                for name in sorted(element_names):
+                    print(f"  {name}")
+                print(f"\nTotal: {len(element_names)} prefab types")
+            else:
+                print("\nNo prefab types found")
+            return 0
+
+        # Apply filters
+        containers, debris, duplicants = apply_filters(
+            containers, debris, duplicants,
+            element_filter=args.element,
+            min_mass=args.min_mass
+        )
 
         if args.json:
             print(format_json_output(containers, debris, duplicants))

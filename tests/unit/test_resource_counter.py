@@ -261,3 +261,225 @@ def test_resource_counter_table_output(tmp_path: Path) -> None:
     assert "Type" in result.stdout or "Prefab" in result.stdout
     assert "Mass" in result.stdout
     assert "---" in result.stdout  # Table separator line
+
+
+def test_resource_counter_element_filter(tmp_path: Path) -> None:
+    """Should filter by element (prefab name)."""
+    save_path = tmp_path / "test.sav"
+    create_save_with_resources(save_path)
+
+    result = subprocess.run(
+        [sys.executable, "examples/resource_counter.py", str(save_path), "--element", "IronOre"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    # Should find IronOre debris
+    assert "IronOre" in result.stdout
+    # Should NOT find storage containers
+    assert "StorageLocker" not in result.stdout
+    assert "LiquidReservoir" not in result.stdout
+
+
+def test_resource_counter_element_filter_json(tmp_path: Path) -> None:
+    """Should filter by element in JSON output."""
+    save_path = tmp_path / "test.sav"
+    create_save_with_resources(save_path)
+
+    result = subprocess.run(
+        [sys.executable, "examples/resource_counter.py", str(save_path), "--element", "StorageLocker", "--json"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    data = json.loads(result.stdout)
+
+    # Should only have StorageLocker in storage
+    assert len(data["storage"]) == 1
+    assert data["storage"][0]["prefab"] == "StorageLocker"
+    # Should have no debris (IronOre filtered out)
+    assert len(data["debris"]) == 0
+
+
+def test_resource_counter_min_mass_filter(tmp_path: Path) -> None:
+    """Should filter by minimum mass."""
+    save_path = tmp_path / "test.sav"
+    create_save_with_resources(save_path)
+
+    # Filter out items below 100kg (should only show storage containers)
+    result = subprocess.run(
+        [sys.executable, "examples/resource_counter.py", str(save_path), "--min-mass", "100"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    # Should find storage containers (500kg and 1000kg)
+    assert "StorageLocker" in result.stdout or "STORAGE" in result.stdout
+    # Should NOT find IronOre debris (25.5kg < 100kg)
+    assert "IronOre" not in result.stdout
+
+
+def test_resource_counter_min_mass_filter_json(tmp_path: Path) -> None:
+    """Should filter by minimum mass in JSON output."""
+    save_path = tmp_path / "test.sav"
+    create_save_with_resources(save_path)
+
+    result = subprocess.run(
+        [sys.executable, "examples/resource_counter.py", str(save_path), "--min-mass", "100", "--json"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    data = json.loads(result.stdout)
+
+    # Should have 2 storage containers (both > 100kg)
+    assert len(data["storage"]) == 2
+    # Should have no debris (IronOre 25.5kg < 100kg)
+    assert len(data["debris"]) == 0
+
+
+def test_resource_counter_combined_filters(tmp_path: Path) -> None:
+    """Should apply both element and min-mass filters."""
+    save_path = tmp_path / "test.sav"
+    create_save_with_resources(save_path)
+
+    result = subprocess.run(
+        [sys.executable, "examples/resource_counter.py", str(save_path),
+         "--element", "StorageLocker", "--min-mass", "100"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    # Should only find StorageLocker with mass >= 100kg
+    assert "StorageLocker" in result.stdout
+    assert "LiquidReservoir" not in result.stdout
+    assert "IronOre" not in result.stdout
+
+
+def test_resource_counter_list_elements(tmp_path: Path) -> None:
+    """Should list all prefab types found."""
+    save_path = tmp_path / "test.sav"
+    create_save_with_resources(save_path)
+
+    result = subprocess.run(
+        [sys.executable, "examples/resource_counter.py", str(save_path), "--list-elements"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    # Should list all prefab types
+    assert "IronOre" in result.stdout
+    assert "StorageLocker" in result.stdout
+    assert "LiquidReservoir" in result.stdout
+    # Should show total count
+    assert "Total:" in result.stdout or "prefab types" in result.stdout
+
+
+def test_resource_counter_file_not_found() -> None:
+    """Should handle file not found error."""
+    result = subprocess.run(
+        [sys.executable, "examples/resource_counter.py", "/nonexistent/file.sav"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "Error" in result.stderr or "not found" in result.stderr.lower()
+
+
+def create_empty_save(path: Path) -> None:
+    """Create a save file with no resources."""
+    game_info = SaveGameInfo(
+        number_of_cycles=1,
+        number_of_duplicants=0,
+        base_name="Empty Test",
+        is_auto_save=False,
+        original_save_name="Empty Test Cycle 1",
+        save_major_version=7,
+        save_minor_version=35,
+        cluster_id="vanilla",
+        sandbox_enabled=False,
+        colony_guid="cccccccc-cccc-cccc-cccc-cccccccccccc",
+        dlc_id="",
+    )
+    header = SaveGameHeader(
+        build_version=555555,
+        header_version=1,
+        is_compressed=True,
+        game_info=game_info,
+    )
+
+    templates = [
+        TypeTemplate(
+            name="Klei.SaveFileRoot",
+            fields=[TypeTemplateMember(name="buildVersion", type=TypeInfo(info=6))],
+            properties=[],
+        ),
+        TypeTemplate(
+            name="Game+Settings",
+            fields=[TypeTemplateMember(name="difficulty", type=TypeInfo(info=6))],
+            properties=[],
+        ),
+    ]
+
+    world = {"buildVersion": 555555}
+    settings = {"difficulty": 2}
+
+    # No game objects
+    game_objects = []
+
+    save_game = SaveGame(
+        header=header,
+        templates=templates,
+        world=world,
+        settings=settings,
+        sim_data=b"\x00" * 100,
+        version_major=7,
+        version_minor=35,
+        game_objects=game_objects,
+        game_data=b"",
+    )
+
+    data = unparse_save_game(save_game)
+    path.write_bytes(data)
+
+
+def test_resource_counter_empty_save(tmp_path: Path) -> None:
+    """Should handle empty save file (no resources)."""
+    save_path = tmp_path / "empty.sav"
+    create_empty_save(save_path)
+
+    result = subprocess.run(
+        [sys.executable, "examples/resource_counter.py", str(save_path)],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    assert "No resources found" in result.stdout
+
+
+def test_resource_counter_empty_save_json(tmp_path: Path) -> None:
+    """Should handle empty save file in JSON output."""
+    save_path = tmp_path / "empty.sav"
+    create_empty_save(save_path)
+
+    result = subprocess.run(
+        [sys.executable, "examples/resource_counter.py", str(save_path), "--json"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    data = json.loads(result.stdout)
+
+    assert len(data["storage"]) == 0
+    assert len(data["debris"]) == 0
+    assert len(data["duplicants"]) == 0
+    assert data["summary"]["total_storage_containers"] == 0
