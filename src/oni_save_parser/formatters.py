@@ -6,7 +6,13 @@ This module provides formatters for different output modes:
 - json: Machine-readable for automation
 """
 
+import math
 from typing import Any
+
+# ONI game constants
+ONI_CYCLE_DURATION_SECONDS = 600.0  # 1 cycle = 600 seconds
+GAS_RESERVOIR_CAPACITY_KG = 1000  # Gas Reservoir capacity
+LIQUID_RESERVOIR_CAPACITY_KG = 5000  # Liquid Reservoir capacity
 
 
 def format_duplicant_compact(duplicant_data: dict[str, Any]) -> str:
@@ -109,7 +115,7 @@ def format_duration(seconds: float) -> str:
     Returns:
         Formatted string with seconds and cycles
     """
-    cycles = seconds / 600.0  # 1 cycle = 600 seconds
+    cycles = seconds / ONI_CYCLE_DURATION_SECONDS
 
     if cycles < 1.0:
         return f"{seconds:.1f}s ({cycles:.1f} cycles)"
@@ -238,10 +244,9 @@ def format_geyser_detailed(
 
     # Calculate reservoir count
     if element_state == "Gas":
-        reservoir_capacity = 1000  # Gas Reservoir
-        reservoir_count = int(
-            stats["storage_for_idle_kg"] / reservoir_capacity
-        ) + (1 if stats["storage_for_idle_kg"] % reservoir_capacity > 0 else 0)
+        reservoir_count = math.ceil(
+            stats["storage_for_idle_kg"] / GAS_RESERVOIR_CAPACITY_KG
+        )
         lines.append(
             f"    - {reservoir_count} Gas Reservoir"
             f"{'s' if reservoir_count != 1 else ''} (1,000 kg each)"
@@ -265,13 +270,14 @@ def format_geyser_detailed(
     thermal_active_str = ""
     if thermal_stats and "thermal_per_eruption_kdtu" in thermal_stats:
         # Total thermal during active period
-        num_eruptions = (
-            stats["active_duration_s"] / stats["eruption_cycle_s"]
-        )
-        total_thermal_active = (
-            thermal_stats["thermal_per_eruption_kdtu"] * num_eruptions
-        )
-        thermal_active_str = f" @ {total_thermal_active:>11,.0f} kDTU"
+        if stats["eruption_cycle_s"] > 0:
+            num_eruptions = (
+                stats["active_duration_s"] / stats["eruption_cycle_s"]
+            )
+            total_thermal_active = (
+                thermal_stats["thermal_per_eruption_kdtu"] * num_eruptions
+            )
+            thermal_active_str = f" @ {total_thermal_active:>11,.0f} kDTU"
 
     lines.append(
         f"  Active:      {active_dur:>28}  → Produces {kg_active_str}{thermal_active_str}"
@@ -287,38 +293,24 @@ def format_geyser_detailed(
 
     # Calculate reservoir and tile storage
     if element_state == "Gas":
-        reservoir_capacity = 1000
-        reservoir_count = int(
-            stats["storage_for_dormancy_kg"] / reservoir_capacity
-        ) + (
-            1
-            if stats["storage_for_dormancy_kg"] % reservoir_capacity > 0
-            else 0
+        reservoir_count = math.ceil(
+            stats["storage_for_dormancy_kg"] / GAS_RESERVOIR_CAPACITY_KG
         )
         lines.append(
             f"    - {reservoir_count} Gas Reservoir"
             f"{'s' if reservoir_count != 1 else ''} (1,000 kg each)"
         )
     else:  # Liquid
-        reservoir_capacity = 5000
-        reservoir_count = int(
-            stats["storage_for_dormancy_kg"] / reservoir_capacity
-        ) + (
-            1
-            if stats["storage_for_dormancy_kg"] % reservoir_capacity > 0
-            else 0
+        reservoir_count = math.ceil(
+            stats["storage_for_dormancy_kg"] / LIQUID_RESERVOIR_CAPACITY_KG
         )
         lines.append(
             f"    - {reservoir_count} Liquid Reservoir"
             f"{'s' if reservoir_count != 1 else ''} (5,000 kg each)"
         )
         if element_max_mass:
-            tile_count = int(
+            tile_count = math.ceil(
                 stats["storage_for_dormancy_kg"] / element_max_mass
-            ) + (
-                1
-                if stats["storage_for_dormancy_kg"] % element_max_mass > 0
-                else 0
             )
             lines.append(f"    - {tile_count} tiles @ {element_max_mass:,.0f} kg/tile max")
 
