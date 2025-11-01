@@ -1,12 +1,16 @@
 """Tests for data extraction functions."""
-import pytest
 from pathlib import Path
-from oni_save_parser import load_save_file, get_game_objects_by_prefab
-from oni_save_parser.extractors import extract_duplicant_skills
-from oni_save_parser.extractors import extract_duplicant_traits
-from oni_save_parser.extractors import extract_health_status
-from oni_save_parser.extractors import extract_attribute_levels
-from oni_save_parser.extractors import extract_geyser_stats
+
+import pytest
+
+from oni_save_parser import get_game_objects_by_prefab, load_save_file
+from oni_save_parser.extractors import (
+    extract_attribute_levels,
+    extract_duplicant_skills,
+    extract_duplicant_traits,
+    extract_geyser_stats,
+    extract_health_status,
+)
 
 
 def test_extract_duplicant_skills_returns_dict():
