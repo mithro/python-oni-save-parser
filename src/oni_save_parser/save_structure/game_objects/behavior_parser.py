@@ -1,23 +1,30 @@
 """Game object behavior parsing."""
 
+from collections.abc import Callable
 from typing import Any
 
 from oni_save_parser.parser.errors import CorruptionError
 from oni_save_parser.parser.parse import BinaryParser
 from oni_save_parser.parser.unparse import BinaryWriter
-from oni_save_parser.save_structure.game_objects.types import GameObjectBehavior
-from oni_save_parser.save_structure.type_templates import TypeTemplate, parse_by_template, unparse_by_template
-from oni_save_parser.save_structure.type_templates.template_parser import validate_dotnet_identifier_name
+from oni_save_parser.save_structure.game_objects.types import GameObject, GameObjectBehavior
+from oni_save_parser.save_structure.type_templates import (
+    TypeTemplate,
+    parse_by_template,
+    unparse_by_template,
+)
+from oni_save_parser.save_structure.type_templates.template_parser import (
+    validate_dotnet_identifier_name,
+)
 
 
 # Forward references to avoid circular import
-def _get_parse_game_object():
+def _get_parse_game_object() -> Callable[[BinaryParser, list[TypeTemplate]], GameObject]:
     """Get parse_game_object function (lazy import to avoid circular dependency)."""
     from oni_save_parser.save_structure.game_objects.object_parser import parse_game_object
     return parse_game_object
 
 
-def _get_unparse_game_object():
+def _get_unparse_game_object() -> Callable[[BinaryWriter, list[TypeTemplate], GameObject], None]:
     """Get unparse_game_object function (lazy import to avoid circular dependency)."""
     from oni_save_parser.save_structure.game_objects.object_parser import unparse_game_object
     return unparse_game_object
@@ -57,8 +64,9 @@ def parse_behavior(parser: BinaryParser, templates: list[TypeTemplate]) -> GameO
     except CorruptionError:
         # If template not found, skip the entire data block
         parser.offset = start_offset + data_length
+        extra_raw = parser.data[start_offset : parser.offset]
         return GameObjectBehavior(
-            name=name, template_data=None, extra_data=None, extra_raw=parser.data[start_offset : parser.offset]
+            name=name, template_data=None, extra_data=None, extra_raw=extra_raw
         )
 
     # Parse extra data for specific behavior types
@@ -78,7 +86,8 @@ def parse_behavior(parser: BinaryParser, templates: list[TypeTemplate]) -> GameO
                 # Read prefab name
                 prefab_name = parser.read_klei_string()
                 if prefab_name is None:
-                    raise CorruptionError("Expected prefab name for stored item, got null", offset=parser.offset)
+                    msg = "Expected prefab name for stored item, got null"
+                    raise CorruptionError(msg, offset=parser.offset)
                 prefab_name = validate_dotnet_identifier_name(prefab_name)
 
                 # Parse GameObject
@@ -108,7 +117,12 @@ def parse_behavior(parser: BinaryParser, templates: list[TypeTemplate]) -> GameO
 
     extra_raw = parser.read_bytes(remaining) if remaining > 0 else b""
 
-    return GameObjectBehavior(name=name, template_data=template_data, extra_data=extra_data, extra_raw=extra_raw)
+    return GameObjectBehavior(
+        name=name,
+        template_data=template_data,
+        extra_data=extra_data,
+        extra_raw=extra_raw,
+    )
 
 
 def unparse_behavior(
@@ -140,7 +154,6 @@ def unparse_behavior(
             # Write prefab name
             data_writer.write_klei_string(stored_obj["name"])
             # Write GameObject (reconstruct from dict)
-            from oni_save_parser.save_structure.game_objects.types import GameObject
             game_obj = GameObject(
                 position=stored_obj["position"],
                 rotation=stored_obj["rotation"],

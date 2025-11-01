@@ -38,7 +38,11 @@ def load_save_file(
         raise FileNotFoundError(f"Save file not found: {file_path}")
 
     data = path.read_bytes()
-    return parse_save_game(data, verify_version=verify_version, allow_minor_mismatch=allow_minor_mismatch)
+    return parse_save_game(
+        data,
+        verify_version=verify_version,
+        allow_minor_mismatch=allow_minor_mismatch,
+    )
 
 
 def save_to_file(save_game: SaveGame, file_path: str | Path) -> None:

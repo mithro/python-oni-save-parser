@@ -33,7 +33,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from oni_save_parser import load_save_file, get_game_objects_by_prefab, list_prefab_types
+from oni_save_parser import get_game_objects_by_prefab, list_prefab_types, load_save_file
 from oni_save_parser.element_loader import get_global_element_loader
 from oni_save_parser.extractors import extract_geyser_stats
 from oni_save_parser.formatters import format_geyser_compact, format_geyser_detailed
@@ -95,7 +95,9 @@ def extract_geyser_info(geyser_object: Any) -> dict[str, Any]:
     return info
 
 
-def format_geyser_output(prefab_name: str, index: int, info: dict[str, Any], debug: bool = False) -> str:
+def format_geyser_output(
+    prefab_name: str, index: int, info: dict[str, Any], debug: bool = False
+) -> str:
     """Format geyser information for display.
 
     Args:
@@ -177,7 +179,8 @@ def main() -> int:
     # Initialize element loader
     element_loader = get_global_element_loader()
     if element_loader is None and not args.debug:
-        print("Warning: Could not find ONI element data. Thermal calculations unavailable.", file=sys.stderr)
+        msg = "Warning: Could not find ONI element data. Thermal calculations unavailable."
+        print(msg, file=sys.stderr)
 
     if not args.save_file.exists():
         print(f"Error: File not found: {args.save_file}", file=sys.stderr)
@@ -230,8 +233,6 @@ def main() -> int:
                 print('=' * 60)
 
                 for i, geyser in enumerate(geysers):
-                    # Extract basic info
-                    info = extract_geyser_info(geyser)
                     position = (geyser.position.x, geyser.position.y)
 
                     # Find geyser configuration and element info
@@ -292,9 +293,15 @@ def main() -> int:
                         thermal_stats = {}
                         if "peak_thermal_power_kdtu_s" in stats:
                             thermal_stats = {
-                                "peak_thermal_power_kdtu_s": stats["peak_thermal_power_kdtu_s"],
-                                "average_thermal_power_kdtu_s": stats["average_thermal_power_kdtu_s"],
-                                "thermal_per_eruption_kdtu": stats["thermal_per_eruption_kdtu"],
+                                "peak_thermal_power_kdtu_s": stats[
+                                    "peak_thermal_power_kdtu_s"
+                                ],
+                                "average_thermal_power_kdtu_s": stats[
+                                    "average_thermal_power_kdtu_s"
+                                ],
+                                "thermal_per_eruption_kdtu": stats[
+                                    "thermal_per_eruption_kdtu"
+                                ],
                             }
 
                         output = format_geyser_detailed(

@@ -11,7 +11,9 @@ from oni_save_parser.save_structure.game_objects.types import GameObjectGroup
 from oni_save_parser.save_structure.type_templates import TypeTemplate
 
 
-def parse_game_objects(parser: BinaryParser, templates: list[TypeTemplate]) -> list[GameObjectGroup]:
+def parse_game_objects(
+    parser: BinaryParser, templates: list[TypeTemplate]
+) -> list[GameObjectGroup]:
     """Parse all game object groups.
 
     Args:
@@ -27,7 +29,8 @@ def parse_game_objects(parser: BinaryParser, templates: list[TypeTemplate]) -> l
     # Read group count
     group_count = parser.read_int32()
     if group_count < 0:
-        raise CorruptionError(f"Invalid game object group count: {group_count}", offset=parser.offset)
+        msg = f"Invalid game object group count: {group_count}"
+        raise CorruptionError(msg, offset=parser.offset)
 
     # Parse groups
     groups = []

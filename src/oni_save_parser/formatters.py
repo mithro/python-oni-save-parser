@@ -218,7 +218,7 @@ def format_geyser_detailed(
         kg_eruption_str = f"{kg_eruption_raw / 1000:>7.1f} t"
     else:
         kg_eruption_str = f"{kg_eruption_raw:>7.1f} kg"
-    
+
     thermal_eruption_str = ""
     if thermal_stats:
         thermal_value = thermal_stats.get("thermal_per_eruption_kdtu", 0)
@@ -261,7 +261,7 @@ def format_geyser_detailed(
         kg_active_str = f"{kg_active_raw / 1000:>7.1f} t"
     else:
         kg_active_str = f"{kg_active_raw:>7.1f} kg"
-    
+
     thermal_active_str = ""
     if thermal_stats and "thermal_per_eruption_kdtu" in thermal_stats:
         # Total thermal during active period
