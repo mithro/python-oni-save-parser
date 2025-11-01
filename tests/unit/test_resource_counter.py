@@ -271,8 +271,8 @@ def test_resource_counter_duplicant_detection(tmp_path: Path) -> None:
     assert result.returncode == 0
     # Fixture has no duplicants, so duplicants section should not appear in table output
     # But we should still see storage and debris sections
-    assert "STORAGE CONTAINERS:" in result.stdout or "Storage" in result.stdout
-    assert "DEBRIS" in result.stdout or "debris" in result.stdout.lower()
+    assert "STORAGE CONTAINERS" in result.stdout  # Works for both summary and detailed
+    assert "DEBRIS" in result.stdout
 
 
 def test_resource_counter_json_output(tmp_path: Path) -> None:
@@ -311,8 +311,8 @@ def test_resource_counter_table_output(tmp_path: Path) -> None:
     )
 
     assert result.returncode == 0
-    # Check for table headers
-    assert "Type" in result.stdout or "Prefab" in result.stdout
+    # Check for table headers (summary format uses "Element", verbose uses "Prefab")
+    assert "Element" in result.stdout or "Type" in result.stdout or "Prefab" in result.stdout
     assert "Mass" in result.stdout
     assert "---" in result.stdout  # Table separator line
 
