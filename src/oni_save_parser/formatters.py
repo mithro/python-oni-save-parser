@@ -65,3 +65,36 @@ def format_duplicant_compact(duplicant_data: dict[str, Any]) -> str:
         lines.append(f"Position: ({position[0]:.1f}, {position[1]:.1f})")
 
     return "\n".join(lines)
+
+
+def format_geyser_compact(
+    prefab_name: str,
+    index: int,
+    position: tuple[float, float],
+    element: str,
+    temperature_c: float,
+    stats: dict[str, Any],
+) -> str:
+    """Format geyser information in compact one-line format.
+
+    Args:
+        prefab_name: Geyser type name
+        index: Geyser index (0-based)
+        position: (x, y) coordinates
+        element: Element type (e.g., "Steam", "Natural Gas")
+        temperature_c: Output temperature in Celsius
+        stats: Statistics from extract_geyser_stats
+
+    Returns:
+        Formatted one-line string
+    """
+    avg_output = stats["average_output_lifetime_kg_s"]
+    eruption_percent = stats["eruption_uptime_percent"]
+    active_percent = stats["active_uptime_percent"]
+
+    return (
+        f"{prefab_name} #{index + 1}: {avg_output:.1f} kg/s avg @ "
+        f"({position[0]}, {position[1]}) | "
+        f"{eruption_percent:.0f}% erupting, {active_percent:.0f}% active | "
+        f"{temperature_c:.1f}°C {element}"
+    )
