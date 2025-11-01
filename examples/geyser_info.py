@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from oni_save_parser import load_save_file, get_game_objects_by_prefab, list_prefab_types
+from oni_save_parser import load_save_file, get_game_objects_by_prefab, list_prefab_types, get_global_element_loader
 
 
 def find_geyser_prefabs(save_file_path: Path) -> list[str]:
@@ -146,6 +146,11 @@ def main() -> int:
     )
 
     args = parser.parse_args()
+
+    # Initialize element loader
+    element_loader = get_global_element_loader()
+    if element_loader is None and not args.debug:
+        print("Warning: Could not find ONI element data. Thermal calculations unavailable.", file=sys.stderr)
 
     if not args.save_file.exists():
         print(f"Error: File not found: {args.save_file}", file=sys.stderr)

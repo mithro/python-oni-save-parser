@@ -8,6 +8,7 @@ from .api import (
     load_save_file,
     save_to_file,
 )
+from .element_loader import ElementLoader, find_elements_path, get_global_element_loader
 from .save_structure import SaveGame
 from .utils import get_sdbm32_lower_hash
 
@@ -23,6 +24,10 @@ __all__ = [
     "get_prefab_counts",
     # Core types
     "SaveGame",
+    # Element loader
+    "ElementLoader",
+    "find_elements_path",
+    "get_global_element_loader",
     # Utilities
     "get_sdbm32_lower_hash",
 ]
