@@ -98,3 +98,35 @@ def format_geyser_compact(
         f"{eruption_percent:.0f}% erupting, {active_percent:.0f}% active | "
         f"{temperature_c:.1f}°C {element}"
     )
+
+
+def format_duration(seconds: float) -> str:
+    """Format duration in seconds and cycles.
+
+    Args:
+        seconds: Duration in seconds
+
+    Returns:
+        Formatted string with seconds and cycles
+    """
+    cycles = seconds / 600.0  # 1 cycle = 600 seconds
+
+    if cycles < 1.0:
+        return f"{seconds:.1f}s ({cycles:.1f} cycles)"
+    else:
+        return f"{cycles:.1f} cycles ({seconds:,.1f}s)"
+
+
+def format_mass(kg: float) -> str:
+    """Format mass in kg or tons.
+
+    Args:
+        kg: Mass in kilograms
+
+    Returns:
+        Formatted string with appropriate unit
+    """
+    if kg >= 1000:
+        return f"{kg / 1000:.1f} t"
+    else:
+        return f"{kg:.1f} kg"
