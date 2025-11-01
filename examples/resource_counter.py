@@ -236,8 +236,8 @@ def format_summary_output(
     # Storage section - aggregated by element
     if containers:
         lines.append("\nSTORAGE CONTAINERS (by element):")
-        lines.append(f"{'Element':<25} {'Count':>8} {'Total Mass':>15} {'Avg Mass':>12}")
-        lines.append("-" * 62)
+        lines.append(f"{'Element':<30} {'Count':>8} {'Total Mass':>15} {'Avg Mass':>12}")
+        lines.append("-" * 68)
 
         agg = aggregate_by_element(containers)
         for prefab in sorted(agg.keys()):
@@ -245,7 +245,7 @@ def format_summary_output(
             avg_mass = stats["total_mass"] / stats["count"]
             total_str = f"{stats['total_mass']:.1f} kg"
             avg_str = f"{avg_mass:.1f} kg"
-            lines.append(f"{prefab:<25} {stats['count']:>8} {total_str:>15} {avg_str:>12}")
+            lines.append(f"{prefab:<30} {stats['count']:>8} {total_str:>15} {avg_str:>12}")
 
         total_mass = sum(c["mass"] for c in containers)
         lines.append(f"\nTotal: {len(containers)} items in storage, {total_mass:.1f} kg")
@@ -253,8 +253,8 @@ def format_summary_output(
     # Debris section - aggregated by element
     if debris:
         lines.append("\nDEBRIS (by element):")
-        lines.append(f"{'Element':<25} {'Piles':>8} {'Total Mass':>15} {'Avg/pile':>12}")
-        lines.append("-" * 62)
+        lines.append(f"{'Element':<30} {'Piles':>8} {'Total Mass':>15} {'Avg/pile':>12}")
+        lines.append("-" * 68)
 
         agg = aggregate_by_element(debris)
         for prefab in sorted(agg.keys()):
@@ -262,7 +262,7 @@ def format_summary_output(
             avg_mass = stats["total_mass"] / stats["count"]
             total_str = f"{stats['total_mass']:.1f} kg"
             avg_str = f"{avg_mass:.1f} kg"
-            lines.append(f"{prefab:<25} {stats['count']:>8} {total_str:>15} {avg_str:>12}")
+            lines.append(f"{prefab:<30} {stats['count']:>8} {total_str:>15} {avg_str:>12}")
 
         total_mass = sum(d["mass"] for d in debris)
         lines.append(f"\nTotal: {len(debris)} debris piles, {total_mass:.1f} kg")
