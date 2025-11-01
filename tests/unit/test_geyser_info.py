@@ -200,3 +200,21 @@ def test_geyser_info_invalid_prefab(tmp_path: Path):
 
     assert result.returncode == 1
     assert "not found" in result.stderr
+
+
+def test_geyser_info_compact_format():
+    """Test geyser_info.py with compact format."""
+    # Use smallest test save
+    save_path = Path("test_saves/01-early-game-cycle-010.sav")
+    if not save_path.exists():
+        pytest.skip("Test save not found")
+
+    result = subprocess.run(
+        [sys.executable, "examples/geyser_info.py", str(save_path), "--format", "compact"],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    assert "kg/s avg" in result.stdout
+    assert "erupting" in result.stdout
