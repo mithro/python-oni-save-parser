@@ -1,7 +1,31 @@
 """Extract and display geyser information from ONI save files.
 
 This script loads a save file and prints detailed information about all geysers,
-including their type, state, emission rates, and dormancy cycles.
+including:
+- Output rates (peak, active average, lifetime average)
+- Eruption and dormancy cycle timing
+- Storage requirements for idle and dormant periods
+- Thermal output (if ONI element data available)
+
+Supports two output formats:
+- Compact: One-line summary per geyser
+- Detailed: Full breakdown with all planning information
+
+Usage:
+    python geyser_info.py SAVE_PATH [--format compact|detailed] [--skip-vents] [--debug]
+
+Examples:
+    # Detailed format (default)
+    python geyser_info.py save.sav
+
+    # Compact one-line summaries
+    python geyser_info.py save.sav --format compact
+
+    # Skip vents, show only geysers
+    python geyser_info.py save.sav --skip-vents
+
+    # Show raw debug data
+    python geyser_info.py save.sav --debug
 """
 
 import argparse
