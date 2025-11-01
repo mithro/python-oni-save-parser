@@ -4,6 +4,7 @@ This module provides reusable functions to extract gameplay-relevant
 information from ONI save file game object behaviors.
 """
 
+import re
 from typing import Any
 
 
@@ -33,7 +34,6 @@ def extract_duplicant_skills(minion_resume_behavior: Any) -> dict[str, Any]:
                 skill_name, has_skill = item
                 if has_skill:
                     # Extract skill level from name (e.g., "Mining3" -> level 3)
-                    import re
                     match = re.search(r'(\D+)(\d+)', skill_name)
                     if match:
                         base_name = match.group(1)

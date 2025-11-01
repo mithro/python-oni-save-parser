@@ -225,12 +225,15 @@ def main() -> int:
             print(json.dumps(all_geysers, indent=2, default=str))
         else:
             # Text output - process each geyser prefab type
+            total_count = 0
             for prefab_name in sorted(geyser_prefabs):
                 geysers = get_game_objects_by_prefab(save, prefab_name)
 
                 print(f"\n{'=' * 60}")
                 print(f"{prefab_name}: {len(geysers)} found")
                 print('=' * 60)
+
+                total_count += len(geysers)
 
                 for i, geyser in enumerate(geysers):
                     position = (geyser.position.x, geyser.position.y)
@@ -260,10 +263,19 @@ def main() -> int:
                             print("Status: Not analyzed or no Geyser behavior")
                         continue
 
+                    # Debug element extraction
+                    if args.debug:
+                        print(f"\nDEBUG - Element extraction for {prefab_name} #{i + 1}:")
+                        print(f"  element_id: {element_id}")
+                        print(f"  temperature_k: {temperature_k}")
+                        print(f"  element_loader available: {element_loader is not None}")
+
                     # Extract statistics
                     element_data = None
                     if element_loader and element_id:
                         element_data = element_loader.get_element(element_id)
+                        if args.debug and element_data is None:
+                            print(f"  WARNING: Could not find element data for '{element_id}'")
 
                     stats = extract_geyser_stats(config, element_data, temperature_k)
 
@@ -321,6 +333,10 @@ def main() -> int:
                     if args.debug:
                         print("\nDEBUG - Raw Configuration:")
                         print(f"  {config}")
+
+            # Print total count
+            print(f"\n{'=' * 60}")
+            print(f"Total geysers: {total_count}")
 
         return 0
 
