@@ -35,7 +35,7 @@ from typing import Any
 
 from oni_save_parser import get_game_objects_by_prefab, list_prefab_types, load_save_file
 from oni_save_parser.element_loader import get_global_element_loader
-from oni_save_parser.extractors import extract_geyser_stats
+from oni_save_parser.extractors import extract_geyser_stats, get_geyser_config_from_prefab
 from oni_save_parser.formatters import format_geyser_compact, format_geyser_detailed
 
 
@@ -263,9 +263,22 @@ def main() -> int:
                             print("Status: Not analyzed or no Geyser behavior")
                         continue
 
+                    # Check if geyser has been analyzed (has actual data vs defaults)
+                    analyzed = element_id is not None and temperature_k is not None
+
+                    # Use prefab config as fallback if not analyzed
+                    if not analyzed:
+                        fallback_element, fallback_temp = get_geyser_config_from_prefab(
+                            prefab_name
+                        )
+                        if fallback_element:
+                            element_id = fallback_element
+                            temperature_k = fallback_temp
+
                     # Debug element extraction
                     if args.debug:
                         print(f"\nDEBUG - Element extraction for {prefab_name} #{i + 1}:")
+                        print(f"  analyzed: {analyzed}")
                         print(f"  element_id: {element_id}")
                         print(f"  temperature_k: {temperature_k}")
                         print(f"  element_loader available: {element_loader is not None}")
@@ -326,6 +339,7 @@ def main() -> int:
                             stats=stats,
                             thermal_stats=thermal_stats if thermal_stats else None,
                             element_max_mass=element_max_mass,
+                            analyzed=analyzed,
                         )
                         print(output)
 

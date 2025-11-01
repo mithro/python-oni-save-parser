@@ -10,6 +10,7 @@ from oni_save_parser.extractors import (
     extract_duplicant_traits,
     extract_geyser_stats,
     extract_health_status,
+    get_geyser_config_from_prefab,
 )
 
 
@@ -184,3 +185,25 @@ def test_extract_geyser_stats_with_thermal():
     # Peak: 5.4 kg/s * 4.179 * 410 / 1000 = 9.25 kDTU/s (approximately)
     assert "peak_thermal_power_kdtu_s" in stats
     assert stats["peak_thermal_power_kdtu_s"] > 0
+
+
+def test_get_geyser_config_from_prefab_known():
+    """Test getting geyser config for known prefabs."""
+    element_id, temp_k = get_geyser_config_from_prefab("GeyserGeneric_hot_water")
+    assert element_id == "Water"
+    assert temp_k == 368.15  # 95°C in Kelvin
+
+    element_id, temp_k = get_geyser_config_from_prefab("GeyserGeneric_chlorine_gas")
+    assert element_id == "ChlorineGas"
+    assert temp_k == 333.15  # 60°C in Kelvin
+
+    element_id, temp_k = get_geyser_config_from_prefab("GeyserGeneric_big_volcano")
+    assert element_id == "Magma"
+    assert temp_k == 2000.0
+
+
+def test_get_geyser_config_from_prefab_unknown():
+    """Test getting geyser config for unknown prefabs."""
+    element_id, temp_k = get_geyser_config_from_prefab("UnknownGeyserType")
+    assert element_id is None
+    assert temp_k is None

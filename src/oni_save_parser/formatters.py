@@ -148,6 +148,7 @@ def format_geyser_detailed(
     stats: dict[str, Any],
     thermal_stats: dict[str, Any] | None = None,
     element_max_mass: float | None = None,
+    analyzed: bool = True,
 ) -> str:
     """Format geyser information in detailed multi-line format.
 
@@ -161,6 +162,7 @@ def format_geyser_detailed(
         stats: Statistics from extract_geyser_stats
         thermal_stats: Optional thermal statistics
         element_max_mass: Optional max kg per tile (for liquids)
+        analyzed: Whether geyser has been analyzed (default True)
 
     Returns:
         Formatted multi-line string
@@ -172,6 +174,7 @@ def format_geyser_detailed(
     lines.append(f"Position:         ({position[0]}, {position[1]})")
     lines.append(f"Output Element:   {element} ({element_state})")
     lines.append(f"Output Temp:      {temperature_c:.1f}°C")
+    lines.append(f"Analyzed:         {'Yes' if analyzed else 'No (estimated from prefab)'}")
     lines.append("")
 
     # Output Rates

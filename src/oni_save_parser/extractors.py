@@ -7,6 +7,57 @@ information from ONI save file game object behaviors.
 import re
 from typing import Any
 
+# Geyser configuration mapping: prefab_name -> (element_id, temperature_k)
+# Temperature values from ONI Wiki (converted to Kelvin: °C + 273.15)
+GEYSER_CONFIG = {
+    # Water/Liquid Geysers
+    "GeyserGeneric_hot_water": ("Water", 368.15),  # 95°C
+    "GeyserGeneric_slush_water": ("Brine", 263.15),  # -10°C
+    "GeyserGeneric_filthy_water": ("DirtyWater", 303.15),  # 30°C
+    "GeyserGeneric_salt_water": ("SaltWater", 368.15),  # 95°C
+    "GeyserGeneric_slush_salt_water": ("Brine", 263.15),  # -10°C
+    "GeyserGeneric_liquid_sulfur": ("LiquidSulfur", 438.35),  # 165.2°C
+    # Gas Geysers/Vents
+    "GeyserGeneric_steam": ("Steam", 383.15),  # 110°C (Cool Steam Vent)
+    "GeyserGeneric_hot_steam": ("Steam", 773.15),  # 500°C (Steam Vent)
+    "GeyserGeneric_hot_co2": ("CarbonDioxide", 773.15),  # 500°C
+    "GeyserGeneric_liquid_co2": ("LiquidCarbonDioxide", 218.0),  # -55.15°C
+    "GeyserGeneric_hot_hydrogen": ("Hydrogen", 773.15),  # 500°C
+    "GeyserGeneric_hot_po2": ("ContaminatedOxygen", 773.15),  # 500°C
+    "GeyserGeneric_slimy_po2": ("ContaminatedOxygen", 333.15),  # 60°C
+    "GeyserGeneric_methane": ("Methane", 423.15),  # 150°C
+    "GeyserGeneric_chlorine_gas": ("ChlorineGas", 333.15),  # 60°C
+    "GeyserGeneric_chlorine_gas_cool": ("ChlorineGas", 278.15),  # 5°C
+    # Metal Volcanoes
+    "GeyserGeneric_molten_copper": ("MoltenCopper", 2500.0),  # 2226.85°C
+    "GeyserGeneric_molten_iron": ("MoltenIron", 2800.0),  # 2526.85°C
+    "GeyserGeneric_molten_gold": ("MoltenGold", 2900.0),  # 2626.85°C
+    "GeyserGeneric_molten_aluminum": ("MoltenAluminum", 2000.0),  # 1726.85°C
+    "GeyserGeneric_molten_tungsten": ("MoltenTungsten", 4000.0),  # 3726.85°C
+    "GeyserGeneric_molten_cobalt": ("MoltenCobalt", 2500.0),  # 2226.85°C
+    "GeyserGeneric_molten_niobium": ("MoltenNiobium", 3500.0),  # 3226.85°C
+    # Magma Volcanoes
+    "GeyserGeneric_big_volcano": ("Magma", 2000.0),  # 1726.85°C (Major Volcano)
+    "GeyserGeneric_small_volcano": ("Magma", 2000.0),  # 1726.85°C (Minor Volcano)
+    # Other
+    "OilWell": ("CrudeOil", 600.0),  # 326.85°C (Leaky Oil Fissure)
+}
+
+
+def get_geyser_config_from_prefab(prefab_name: str) -> tuple[str | None, float | None]:
+    """Get default element ID and temperature for a geyser prefab.
+
+    Args:
+        prefab_name: Geyser prefab name (e.g., "GeyserGeneric_hot_water")
+
+    Returns:
+        Tuple of (element_id, temperature_k) or (None, None) if unknown
+    """
+    config = GEYSER_CONFIG.get(prefab_name)
+    if config:
+        return config
+    return (None, None)
+
 
 def extract_duplicant_skills(minion_resume_behavior: Any) -> dict[str, Any]:
     """Extract skill levels from MinionResume behavior.
