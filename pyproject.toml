@@ -17,7 +17,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
-dependencies = ["pyyaml>=6.0"]
+dependencies = ["pyyaml>=6.0", "pillow>=10.0.0"]
 
 [project.scripts]
 oni-save-parser = "oni_save_parser.__main__:main"
