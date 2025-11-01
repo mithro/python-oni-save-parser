@@ -152,7 +152,7 @@ def example_analyze_buildings(save_path: str) -> None:
         print(f"  {category_name}: {count} buildings")
 
 
-def main():
+def main() -> int:
     """Run all examples."""
     import argparse
 
