@@ -138,6 +138,12 @@ def main() -> int:
         action="store_true",
         help="Only show actual geysers, not vents",
     )
+    parser.add_argument(
+        "--format",
+        choices=["compact", "detailed"],
+        default="detailed",
+        help="Output format (default: detailed)",
+    )
 
     args = parser.parse_args()
 
