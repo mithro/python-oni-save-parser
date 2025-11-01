@@ -8,7 +8,7 @@ from oni_save_parser.formatters import (
 )
 
 
-def test_format_duplicant_compact_basic_info():
+def test_format_duplicant_compact_basic_info() -> None:
     """Test compact duplicant formatting."""
     duplicant_data = {
         "name": "Ashkan",
@@ -30,7 +30,7 @@ def test_format_duplicant_compact_basic_info():
     assert "12" in result  # stress value
 
 
-def test_format_geyser_compact():
+def test_format_geyser_compact() -> None:
     """Test compact geyser format."""
     stats = {
         "average_output_lifetime_kg_s": 2.1,
@@ -54,29 +54,29 @@ def test_format_geyser_compact():
     assert result == expected
 
 
-def test_format_duration_short():
+def test_format_duration_short() -> None:
     """Test duration formatting for short periods (< 1 cycle)."""
     result = format_duration(233.4)
     assert result == "233.4s (0.4 cycles)"
 
 
-def test_format_duration_long():
+def test_format_duration_long() -> None:
     """Test duration formatting for long periods (>= 1 cycle)."""
     result = format_duration(58896.1)
     assert result == "98.2 cycles (58,896.1s)"
 
 
-def test_format_mass_kg():
+def test_format_mass_kg() -> None:
     """Test mass formatting in kilograms."""
     assert format_mass(486.0) == "486.0 kg"
 
 
-def test_format_mass_tons():
+def test_format_mass_tons() -> None:
     """Test mass formatting in tons."""
     assert format_mass(48100.0) == "48.1 t"
 
 
-def test_format_geyser_detailed_header():
+def test_format_geyser_detailed_header() -> None:
     """Test detailed format header section."""
     stats = {
         "average_output_lifetime_kg_s": 2.1,

@@ -502,7 +502,7 @@ def create_empty_save(path: Path) -> None:
     settings = {"difficulty": 2}
 
     # No game objects
-    game_objects = []
+    game_objects: list[GameObjectGroup] = []
 
     save_game = SaveGame(
         header=header,

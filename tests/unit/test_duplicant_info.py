@@ -160,7 +160,7 @@ def create_save_with_duplicants(path: Path) -> None:
     path.write_bytes(data)
 
 
-def test_duplicant_info_help():
+def test_duplicant_info_help() -> None:
     """Should display help message."""
     result = subprocess.run(
         [sys.executable, "examples/duplicant_info.py", "--help"],
@@ -172,7 +172,7 @@ def test_duplicant_info_help():
     assert "Extract duplicant information" in result.stdout
 
 
-def test_duplicant_info_list_duplicants(tmp_path: Path):
+def test_duplicant_info_list_duplicants(tmp_path: Path) -> None:
     """Should list all duplicants."""
     save_path = tmp_path / "test.sav"
     create_save_with_duplicants(save_path)
@@ -187,7 +187,7 @@ def test_duplicant_info_list_duplicants(tmp_path: Path):
     assert "Found 3 duplicants" in result.stdout or "3 duplicants" in result.stdout.lower()
 
 
-def test_duplicant_info_shows_names(tmp_path: Path):
+def test_duplicant_info_shows_names(tmp_path: Path) -> None:
     """Should show duplicant names in new compact format."""
     save_path = tmp_path / "test.sav"
     create_save_with_duplicants(save_path)
@@ -211,7 +211,7 @@ def test_duplicant_info_shows_names(tmp_path: Path):
     assert "Behaviors:" not in result.stdout
 
 
-def test_duplicant_info_debug_mode(tmp_path: Path):
+def test_duplicant_info_debug_mode(tmp_path: Path) -> None:
     """Should show behaviors when --debug flag is used."""
     save_path = tmp_path / "test.sav"
     create_save_with_duplicants(save_path)
@@ -232,7 +232,7 @@ def test_duplicant_info_debug_mode(tmp_path: Path):
     assert "Meep" in result.stdout
 
 
-def test_duplicant_info_json_output(tmp_path: Path):
+def test_duplicant_info_json_output(tmp_path: Path) -> None:
     """Should output duplicant info as JSON."""
     save_path = tmp_path / "test.sav"
     create_save_with_duplicants(save_path)
@@ -258,7 +258,7 @@ def test_duplicant_info_json_output(tmp_path: Path):
     assert "behaviors" not in data[0]
 
 
-def test_duplicant_info_file_not_found():
+def test_duplicant_info_file_not_found() -> None:
     """Should handle missing file gracefully."""
     result = subprocess.run(
         [sys.executable, "examples/duplicant_info.py", "nonexistent.sav"],
@@ -270,7 +270,7 @@ def test_duplicant_info_file_not_found():
     assert "Error" in result.stderr
 
 
-def test_duplicant_info_no_duplicants(tmp_path: Path):
+def test_duplicant_info_no_duplicants(tmp_path: Path) -> None:
     """Should handle save with no duplicants."""
     save_path = tmp_path / "test.sav"
 

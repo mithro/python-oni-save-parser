@@ -104,7 +104,7 @@ def create_test_save_game() -> SaveGame:
     )
 
 
-def test_load_save_file_success(tmp_path: Path):
+def test_load_save_file_success(tmp_path: Path) -> None:
     """Should load save file from disk."""
     save_game = create_test_save_game()
     save_path = tmp_path / "test.sav"
@@ -122,13 +122,13 @@ def test_load_save_file_success(tmp_path: Path):
     assert loaded.header.game_info.number_of_cycles == 100
 
 
-def test_load_save_file_not_found():
+def test_load_save_file_not_found() -> None:
     """Should raise FileNotFoundError for missing file."""
     with pytest.raises(FileNotFoundError):
         load_save_file("nonexistent.sav")
 
 
-def test_load_save_file_version_mismatch(tmp_path: Path):
+def test_load_save_file_version_mismatch(tmp_path: Path) -> None:
     """Should raise VersionMismatchError for incompatible version."""
     save_game = create_test_save_game()
     save_game.header.game_info.save_major_version = 6
@@ -143,7 +143,7 @@ def test_load_save_file_version_mismatch(tmp_path: Path):
         load_save_file(save_path, verify_version=True, allow_minor_mismatch=False)
 
 
-def test_load_save_file_allow_minor_mismatch(tmp_path: Path):
+def test_load_save_file_allow_minor_mismatch(tmp_path: Path) -> None:
     """Should allow minor version mismatch when requested."""
     save_game = create_test_save_game()
     save_game.header.game_info.save_minor_version = 30
@@ -158,7 +158,7 @@ def test_load_save_file_allow_minor_mismatch(tmp_path: Path):
     assert loaded.header.game_info.save_minor_version == 30
 
 
-def test_save_to_file(tmp_path: Path):
+def test_save_to_file(tmp_path: Path) -> None:
     """Should write SaveGame to disk."""
     save_game = create_test_save_game()
     save_path = tmp_path / "output.sav"
@@ -173,7 +173,7 @@ def test_save_to_file(tmp_path: Path):
     assert loaded.header.game_info.base_name == save_game.header.game_info.base_name
 
 
-def test_save_to_file_with_string_path(tmp_path: Path):
+def test_save_to_file_with_string_path(tmp_path: Path) -> None:
     """Should accept string path."""
     save_game = create_test_save_game()
     save_path = str(tmp_path / "output.sav")
@@ -183,7 +183,7 @@ def test_save_to_file_with_string_path(tmp_path: Path):
     assert Path(save_path).exists()
 
 
-def test_get_colony_info():
+def test_get_colony_info() -> None:
     """Should extract colony information."""
     save_game = create_test_save_game()
     info = get_colony_info(save_game)
@@ -200,7 +200,7 @@ def test_get_colony_info():
     assert info["compressed"] is True
 
 
-def test_get_game_objects_by_prefab():
+def test_get_game_objects_by_prefab() -> None:
     """Should get game objects by prefab name."""
     save_game = create_test_save_game()
 
@@ -214,7 +214,7 @@ def test_get_game_objects_by_prefab():
     assert len(doors) == 10
 
 
-def test_get_game_objects_by_prefab_not_found():
+def test_get_game_objects_by_prefab_not_found() -> None:
     """Should return empty list for non-existent prefab."""
     save_game = create_test_save_game()
 
@@ -222,7 +222,7 @@ def test_get_game_objects_by_prefab_not_found():
     assert result == []
 
 
-def test_list_prefab_types():
+def test_list_prefab_types() -> None:
     """Should list all prefab types."""
     save_game = create_test_save_game()
 
@@ -234,7 +234,7 @@ def test_list_prefab_types():
     assert "Door" in prefabs
 
 
-def test_list_prefab_types_empty():
+def test_list_prefab_types_empty() -> None:
     """Should return empty list for save with no game objects."""
     save_game = create_test_save_game()
     save_game.game_objects = []
@@ -243,7 +243,7 @@ def test_list_prefab_types_empty():
     assert prefabs == []
 
 
-def test_get_prefab_counts():
+def test_get_prefab_counts() -> None:
     """Should get counts for each prefab type."""
     save_game = create_test_save_game()
 
@@ -255,7 +255,7 @@ def test_get_prefab_counts():
     assert len(counts) == 3
 
 
-def test_get_prefab_counts_empty():
+def test_get_prefab_counts_empty() -> None:
     """Should return empty dict for save with no game objects."""
     save_game = create_test_save_game()
     save_game.game_objects = []
@@ -264,7 +264,7 @@ def test_get_prefab_counts_empty():
     assert counts == {}
 
 
-def test_round_trip_through_file(tmp_path: Path):
+def test_round_trip_through_file(tmp_path: Path) -> None:
     """Should maintain data through save and load cycle."""
     original = create_test_save_game()
     save_path = tmp_path / "round_trip.sav"

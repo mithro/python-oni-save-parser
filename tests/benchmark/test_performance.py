@@ -7,6 +7,7 @@ Run with: pytest tests/benchmark --benchmark-only
 from pathlib import Path
 
 import pytest
+from pytest_benchmark.fixture import BenchmarkFixture
 
 from oni_save_parser import get_colony_info, get_prefab_counts, load_save_file, save_to_file
 from oni_save_parser.parser import BinaryParser, BinaryWriter
@@ -155,19 +156,19 @@ def large_save_bytes(large_save: SaveGame) -> bytes:
 # Parsing Benchmarks
 
 
-def test_benchmark_parse_small_save(benchmark, small_save_bytes: bytes):
+def test_benchmark_parse_small_save(benchmark: BenchmarkFixture, small_save_bytes: bytes) -> None:
     """Benchmark parsing a small save file."""
     result = benchmark(parse_save_game, small_save_bytes)
     assert result.header.game_info.number_of_duplicants == 5
 
 
-def test_benchmark_parse_medium_save(benchmark, medium_save_bytes: bytes):
+def test_benchmark_parse_medium_save(benchmark: BenchmarkFixture, medium_save_bytes: bytes) -> None:
     """Benchmark parsing a medium save file."""
     result = benchmark(parse_save_game, medium_save_bytes)
     assert result.header.game_info.number_of_duplicants == 10
 
 
-def test_benchmark_parse_large_save(benchmark, large_save_bytes: bytes):
+def test_benchmark_parse_large_save(benchmark: BenchmarkFixture, large_save_bytes: bytes) -> None:
     """Benchmark parsing a large save file."""
     result = benchmark(parse_save_game, large_save_bytes)
     assert result.header.game_info.number_of_duplicants == 20
@@ -176,19 +177,19 @@ def test_benchmark_parse_large_save(benchmark, large_save_bytes: bytes):
 # Serialization Benchmarks
 
 
-def test_benchmark_unparse_small_save(benchmark, small_save: SaveGame):
+def test_benchmark_unparse_small_save(benchmark: BenchmarkFixture, small_save: SaveGame) -> None:
     """Benchmark serializing a small save file."""
     result = benchmark(unparse_save_game, small_save)
     assert len(result) > 0
 
 
-def test_benchmark_unparse_medium_save(benchmark, medium_save: SaveGame):
+def test_benchmark_unparse_medium_save(benchmark: BenchmarkFixture, medium_save: SaveGame) -> None:
     """Benchmark serializing a medium save file."""
     result = benchmark(unparse_save_game, medium_save)
     assert len(result) > 0
 
 
-def test_benchmark_unparse_large_save(benchmark, large_save: SaveGame):
+def test_benchmark_unparse_large_save(benchmark: BenchmarkFixture, large_save: SaveGame) -> None:
     """Benchmark serializing a large save file."""
     result = benchmark(unparse_save_game, large_save)
     assert len(result) > 0
@@ -197,10 +198,12 @@ def test_benchmark_unparse_large_save(benchmark, large_save: SaveGame):
 # Round-trip Benchmarks
 
 
-def test_benchmark_round_trip_small_save(benchmark, small_save_bytes: bytes):
+def test_benchmark_round_trip_small_save(
+    benchmark: BenchmarkFixture, small_save_bytes: bytes
+) -> None:
     """Benchmark full round-trip (parse + serialize) for small save."""
 
-    def round_trip():
+    def round_trip() -> bytes:
         save = parse_save_game(small_save_bytes)
         return unparse_save_game(save)
 
@@ -208,10 +211,12 @@ def test_benchmark_round_trip_small_save(benchmark, small_save_bytes: bytes):
     assert len(result) > 0
 
 
-def test_benchmark_round_trip_medium_save(benchmark, medium_save_bytes: bytes):
+def test_benchmark_round_trip_medium_save(
+    benchmark: BenchmarkFixture, medium_save_bytes: bytes
+) -> None:
     """Benchmark full round-trip (parse + serialize) for medium save."""
 
-    def round_trip():
+    def round_trip() -> bytes:
         save = parse_save_game(medium_save_bytes)
         return unparse_save_game(save)
 
@@ -222,13 +227,13 @@ def test_benchmark_round_trip_medium_save(benchmark, medium_save_bytes: bytes):
 # API Benchmarks
 
 
-def test_benchmark_get_colony_info(benchmark, medium_save: SaveGame):
+def test_benchmark_get_colony_info(benchmark: BenchmarkFixture, medium_save: SaveGame) -> None:
     """Benchmark extracting colony information."""
     result = benchmark(get_colony_info, medium_save)
     assert result["colony_name"] == "Benchmark Colony"
 
 
-def test_benchmark_get_prefab_counts(benchmark, medium_save: SaveGame):
+def test_benchmark_get_prefab_counts(benchmark: BenchmarkFixture, medium_save: SaveGame) -> None:
     """Benchmark counting prefabs."""
     result = benchmark(get_prefab_counts, medium_save)
     assert result["Minion"] == 10
@@ -237,18 +242,22 @@ def test_benchmark_get_prefab_counts(benchmark, medium_save: SaveGame):
 # File I/O Benchmarks
 
 
-def test_benchmark_file_write(benchmark, tmp_path: Path, medium_save: SaveGame):
+def test_benchmark_file_write(
+    benchmark: BenchmarkFixture, tmp_path: Path, medium_save: SaveGame
+) -> None:
     """Benchmark writing save file to disk."""
     save_path = tmp_path / "benchmark.sav"
 
-    def write_file():
+    def write_file() -> None:
         save_to_file(medium_save, save_path)
 
     benchmark(write_file)
     assert save_path.exists()
 
 
-def test_benchmark_file_read(benchmark, tmp_path: Path, medium_save: SaveGame):
+def test_benchmark_file_read(
+    benchmark: BenchmarkFixture, tmp_path: Path, medium_save: SaveGame
+) -> None:
     """Benchmark reading save file from disk."""
     save_path = tmp_path / "benchmark.sav"
     save_to_file(medium_save, save_path)
@@ -260,11 +269,11 @@ def test_benchmark_file_read(benchmark, tmp_path: Path, medium_save: SaveGame):
 # Low-level Parser Benchmarks
 
 
-def test_benchmark_binary_parser_read(benchmark):
+def test_benchmark_binary_parser_read(benchmark: BenchmarkFixture) -> None:
     """Benchmark BinaryParser read operations."""
     data = b"\x00" * 10000
 
-    def read_operations():
+    def read_operations() -> None:
         parser = BinaryParser(data)
         for _ in range(1000):
             parser.offset = 0
@@ -276,10 +285,10 @@ def test_benchmark_binary_parser_read(benchmark):
     benchmark(read_operations)
 
 
-def test_benchmark_binary_writer_write(benchmark):
+def test_benchmark_binary_writer_write(benchmark: BenchmarkFixture) -> None:
     """Benchmark BinaryWriter write operations."""
 
-    def write_operations():
+    def write_operations() -> bytes:
         writer = BinaryWriter()
         for _ in range(1000):
             writer.write_uint32(12345)

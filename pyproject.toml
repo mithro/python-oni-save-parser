@@ -45,22 +45,10 @@ python_functions = ["test_*"]
 addopts = "-v --strict-markers"
 
 [tool.mypy]
+strict = true
 warn_return_any = true
 warn_unused_configs = true
-# Strict checking for source code only
-files = ["src", "examples"]
-
-[[tool.mypy.overrides]]
-module = ["src.*", "examples.*"]
-strict = true
 disallow_untyped_defs = true
-
-[[tool.mypy.overrides]]
-module = "tests.*"
-# Allow untyped test functions for readability
-disallow_untyped_defs = false
-disallow_untyped_calls = false
-check_untyped_defs = false
 
 [tool.ruff]
 line-length = 100

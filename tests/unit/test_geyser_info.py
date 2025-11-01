@@ -86,7 +86,7 @@ def create_save_with_geysers(path: Path) -> None:
     path.write_bytes(data)
 
 
-def test_geyser_info_help():
+def test_geyser_info_help() -> None:
     """Should display help message."""
     result = subprocess.run(
         [sys.executable, "examples/geyser_info.py", "--help"],
@@ -98,7 +98,7 @@ def test_geyser_info_help():
     assert "Extract geyser information" in result.stdout
 
 
-def test_geyser_info_list_prefabs(tmp_path: Path):
+def test_geyser_info_list_prefabs(tmp_path: Path) -> None:
     """Should list geyser prefabs."""
     save_path = tmp_path / "test.sav"
     create_save_with_geysers(save_path)
@@ -114,7 +114,7 @@ def test_geyser_info_list_prefabs(tmp_path: Path):
     assert "GeyserGeneric_hot_co2" in result.stdout
 
 
-def test_geyser_info_text_output(tmp_path: Path):
+def test_geyser_info_text_output(tmp_path: Path) -> None:
     """Should display geyser information in text format."""
     save_path = tmp_path / "test.sav"
     create_save_with_geysers(save_path)
@@ -131,7 +131,7 @@ def test_geyser_info_text_output(tmp_path: Path):
     assert "Total geysers: 3" in result.stdout
 
 
-def test_geyser_info_json_output(tmp_path: Path):
+def test_geyser_info_json_output(tmp_path: Path) -> None:
     """Should display geyser information in JSON format."""
     save_path = tmp_path / "test.sav"
     create_save_with_geysers(save_path)
@@ -153,7 +153,7 @@ def test_geyser_info_json_output(tmp_path: Path):
     assert len(data["GeyserGeneric_hot_co2"]) == 1
 
 
-def test_geyser_info_filter_prefab(tmp_path: Path):
+def test_geyser_info_filter_prefab(tmp_path: Path) -> None:
     """Should filter to specific prefab type."""
     save_path = tmp_path / "test.sav"
     create_save_with_geysers(save_path)
@@ -175,7 +175,7 @@ def test_geyser_info_filter_prefab(tmp_path: Path):
     assert "GeyserGeneric_hot_co2" not in result.stdout
 
 
-def test_geyser_info_file_not_found():
+def test_geyser_info_file_not_found() -> None:
     """Should handle missing file gracefully."""
     result = subprocess.run(
         [sys.executable, "examples/geyser_info.py", "nonexistent.sav"],
@@ -187,7 +187,7 @@ def test_geyser_info_file_not_found():
     assert "Error" in result.stderr
 
 
-def test_geyser_info_invalid_prefab(tmp_path: Path):
+def test_geyser_info_invalid_prefab(tmp_path: Path) -> None:
     """Should handle invalid prefab filter."""
     save_path = tmp_path / "test.sav"
     create_save_with_geysers(save_path)
@@ -208,7 +208,7 @@ def test_geyser_info_invalid_prefab(tmp_path: Path):
     assert "not found" in result.stderr
 
 
-def test_geyser_info_compact_format():
+def test_geyser_info_compact_format() -> None:
     """Test geyser_info.py with compact format."""
     # Use smallest test save
     save_path = Path("test_saves/01-early-game-cycle-010.sav")

@@ -4,10 +4,12 @@ import logging
 from pathlib import Path
 from unittest.mock import mock_open, patch
 
+import pytest
+
 from oni_save_parser.element_loader import ElementLoader
 
 
-def test_element_loader_loads_gas_yaml():
+def test_element_loader_loads_gas_yaml() -> None:
     """Test that ElementLoader can load gas.yaml."""
     yaml_content = """---
 elements:
@@ -28,7 +30,7 @@ elements:
     assert element["specific_heat_capacity"] == 4.179
 
 
-def test_find_elements_path_returns_valid_path():
+def test_find_elements_path_returns_valid_path() -> None:
     """Test that find_elements_path() finds ONI installation."""
     from oni_save_parser.element_loader import find_elements_path
 
@@ -42,7 +44,7 @@ def test_find_elements_path_returns_valid_path():
     assert result is None or isinstance(result, Path)
 
 
-def test_element_loader_handles_missing_files(caplog):
+def test_element_loader_handles_missing_files(caplog: pytest.LogCaptureFixture) -> None:
     """Test graceful handling when YAML files don't exist."""
     with caplog.at_level(logging.WARNING):
         loader = ElementLoader(Path("/nonexistent/path"))

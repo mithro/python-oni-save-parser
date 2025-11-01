@@ -15,7 +15,7 @@ from oni_save_parser.save_structure.header import (
 )
 
 
-def test_save_game_info_to_dict():
+def test_save_game_info_to_dict() -> None:
     """Should convert SaveGameInfo to dictionary."""
     info = SaveGameInfo(
         number_of_cycles=100,
@@ -39,7 +39,7 @@ def test_save_game_info_to_dict():
     assert data["isAutoSave"] is False
 
 
-def test_save_game_info_from_dict():
+def test_save_game_info_from_dict() -> None:
     """Should create SaveGameInfo from dictionary."""
     data = {
         "numberOfCycles": 100,
@@ -63,7 +63,7 @@ def test_save_game_info_from_dict():
     assert info.is_auto_save is False
 
 
-def test_parse_header_version_0():
+def test_parse_header_version_0() -> None:
     """Should parse header version 0 (no compression flag)."""
     game_info = {
         "numberOfCycles": 50,
@@ -98,7 +98,7 @@ def test_parse_header_version_0():
     assert header.game_info.base_name == "TestBase"
 
 
-def test_parse_header_version_1_uncompressed():
+def test_parse_header_version_1_uncompressed() -> None:
     """Should parse header version 1 with compression flag false."""
     game_info = {
         "numberOfCycles": 100,
@@ -132,7 +132,7 @@ def test_parse_header_version_1_uncompressed():
     assert header.game_info.number_of_cycles == 100
 
 
-def test_parse_header_version_1_compressed():
+def test_parse_header_version_1_compressed() -> None:
     """Should parse header version 1 with compression flag true."""
     game_info = {
         "numberOfCycles": 200,
@@ -166,7 +166,7 @@ def test_parse_header_version_1_compressed():
     assert header.game_info.dlc_id == "EXPANSION1_ID"
 
 
-def test_parse_header_invalid_json():
+def test_parse_header_invalid_json() -> None:
     """Should raise error on invalid JSON."""
     invalid_json = b"{ invalid json }"
 
@@ -183,7 +183,7 @@ def test_parse_header_invalid_json():
         parse_header(parser)
 
 
-def test_unparse_header_version_0():
+def test_unparse_header_version_0() -> None:
     """Should write header version 0."""
     game_info = SaveGameInfo(
         number_of_cycles=50,
@@ -215,7 +215,7 @@ def test_unparse_header_version_0():
     assert parsed.game_info.base_name == "TestBase"
 
 
-def test_unparse_header_version_1():
+def test_unparse_header_version_1() -> None:
     """Should write header version 1 with compression flag."""
     game_info = SaveGameInfo(
         number_of_cycles=100,
@@ -247,7 +247,7 @@ def test_unparse_header_version_1():
     assert parsed.game_info.number_of_cycles == 100
 
 
-def test_round_trip_header():
+def test_round_trip_header() -> None:
     """Should round-trip header."""
     original_info = SaveGameInfo(
         number_of_cycles=150,

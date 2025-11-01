@@ -103,7 +103,7 @@ def create_test_save_game(compressed: bool = True) -> SaveGame:
     )
 
 
-def test_parse_save_game_compressed():
+def test_parse_save_game_compressed() -> None:
     """Should parse compressed save game."""
     save_game = create_test_save_game(compressed=True)
     data = unparse_save_game(save_game)
@@ -122,7 +122,7 @@ def test_parse_save_game_compressed():
     assert parsed.version_minor == 35
 
 
-def test_parse_save_game_uncompressed():
+def test_parse_save_game_uncompressed() -> None:
     """Should parse uncompressed save game."""
     save_game = create_test_save_game(compressed=False)
     data = unparse_save_game(save_game)
@@ -134,7 +134,7 @@ def test_parse_save_game_uncompressed():
     assert parsed.settings["autoSaveCycleInterval"] == 10
 
 
-def test_parse_save_game_version_mismatch_major():
+def test_parse_save_game_version_mismatch_major() -> None:
     """Should raise error on major version mismatch."""
     save_game = create_test_save_game()
     save_game.header.game_info.save_major_version = 6  # Wrong major version
@@ -146,7 +146,7 @@ def test_parse_save_game_version_mismatch_major():
         parse_save_game(data, verify_version=True)
 
 
-def test_parse_save_game_version_mismatch_minor():
+def test_parse_save_game_version_mismatch_minor() -> None:
     """Should raise error on minor version mismatch by default."""
     save_game = create_test_save_game()
     save_game.header.game_info.save_minor_version = 30  # Wrong minor version
@@ -158,7 +158,7 @@ def test_parse_save_game_version_mismatch_minor():
         parse_save_game(data, verify_version=True)
 
 
-def test_parse_save_game_allow_minor_mismatch():
+def test_parse_save_game_allow_minor_mismatch() -> None:
     """Should allow minor version mismatch when requested."""
     save_game = create_test_save_game()
     save_game.header.game_info.save_minor_version = 30
@@ -169,7 +169,7 @@ def test_parse_save_game_allow_minor_mismatch():
     assert parsed.header.game_info.save_minor_version == 30
 
 
-def test_parse_save_game_no_version_check():
+def test_parse_save_game_no_version_check() -> None:
     """Should skip version check when requested."""
     save_game = create_test_save_game()
     save_game.header.game_info.save_major_version = 6
@@ -180,7 +180,7 @@ def test_parse_save_game_no_version_check():
     assert parsed.header.game_info.save_major_version == 6
 
 
-def test_parse_save_game_corrupted_compression():
+def test_parse_save_game_corrupted_compression() -> None:
     """Should raise error on corrupted compressed data."""
     save_game = create_test_save_game(compressed=True)
     data = bytearray(unparse_save_game(save_game))
@@ -194,7 +194,7 @@ def test_parse_save_game_corrupted_compression():
         parse_save_game(bytes(data))
 
 
-def test_parse_save_game_invalid_world_marker():
+def test_parse_save_game_invalid_world_marker() -> None:
     """Should raise error on invalid world marker."""
     save_game = create_test_save_game()
 
@@ -218,7 +218,7 @@ def test_parse_save_game_invalid_world_marker():
         parse_save_game(writer.data)
 
 
-def test_parse_save_game_invalid_world_type():
+def test_parse_save_game_invalid_world_type() -> None:
     """Should raise error on invalid world type name."""
     save_game = create_test_save_game()
 
@@ -241,7 +241,7 @@ def test_parse_save_game_invalid_world_type():
         parse_save_game(writer.data)
 
 
-def test_parse_save_game_invalid_settings_type():
+def test_parse_save_game_invalid_settings_type() -> None:
     """Should raise error on invalid settings type name."""
     save_game = create_test_save_game()
 
@@ -271,7 +271,7 @@ def test_parse_save_game_invalid_settings_type():
         parse_save_game(writer.data)
 
 
-def test_parse_save_game_invalid_ksav_marker():
+def test_parse_save_game_invalid_ksav_marker() -> None:
     """Should raise error on invalid KSAV marker."""
     save_game = create_test_save_game()
 
@@ -307,7 +307,7 @@ def test_parse_save_game_invalid_ksav_marker():
         parse_save_game(writer.data)
 
 
-def test_round_trip_save_game_compressed():
+def test_round_trip_save_game_compressed() -> None:
     """Should round-trip compressed save game."""
     original = create_test_save_game(compressed=True)
 
@@ -330,7 +330,7 @@ def test_round_trip_save_game_compressed():
     assert parsed.game_data == original.game_data
 
 
-def test_round_trip_save_game_uncompressed():
+def test_round_trip_save_game_uncompressed() -> None:
     """Should round-trip uncompressed save game."""
     original = create_test_save_game(compressed=False)
 
@@ -346,7 +346,7 @@ def test_round_trip_save_game_uncompressed():
     assert parsed.settings == original.settings
 
 
-def test_save_game_with_empty_sim_data():
+def test_save_game_with_empty_sim_data() -> None:
     """Should handle empty sim data."""
     save_game = create_test_save_game()
     save_game.sim_data = b""
@@ -357,7 +357,7 @@ def test_save_game_with_empty_sim_data():
     assert parsed.sim_data == b""
 
 
-def test_save_game_with_large_sim_data():
+def test_save_game_with_large_sim_data() -> None:
     """Should handle large sim data."""
     save_game = create_test_save_game()
     save_game.sim_data = b"\x42" * 10000  # 10KB of data

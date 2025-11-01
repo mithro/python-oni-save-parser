@@ -14,11 +14,11 @@ from oni_save_parser.extractors import (
 )
 
 
-def test_extract_duplicant_skills_returns_dict():
+def test_extract_duplicant_skills_returns_dict() -> None:
     """Test that extract_duplicant_skills returns expected structure."""
     # Mock MinionResume behavior
     class MockBehavior:
-        def __init__(self):
+        def __init__(self) -> None:
             self.name = "MinionResume"
             self.template_data = {
                 "MasteryBySkillID": {"Mining": 7, "Building": 5},
@@ -34,15 +34,15 @@ def test_extract_duplicant_skills_returns_dict():
     assert result["mastery_by_skill"]["Mining"] == 7
 
 
-def test_extract_duplicant_traits_returns_list():
+def test_extract_duplicant_traits_returns_list() -> None:
     """Test that extract_duplicant_traits returns trait names."""
     # Mock Klei.AI.Traits behavior
     class MockTrait:
-        def __init__(self, trait_id):
+        def __init__(self, trait_id: str) -> None:
             self.Name = trait_id
 
     class MockBehavior:
-        def __init__(self):
+        def __init__(self) -> None:
             self.name = "Klei.AI.Traits"
             self.template_data = {
                 "TraitList": [
@@ -62,11 +62,11 @@ def test_extract_duplicant_traits_returns_list():
     assert len(result) == 3
 
 
-def test_extract_health_status_returns_dict():
+def test_extract_health_status_returns_dict() -> None:
     """Test that extract_health_status returns health state."""
     # Mock Health behavior
     class MockBehavior:
-        def __init__(self):
+        def __init__(self) -> None:
             self.name = "Health"
             self.template_data = {
                 "State": 0,  # Alive
@@ -82,17 +82,17 @@ def test_extract_health_status_returns_dict():
     assert result["can_be_incapacitated"] is True
 
 
-def test_extract_attribute_levels_returns_dict():
+def test_extract_attribute_levels_returns_dict() -> None:
     """Test that extract_attribute_levels extracts health/stress values."""
     # Mock Klei.AI.AttributeLevels behavior
     class MockAttribute:
-        def __init__(self, attribute_id, value, max_value):
+        def __init__(self, attribute_id: str, value: float, max_value: float) -> None:
             self.AttributeId = attribute_id
             self.experience = value
             self.experienceMax = max_value
 
     class MockBehavior:
-        def __init__(self):
+        def __init__(self) -> None:
             self.name = "Klei.AI.AttributeLevels"
             self.template_data = {
                 "saveLoadLevels": [
@@ -111,7 +111,7 @@ def test_extract_attribute_levels_returns_dict():
     assert result["Stress"]["current"] == 12.0
 
 
-def test_extractors_with_real_save():
+def test_extractors_with_real_save() -> None:
     """Test extractors with actual save file data."""
     save_path = Path("test_saves/01-early-game-cycle-010.sav")
     if not save_path.exists():
@@ -145,7 +145,7 @@ def test_extractors_with_real_save():
             assert isinstance(attrs, dict)
 
 
-def test_extract_geyser_stats_calculates_rates():
+def test_extract_geyser_stats_calculates_rates() -> None:
     """Test geyser statistics extraction."""
     # Mock geyser configuration data
     config = {
@@ -163,7 +163,7 @@ def test_extract_geyser_stats_calculates_rates():
     assert abs(stats["average_output_lifetime_kg_s"] - 2.26) < 0.01  # 5.4 * 0.582 * 0.720
 
 
-def test_extract_geyser_stats_with_thermal():
+def test_extract_geyser_stats_with_thermal() -> None:
     """Test geyser thermal calculations with element data."""
     config = {
         "scaledRate": 5.4,
@@ -187,7 +187,7 @@ def test_extract_geyser_stats_with_thermal():
     assert stats["peak_thermal_power_kdtu_s"] > 0
 
 
-def test_get_geyser_config_from_prefab_known():
+def test_get_geyser_config_from_prefab_known() -> None:
     """Test getting geyser config for known prefabs."""
     element_id, temp_k = get_geyser_config_from_prefab("GeyserGeneric_hot_water")
     assert element_id == "Water"
@@ -202,14 +202,14 @@ def test_get_geyser_config_from_prefab_known():
     assert temp_k == 2000.0
 
 
-def test_get_geyser_config_from_prefab_unknown():
+def test_get_geyser_config_from_prefab_unknown() -> None:
     """Test getting geyser config for unknown prefabs."""
     element_id, temp_k = get_geyser_config_from_prefab("UnknownGeyserType")
     assert element_id is None
     assert temp_k is None
 
 
-def test_geyser_config_element_ids_valid():
+def test_geyser_config_element_ids_valid() -> None:
     """Verify all element IDs in GEYSER_CONFIG exist in element loader."""
     from oni_save_parser.element_loader import get_global_element_loader
     from oni_save_parser.extractors import GEYSER_CONFIG
@@ -227,7 +227,7 @@ def test_geyser_config_element_ids_valid():
     assert not invalid_elements, "Invalid element IDs found:\n" + "\n".join(invalid_elements)
 
 
-def test_geyser_config_temperature_ranges():
+def test_geyser_config_temperature_ranges() -> None:
     """Verify temperatures are within physically reasonable ranges."""
     from oni_save_parser.extractors import GEYSER_CONFIG, MAX_GAME_TEMP_K, MIN_GAME_TEMP_K
 
