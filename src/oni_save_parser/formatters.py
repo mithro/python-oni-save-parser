@@ -141,6 +141,7 @@ def format_geyser_detailed(
     temperature_c: float,
     stats: dict[str, Any],
     thermal_stats: dict[str, Any] | None = None,
+    element_max_mass: float | None = None,
 ) -> str:
     """Format geyser information in detailed multi-line format.
 
@@ -148,11 +149,12 @@ def format_geyser_detailed(
         prefab_name: Geyser type name
         index: Geyser index (0-based)
         position: (x, y) coordinates
-        element: Element type (e.g., "Steam", "Natural Gas")
+        element: Element type
         element_state: "Gas" or "Liquid"
         temperature_c: Output temperature in Celsius
         stats: Statistics from extract_geyser_stats
         thermal_stats: Optional thermal statistics
+        element_max_mass: Optional max kg per tile (for liquids)
 
     Returns:
         Formatted multi-line string
@@ -168,9 +170,21 @@ def format_geyser_detailed(
 
     # Output Rates
     lines.append("Output Rates:")
-    lines.append(f"  Average (lifetime):        {stats['average_output_lifetime_kg_s']:.1f} kg/s  (accounts for all downtime)")
-    lines.append(f"  Average (when active):     {stats['average_output_active_kg_s']:.1f} kg/s  (during active period only)")
-    lines.append(f"  Peak (when erupting):      {stats['emission_rate_kg_s']:.1f} kg/s  (maximum output rate)")
+    lines.append(
+        f"  Average (lifetime):        "
+        f"{stats['average_output_lifetime_kg_s']:.1f} kg/s  "
+        f"(accounts for all downtime)"
+    )
+    lines.append(
+        f"  Average (when active):     "
+        f"{stats['average_output_active_kg_s']:.1f} kg/s  "
+        f"(during active period only)"
+    )
+    lines.append(
+        f"  Peak (when erupting):      "
+        f"{stats['emission_rate_kg_s']:.1f} kg/s  "
+        f"(maximum output rate)"
+    )
     lines.append("")
 
     # Thermal Output (if available)
@@ -180,9 +194,19 @@ def format_geyser_detailed(
         thermal_eruption = thermal_stats.get("thermal_per_eruption_kdtu", 0)
 
         lines.append("Thermal Output:")
-        lines.append(f"  Peak thermal power:          {peak_thermal:>7.1f} kDTU/s  (when erupting)")
-        lines.append(f"  Average thermal power:       {avg_thermal:>7.1f} kDTU/s  (lifetime average)")
-        lines.append(f"  Total heat per eruption: {thermal_eruption:>11,.1f} kDTU    (over {format_duration(stats['eruption_duration_s'])})")
+        lines.append(
+            f"  Peak thermal power:          {peak_thermal:>7.1f} kDTU/s  "
+            f"(when erupting)"
+        )
+        lines.append(
+            f"  Average thermal power:       {avg_thermal:>7.1f} kDTU/s  "
+            f"(lifetime average)"
+        )
+        eruption_dur_str = format_duration(stats["eruption_duration_s"])
+        lines.append(
+            f"  Total heat per eruption: {thermal_eruption:>11,.1f} kDTU    "
+            f"(over {eruption_dur_str})"
+        )
         lines.append("")
 
     # Eruption Cycle
@@ -195,9 +219,13 @@ def format_geyser_detailed(
     kg_eruption = format_mass(stats["kg_per_eruption"])
     thermal_eruption_str = ""
     if thermal_stats:
-        thermal_eruption_str = f" @ {thermal_stats.get('thermal_per_eruption_kdtu', 0):>11,.0f} kDTU"
+        thermal_value = thermal_stats.get("thermal_per_eruption_kdtu", 0)
+        thermal_eruption_str = f" @ {thermal_value:>11,.0f} kDTU"
 
-    lines.append(f"  Erupting:    {erupting_dur:>20}  → Produces {kg_eruption:>8}{thermal_eruption_str}")
+    lines.append(
+        f"  Erupting:    {erupting_dur:>20}  → Produces "
+        f"{kg_eruption:>8}{thermal_eruption_str}"
+    )
     lines.append(f"  Idle:        {idle_dur:>20}  → Produces    0.0 kg")
     lines.append(f"  Total cycle: {cycle_dur:>20}")
     lines.append(f"  Uptime:      {stats['eruption_uptime_percent']:>6.1f}%")
@@ -210,9 +238,104 @@ def format_geyser_detailed(
     # Calculate reservoir count
     if element_state == "Gas":
         reservoir_capacity = 1000  # Gas Reservoir
-        reservoir_count = int(stats["storage_for_idle_kg"] / reservoir_capacity) + (1 if stats["storage_for_idle_kg"] % reservoir_capacity > 0 else 0)
-        lines.append(f"    - {reservoir_count} Gas Reservoir{'s' if reservoir_count != 1 else ''} (1,000 kg each)")
+        reservoir_count = int(
+            stats["storage_for_idle_kg"] / reservoir_capacity
+        ) + (1 if stats["storage_for_idle_kg"] % reservoir_capacity > 0 else 0)
+        lines.append(
+            f"    - {reservoir_count} Gas Reservoir"
+            f"{'s' if reservoir_count != 1 else ''} (1,000 kg each)"
+        )
 
     lines.append("")
+
+    # Dormancy Cycle
+    lines.append("Dormancy Cycle (long-term):")
+
+    active_dur = format_duration(stats["active_duration_s"])
+    dormant_dur = format_duration(stats["dormant_duration_s"])
+    dormancy_cycle_dur = format_duration(stats["dormancy_cycle_s"])
+
+    kg_active = format_mass(stats["kg_per_active_period"])
+    thermal_active_str = ""
+    if thermal_stats and "thermal_per_eruption_kdtu" in thermal_stats:
+        # Total thermal during active period
+        num_eruptions = (
+            stats["active_duration_s"] / stats["eruption_cycle_s"]
+        )
+        total_thermal_active = (
+            thermal_stats["thermal_per_eruption_kdtu"] * num_eruptions
+        )
+        thermal_active_str = f" @ {total_thermal_active:>11,.0f} kDTU"
+
+    lines.append(
+        f"  Active:      {active_dur:>28}  → Produces "
+        f"{kg_active:>8}{thermal_active_str}"
+    )
+    lines.append(f"  Dormant:     {dormant_dur:>28}  → Produces    0.0 kg")
+    lines.append(f"  Total cycle: {dormancy_cycle_dur:>28}")
+    lines.append(f"  Uptime:      {stats['active_uptime_percent']:>6.1f}%")
+    lines.append("")
+
+    # Storage for dormancy
+    storage_dormancy = format_mass(stats["storage_for_dormancy_kg"])
+    lines.append(f"  Storage for dormancy: {storage_dormancy}")
+
+    # Calculate reservoir and tile storage
+    if element_state == "Gas":
+        reservoir_capacity = 1000
+        reservoir_count = int(
+            stats["storage_for_dormancy_kg"] / reservoir_capacity
+        ) + (
+            1
+            if stats["storage_for_dormancy_kg"] % reservoir_capacity > 0
+            else 0
+        )
+        lines.append(
+            f"    - {reservoir_count} Gas Reservoir"
+            f"{'s' if reservoir_count != 1 else ''} (1,000 kg each)"
+        )
+    else:  # Liquid
+        reservoir_capacity = 5000
+        reservoir_count = int(
+            stats["storage_for_dormancy_kg"] / reservoir_capacity
+        ) + (
+            1
+            if stats["storage_for_dormancy_kg"] % reservoir_capacity > 0
+            else 0
+        )
+        lines.append(
+            f"    - {reservoir_count} Liquid Reservoir"
+            f"{'s' if reservoir_count != 1 else ''} (5,000 kg each)"
+        )
+        if element_max_mass:
+            tile_count = int(
+                stats["storage_for_dormancy_kg"] / element_max_mass
+            ) + (
+                1
+                if stats["storage_for_dormancy_kg"] % element_max_mass > 0
+                else 0
+            )
+            lines.append(f"    - {tile_count} tiles @ {element_max_mass:,.0f} kg/tile max")
+
+    lines.append("")
+
+    # Overall summary
+    lines.append(
+        f"Overall Uptime: {stats['overall_uptime_percent']:.1f}% "
+        f"({stats['eruption_uptime_percent']:.1f}% erupting × "
+        f"{stats['active_uptime_percent']:.1f}% active)"
+    )
+    lines.append("")
+
+    # Recommended storage
+    recommended = format_mass(stats["recommended_storage_kg"])
+    buffer_type = (
+        "dormancy"
+        if stats["storage_for_dormancy_kg"] > stats["storage_for_idle_kg"]
+        else "idle"
+    )
+    lines.append(
+        f"Recommended minimum storage: {recommended} ({buffer_type} buffer dominates)"
+    )
 
     return "\n".join(lines)
