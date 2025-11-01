@@ -43,6 +43,9 @@ class StaticRenderer:
         img = Image.new("RGB", (width, height))
         pixels = img.load()
 
+        if pixels is None:
+            raise RuntimeError("Failed to load image pixels")
+
         # Render each cell
         for y in range(asteroid.height):
             for x in range(asteroid.width):
