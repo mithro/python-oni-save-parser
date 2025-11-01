@@ -243,12 +243,12 @@ def format_summary_output(
         for prefab in sorted(agg.keys()):
             stats = agg[prefab]
             avg_mass = stats["total_mass"] / stats["count"]
-            total_str = f"{stats['total_mass']:.1f} kg"
-            avg_str = f"{avg_mass:.1f} kg"
+            total_str = f"{stats['total_mass']:,.1f} kg"
+            avg_str = f"{avg_mass:,.1f} kg"
             lines.append(f"{prefab:<30} {stats['count']:>8} {total_str:>15} {avg_str:>12}")
 
         total_mass = sum(c["mass"] for c in containers)
-        lines.append(f"\nTotal: {len(containers)} items in storage, {total_mass:.1f} kg")
+        lines.append(f"\nTotal: {len(containers)} items in storage, {total_mass:,.1f} kg")
 
     # Debris section - aggregated by element
     if debris:
@@ -260,12 +260,12 @@ def format_summary_output(
         for prefab in sorted(agg.keys()):
             stats = agg[prefab]
             avg_mass = stats["total_mass"] / stats["count"]
-            total_str = f"{stats['total_mass']:.1f} kg"
-            avg_str = f"{avg_mass:.1f} kg"
+            total_str = f"{stats['total_mass']:,.1f} kg"
+            avg_str = f"{avg_mass:,.1f} kg"
             lines.append(f"{prefab:<30} {stats['count']:>8} {total_str:>15} {avg_str:>12}")
 
         total_mass = sum(d["mass"] for d in debris)
-        lines.append(f"\nTotal: {len(debris)} debris piles, {total_mass:.1f} kg")
+        lines.append(f"\nTotal: {len(debris)} debris piles, {total_mass:,.1f} kg")
 
     # Duplicants section - show individuals (usually small count)
     if duplicants:
@@ -274,11 +274,11 @@ def format_summary_output(
         lines.append("-" * 59)
         for item in duplicants:
             prefab = item.get("prefab", "Unknown")
-            mass_str = f"{item['mass']:.1f} kg"
+            mass_str = f"{item['mass']:,.1f} kg"
             lines.append(f"{item['duplicant']:<20} {prefab:<25} {mass_str:>12}")
 
         total_mass = sum(d["mass"] for d in duplicants)
-        lines.append(f"\nTotal: {len(duplicants)} items carried, {total_mass:.1f} kg")
+        lines.append(f"\nTotal: {len(duplicants)} items carried, {total_mass:,.1f} kg")
 
     if not containers and not debris and not duplicants:
         lines.append("\nNo resources found")
@@ -299,9 +299,9 @@ def format_detailed_output(
         lines.append("-" * 53)
         for item in containers:
             pos_str = f"({item['position'][0]:.1f}, {item['position'][1]:.1f})"
-            lines.append(f"{item['prefab']:<20} {item['mass']:>12.1f} {pos_str:>20}")
+            lines.append(f"{item['prefab']:<20} {item['mass']:>12,.1f} {pos_str:>20}")
         total_mass = sum(c["mass"] for c in containers)
-        lines.append(f"\nTotal: {len(containers)} containers, {total_mass:.1f} kg")
+        lines.append(f"\nTotal: {len(containers)} containers, {total_mass:,.1f} kg")
 
     # Debris section
     if debris:
@@ -310,8 +310,8 @@ def format_detailed_output(
         lines.append("-" * 53)
         for item in debris:
             pos_str = f"({item['position'][0]:.1f}, {item['position'][1]:.1f})"
-            lines.append(f"{item['prefab']:<20} {item['mass']:>12.1f} {pos_str:>20}")
-        lines.append(f"\nTotal: {len(debris)} items, {sum(d['mass'] for d in debris):.1f} kg")
+            lines.append(f"{item['prefab']:<20} {item['mass']:>12,.1f} {pos_str:>20}")
+        lines.append(f"\nTotal: {len(debris)} items, {sum(d['mass'] for d in debris):,.1f} kg")
 
     # Duplicants section
     if duplicants:
@@ -322,10 +322,10 @@ def format_detailed_output(
             pos_str = f"({item['position'][0]:.1f}, {item['position'][1]:.1f})"
             prefab = item.get("prefab", "Unknown")
             lines.append(
-                f"{item['duplicant']:<20} {prefab:<20} {item['mass']:>12.1f} {pos_str:>20}"
+                f"{item['duplicant']:<20} {prefab:<20} {item['mass']:>12,.1f} {pos_str:>20}"
             )
         total_mass = sum(d["mass"] for d in duplicants)
-        lines.append(f"\nTotal: {len(duplicants)} items carried, {total_mass:.1f} kg")
+        lines.append(f"\nTotal: {len(duplicants)} items carried, {total_mass:,.1f} kg")
 
     if not containers and not debris and not duplicants:
         lines.append("\nNo resources found")
