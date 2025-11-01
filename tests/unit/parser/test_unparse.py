@@ -25,7 +25,7 @@ def test_write_byte() -> None:
     writer = BinaryWriter()
     writer.write_byte(0x42)
     writer.write_byte(0xFF)
-    assert writer.data == b"\x42\xFF"
+    assert writer.data == b"\x42\xff"
 
 
 def test_write_bytes() -> None:

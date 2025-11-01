@@ -1,4 +1,5 @@
 """Tests for data extraction functions."""
+
 from pathlib import Path
 
 import pytest
@@ -16,6 +17,7 @@ from oni_save_parser.extractors import (
 
 def test_extract_duplicant_skills_returns_dict() -> None:
     """Test that extract_duplicant_skills returns expected structure."""
+
     # Mock MinionResume behavior
     class MockBehavior:
         def __init__(self) -> None:
@@ -23,7 +25,7 @@ def test_extract_duplicant_skills_returns_dict() -> None:
             self.template_data = {
                 "MasteryBySkillID": {"Mining": 7, "Building": 5},
                 "AptitudeBySkillGroup": {"Mining": 3, "Building": 2},
-                "currentRole": "Miner"
+                "currentRole": "Miner",
             }
 
     behavior = MockBehavior()
@@ -36,6 +38,7 @@ def test_extract_duplicant_skills_returns_dict() -> None:
 
 def test_extract_duplicant_traits_returns_list() -> None:
     """Test that extract_duplicant_traits returns trait names."""
+
     # Mock Klei.AI.Traits behavior
     class MockTrait:
         def __init__(self, trait_id: str) -> None:
@@ -48,7 +51,7 @@ def test_extract_duplicant_traits_returns_list() -> None:
                 "TraitList": [
                     MockTrait("QuickLearner"),
                     MockTrait("Yokel"),
-                    MockTrait("MouthBreather")
+                    MockTrait("MouthBreather"),
                 ]
             }
 
@@ -64,13 +67,14 @@ def test_extract_duplicant_traits_returns_list() -> None:
 
 def test_extract_health_status_returns_dict() -> None:
     """Test that extract_health_status returns health state."""
+
     # Mock Health behavior
     class MockBehavior:
         def __init__(self) -> None:
             self.name = "Health"
             self.template_data = {
                 "State": 0,  # Alive
-                "CanBeIncapacitated": True
+                "CanBeIncapacitated": True,
             }
 
     behavior = MockBehavior()
@@ -84,6 +88,7 @@ def test_extract_health_status_returns_dict() -> None:
 
 def test_extract_attribute_levels_returns_dict() -> None:
     """Test that extract_attribute_levels extracts health/stress values."""
+
     # Mock Klei.AI.AttributeLevels behavior
     class MockAttribute:
         def __init__(self, attribute_id: str, value: float, max_value: float) -> None:
@@ -98,7 +103,7 @@ def test_extract_attribute_levels_returns_dict() -> None:
                 "saveLoadLevels": [
                     MockAttribute("HitPoints", 85.0, 100.0),
                     MockAttribute("Stress", 12.0, 100.0),
-                    MockAttribute("QualityOfLife", 5.0, 100.0)
+                    MockAttribute("QualityOfLife", 5.0, 100.0),
                 ]
             }
 

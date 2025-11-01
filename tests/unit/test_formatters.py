@@ -1,4 +1,5 @@
 """Tests for output formatting functions."""
+
 from oni_save_parser.formatters import (
     format_duplicant_compact,
     format_duration,
@@ -17,7 +18,7 @@ def test_format_duplicant_compact_basic_info() -> None:
         "skills": {"Mining": 7, "Building": 5, "Farming": 2},
         "traits": ["QuickLearner", "Yokel", "MouthBreather"],
         "health": {"current": 85.0, "max": 100.0},
-        "stress": {"current": 12.0, "max": 100.0}
+        "stress": {"current": 12.0, "max": 100.0},
     }
 
     result = format_duplicant_compact(duplicant_data)

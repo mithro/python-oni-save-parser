@@ -87,8 +87,7 @@ def find_elements_path() -> Path | None:
     # Check environment variable
     if "ONI_INSTALL_PATH" in os.environ:
         custom_path = (
-            Path(os.environ["ONI_INSTALL_PATH"])
-            / "OxygenNotIncluded_Data/StreamingAssets/elements"
+            Path(os.environ["ONI_INSTALL_PATH"]) / "OxygenNotIncluded_Data/StreamingAssets/elements"
         )
         search_paths.insert(0, custom_path)
 

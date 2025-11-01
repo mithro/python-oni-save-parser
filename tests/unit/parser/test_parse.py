@@ -26,7 +26,7 @@ def test_read_int32() -> None:
 
 def test_read_byte() -> None:
     """Should read single unsigned byte."""
-    data = b"\x42\xFF"
+    data = b"\x42\xff"
     parser = BinaryParser(data)
     assert parser.read_byte() == 0x42
     assert parser.read_byte() == 0xFF

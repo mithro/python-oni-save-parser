@@ -201,6 +201,7 @@ def test_parse_save_game_invalid_world_marker() -> None:
     # Manually construct save with wrong world marker
     writer = BinaryWriter()
     from oni_save_parser.save_structure.header import unparse_header
+
     unparse_header(writer, save_game.header)
     unparse_templates(writer, save_game.templates)
 
@@ -224,6 +225,7 @@ def test_parse_save_game_invalid_world_type() -> None:
 
     writer = BinaryWriter()
     from oni_save_parser.save_structure.header import unparse_header
+
     unparse_header(writer, save_game.header)
     unparse_templates(writer, save_game.templates)
 
@@ -247,6 +249,7 @@ def test_parse_save_game_invalid_settings_type() -> None:
 
     writer = BinaryWriter()
     from oni_save_parser.save_structure.header import unparse_header
+
     unparse_header(writer, save_game.header)
     unparse_templates(writer, save_game.templates)
 
@@ -256,6 +259,7 @@ def test_parse_save_game_invalid_settings_type() -> None:
 
     # Write minimal world data
     from oni_save_parser.save_structure.type_templates import unparse_by_template
+
     unparse_by_template(body_writer, save_game.templates, "Klei.SaveFileRoot", save_game.world)
 
     # Write invalid settings type
@@ -277,6 +281,7 @@ def test_parse_save_game_invalid_ksav_marker() -> None:
 
     writer = BinaryWriter()
     from oni_save_parser.save_structure.header import unparse_header
+
     unparse_header(writer, save_game.header)
     unparse_templates(writer, save_game.templates)
 
@@ -285,6 +290,7 @@ def test_parse_save_game_invalid_ksav_marker() -> None:
     body_writer.write_klei_string("Klei.SaveFileRoot")
 
     from oni_save_parser.save_structure.type_templates import unparse_by_template
+
     unparse_by_template(body_writer, save_game.templates, "Klei.SaveFileRoot", save_game.world)
 
     body_writer.write_klei_string("Game+Settings")

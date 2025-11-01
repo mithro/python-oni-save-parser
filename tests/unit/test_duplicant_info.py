@@ -135,13 +135,19 @@ def create_save_with_duplicants(path: Path) -> None:
 
     game_objects = [
         GameObjectGroup(prefab_name="Minion", objects=[dup1, dup2, dup3]),
-        GameObjectGroup(prefab_name="Tile", objects=[GameObject(
-            position=Vector3(x=0.0, y=0.0, z=0.0),
-            rotation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
-            scale=Vector3(x=1.0, y=1.0, z=1.0),
-            folder=0,
-            behaviors=[],
-        )] * 10),
+        GameObjectGroup(
+            prefab_name="Tile",
+            objects=[
+                GameObject(
+                    position=Vector3(x=0.0, y=0.0, z=0.0),
+                    rotation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
+                    scale=Vector3(x=1.0, y=1.0, z=1.0),
+                    folder=0,
+                    behaviors=[],
+                )
+            ]
+            * 10,
+        ),
     ]
 
     save_game = SaveGame(
@@ -246,6 +252,7 @@ def test_duplicant_info_json_output(tmp_path: Path) -> None:
     assert result.returncode == 0
 
     import json
+
     data = json.loads(result.stdout)
 
     assert isinstance(data, list)

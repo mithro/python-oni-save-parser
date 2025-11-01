@@ -187,9 +187,7 @@ def _unparse_array_like(
     writer.write_bytes(temp_writer.data)
 
 
-def parse_by_type(
-    parser: BinaryParser, templates: list[TypeTemplate], type_info: TypeInfo
-) -> Any:
+def parse_by_type(parser: BinaryParser, templates: list[TypeTemplate], type_info: TypeInfo) -> Any:
     """Parse value based on its type information.
 
     Args:
@@ -324,7 +322,7 @@ def parse_by_type(
         if parse_length != data_length:
             raise CorruptionError(
                 f'Template "{type_info.template_name}" parsed {abs(parse_length - data_length)} '
-                f'bytes {"more" if parse_length > data_length else "less"} than expected',
+                f"bytes {'more' if parse_length > data_length else 'less'} than expected",
                 offset=parse_start,
             )
 

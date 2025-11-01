@@ -101,7 +101,7 @@ def extract_duplicant_skills(minion_resume_behavior: Any) -> dict[str, Any]:
                 skill_name, has_skill = item
                 if has_skill:
                     # Extract skill level from name (e.g., "Mining3" -> level 3)
-                    match = re.search(r'(\D+)(\d+)', skill_name)
+                    match = re.search(r"(\D+)(\d+)", skill_name)
                     if match:
                         base_name = match.group(1)
                         level = int(match.group(2))
@@ -113,7 +113,7 @@ def extract_duplicant_skills(minion_resume_behavior: Any) -> dict[str, Any]:
     return {
         "mastery_by_skill": mastery_by_skill,
         "aptitude_by_group": template_data.get("AptitudeBySkillGroup", {}),
-        "current_role": template_data.get("currentRole", "None")
+        "current_role": template_data.get("currentRole", "None"),
     }
 
 
@@ -166,7 +166,7 @@ def extract_health_status(health_behavior: Any) -> dict[str, Any]:
 
     return {
         "state": state_map.get(state_value, "Unknown"),
-        "can_be_incapacitated": template_data.get("CanBeIncapacitated", True)
+        "can_be_incapacitated": template_data.get("CanBeIncapacitated", True),
     }
 
 
@@ -203,10 +203,7 @@ def extract_attribute_levels(attribute_levels_behavior: Any) -> dict[str, dict[s
         else:
             continue
 
-        attributes[attr_id] = {
-            "current": current,
-            "max": max_val
-        }
+        attributes[attr_id] = {"current": current, "max": max_val}
 
     return attributes
 
@@ -294,27 +291,22 @@ def extract_geyser_stats(
         "emission_rate_kg_s": emission_rate,
         "average_output_active_kg_s": avg_active,
         "average_output_lifetime_kg_s": avg_lifetime,
-
         # Eruption cycle
         "eruption_duration_s": eruption_duration,
         "idle_duration_s": idle_duration,
         "eruption_cycle_s": iteration_length,
         "eruption_uptime_percent": eruption_uptime_percent,
-
         # Dormancy cycle
         "active_duration_s": active_duration,
         "dormant_duration_s": dormant_duration,
         "dormancy_cycle_s": year_length,
         "active_uptime_percent": active_uptime_percent,
-
         # Overall
         "overall_uptime_percent": overall_uptime_percent,
-
         # Production amounts
         "kg_per_eruption": kg_per_eruption,
         "kg_per_eruption_cycle": kg_per_eruption_cycle,
         "kg_per_active_period": kg_per_active_period,
-
         # Storage requirements
         "storage_for_idle_kg": storage_idle,
         "storage_for_dormancy_kg": storage_dormancy,
@@ -330,10 +322,12 @@ def extract_geyser_stats(
             avg_thermal = avg_lifetime * shc * temperature_k / 1000
             thermal_per_eruption = kg_per_eruption * shc * temperature_k / 1000
 
-            result.update({
-                "peak_thermal_power_kdtu_s": peak_thermal,
-                "average_thermal_power_kdtu_s": avg_thermal,
-                "thermal_per_eruption_kdtu": thermal_per_eruption,
-            })
+            result.update(
+                {
+                    "peak_thermal_power_kdtu_s": peak_thermal,
+                    "average_thermal_power_kdtu_s": avg_thermal,
+                    "thermal_per_eruption_kdtu": thermal_per_eruption,
+                }
+            )
 
     return result

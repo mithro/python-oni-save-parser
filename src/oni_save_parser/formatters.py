@@ -200,13 +200,9 @@ def format_geyser_detailed(
         thermal_eruption = thermal_stats.get("thermal_per_eruption_kdtu", 0)
 
         lines.append("Thermal Output:")
+        lines.append(f"  Peak thermal power:          {peak_thermal:>7.1f} kDTU/s  (when erupting)")
         lines.append(
-            f"  Peak thermal power:          {peak_thermal:>7.1f} kDTU/s  "
-            f"(when erupting)"
-        )
-        lines.append(
-            f"  Average thermal power:       {avg_thermal:>7.1f} kDTU/s  "
-            f"(lifetime average)"
+            f"  Average thermal power:       {avg_thermal:>7.1f} kDTU/s  (lifetime average)"
         )
         eruption_dur_str = format_duration(stats["eruption_duration_s"])
         lines.append(
@@ -247,9 +243,7 @@ def format_geyser_detailed(
 
     # Calculate reservoir count
     if element_state == "Gas":
-        reservoir_count = math.ceil(
-            stats["storage_for_idle_kg"] / GAS_RESERVOIR_CAPACITY_KG
-        )
+        reservoir_count = math.ceil(stats["storage_for_idle_kg"] / GAS_RESERVOIR_CAPACITY_KG)
         lines.append(
             f"    - {reservoir_count} Gas Reservoir"
             f"{'s' if reservoir_count != 1 else ''} (1,000 kg each)"
@@ -274,17 +268,11 @@ def format_geyser_detailed(
     if thermal_stats and "thermal_per_eruption_kdtu" in thermal_stats:
         # Total thermal during active period
         if stats["eruption_cycle_s"] > 0:
-            num_eruptions = (
-                stats["active_duration_s"] / stats["eruption_cycle_s"]
-            )
-            total_thermal_active = (
-                thermal_stats["thermal_per_eruption_kdtu"] * num_eruptions
-            )
+            num_eruptions = stats["active_duration_s"] / stats["eruption_cycle_s"]
+            total_thermal_active = thermal_stats["thermal_per_eruption_kdtu"] * num_eruptions
             thermal_active_str = f" @ {total_thermal_active:>11,.0f} kDTU"
 
-    lines.append(
-        f"  Active:      {active_dur:>28}  → Produces {kg_active_str}{thermal_active_str}"
-    )
+    lines.append(f"  Active:      {active_dur:>28}  → Produces {kg_active_str}{thermal_active_str}")
     lines.append(f"  Dormant:     {dormant_dur:>28}  → Produces    0.0 kg")
     lines.append(f"  Total cycle: {dormancy_cycle_dur:>28}")
     lines.append(f"  Uptime:      {stats['active_uptime_percent']:>6.1f}%")
@@ -296,25 +284,19 @@ def format_geyser_detailed(
 
     # Calculate reservoir and tile storage
     if element_state == "Gas":
-        reservoir_count = math.ceil(
-            stats["storage_for_dormancy_kg"] / GAS_RESERVOIR_CAPACITY_KG
-        )
+        reservoir_count = math.ceil(stats["storage_for_dormancy_kg"] / GAS_RESERVOIR_CAPACITY_KG)
         lines.append(
             f"    - {reservoir_count} Gas Reservoir"
             f"{'s' if reservoir_count != 1 else ''} (1,000 kg each)"
         )
     else:  # Liquid
-        reservoir_count = math.ceil(
-            stats["storage_for_dormancy_kg"] / LIQUID_RESERVOIR_CAPACITY_KG
-        )
+        reservoir_count = math.ceil(stats["storage_for_dormancy_kg"] / LIQUID_RESERVOIR_CAPACITY_KG)
         lines.append(
             f"    - {reservoir_count} Liquid Reservoir"
             f"{'s' if reservoir_count != 1 else ''} (5,000 kg each)"
         )
         if element_max_mass:
-            tile_count = math.ceil(
-                stats["storage_for_dormancy_kg"] / element_max_mass
-            )
+            tile_count = math.ceil(stats["storage_for_dormancy_kg"] / element_max_mass)
             lines.append(f"    - {tile_count} tiles @ {element_max_mass:,.0f} kg/tile max")
 
     lines.append("")
@@ -330,12 +312,8 @@ def format_geyser_detailed(
     # Recommended storage
     recommended = format_mass(stats["recommended_storage_kg"])
     buffer_type = (
-        "dormancy"
-        if stats["storage_for_dormancy_kg"] > stats["storage_for_idle_kg"]
-        else "idle"
+        "dormancy" if stats["storage_for_dormancy_kg"] > stats["storage_for_idle_kg"] else "idle"
     )
-    lines.append(
-        f"Recommended minimum storage: {recommended} ({buffer_type} buffer dominates)"
-    )
+    lines.append(f"Recommended minimum storage: {recommended} ({buffer_type} buffer dominates)")
 
     return "\n".join(lines)

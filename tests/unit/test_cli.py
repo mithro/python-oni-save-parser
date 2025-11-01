@@ -155,9 +155,7 @@ def test_cmd_prefabs_list(tmp_path: Path, capsys: pytest.CaptureFixture[str]) ->
 
     import argparse
 
-    args = argparse.Namespace(
-        file=save_path, counts=False, json=False, allow_minor_mismatch=True
-    )
+    args = argparse.Namespace(file=save_path, counts=False, json=False, allow_minor_mismatch=True)
 
     result = cmd_prefabs(args)
 
@@ -176,9 +174,7 @@ def test_cmd_prefabs_with_counts(tmp_path: Path, capsys: pytest.CaptureFixture[s
 
     import argparse
 
-    args = argparse.Namespace(
-        file=save_path, counts=True, json=False, allow_minor_mismatch=True
-    )
+    args = argparse.Namespace(file=save_path, counts=True, json=False, allow_minor_mismatch=True)
 
     result = cmd_prefabs(args)
 
@@ -197,9 +193,7 @@ def test_cmd_prefabs_json_list(tmp_path: Path, capsys: pytest.CaptureFixture[str
 
     import argparse
 
-    args = argparse.Namespace(
-        file=save_path, counts=False, json=True, allow_minor_mismatch=True
-    )
+    args = argparse.Namespace(file=save_path, counts=False, json=True, allow_minor_mismatch=True)
 
     result = cmd_prefabs(args)
 

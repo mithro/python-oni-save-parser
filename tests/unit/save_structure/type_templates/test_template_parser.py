@@ -139,9 +139,7 @@ def test_unparse_simple_template() -> None:
     field2 = TypeTemplateMember(name="field2", type=TypeInfo(info=12))
     prop1 = TypeTemplateMember(name="prop1", type=TypeInfo(info=3))
 
-    template = TypeTemplate(
-        name="TestClass", fields=[field1, field2], properties=[prop1]
-    )
+    template = TypeTemplate(name="TestClass", fields=[field1, field2], properties=[prop1])
 
     writer = BinaryWriter()
     unparse_template(writer, template)

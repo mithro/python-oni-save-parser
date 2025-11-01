@@ -13,8 +13,14 @@ from typing import Any
 from oni_save_parser import load_save_file
 
 # Storage container prefab names
-STORAGE_PREFABS = {"StorageLocker", "LiquidReservoir", "GasReservoir",
-                   "StorageLockerSmart", "LiquidReservoirSmart", "GasReservoirSmart"}
+STORAGE_PREFABS = {
+    "StorageLocker",
+    "LiquidReservoir",
+    "GasReservoir",
+    "StorageLockerSmart",
+    "LiquidReservoirSmart",
+    "GasReservoirSmart",
+}
 
 # Prefabs to exclude from debris detection (handled separately or not relevant)
 DEBRIS_EXCLUSIONS = STORAGE_PREFABS | {"Minion"}  # Minions handled by duplicant inventory function
@@ -36,17 +42,18 @@ def find_storage_containers(save: Any) -> list[dict[str, Any]]:
                             for stored_behavior in stored_obj.get("behaviors", []):
                                 if stored_behavior.name == "PrimaryElement":
                                     # Real saves use "Units", test fixtures use "Mass"
-                                    mass = (
-                                        stored_behavior.template_data.get("Units")
-                                        or stored_behavior.template_data.get("Mass", 0.0)
-                                    )
+                                    mass = stored_behavior.template_data.get(
+                                        "Units"
+                                    ) or stored_behavior.template_data.get("Mass", 0.0)
                                     if mass > 0:
-                                        stored_items.append({
-                                            "prefab": stored_obj.get("name", "Unknown"),
-                                            "mass": mass,
-                                            "position": (obj.position.x, obj.position.y),
-                                            "container": group.prefab_name,
-                                        })
+                                        stored_items.append(
+                                            {
+                                                "prefab": stored_obj.get("name", "Unknown"),
+                                                "mass": mass,
+                                                "position": (obj.position.x, obj.position.y),
+                                                "container": group.prefab_name,
+                                            }
+                                        )
     return stored_items
 
 
@@ -88,16 +95,17 @@ def find_debris(save: Any) -> list[dict[str, Any]]:
             # Buildings/plants have PrimaryElement but NOT Pickupable
             if has_pickupable and primary_element:
                 # Real saves use "Units", test fixtures use "Mass"
-                mass = (
-                    primary_element.template_data.get("Units")
-                    or primary_element.template_data.get("Mass", 0.0)
-                )
+                mass = primary_element.template_data.get(
+                    "Units"
+                ) or primary_element.template_data.get("Mass", 0.0)
                 if mass > 0:
-                    debris_items.append({
-                        "prefab": group.prefab_name,
-                        "mass": mass,
-                        "position": (obj.position.x, obj.position.y)
-                    })
+                    debris_items.append(
+                        {
+                            "prefab": group.prefab_name,
+                            "mass": mass,
+                            "position": (obj.position.x, obj.position.y),
+                        }
+                    )
 
     return debris_items
 
@@ -128,17 +136,18 @@ def find_duplicant_inventories(save: Any) -> list[dict[str, Any]]:
                             for carried_behavior in carried_obj.get("behaviors", []):
                                 if carried_behavior.name == "PrimaryElement":
                                     # Real saves use "Units", test fixtures use "Mass"
-                                    mass = (
-                                        carried_behavior.template_data.get("Units")
-                                        or carried_behavior.template_data.get("Mass", 0.0)
-                                    )
+                                    mass = carried_behavior.template_data.get(
+                                        "Units"
+                                    ) or carried_behavior.template_data.get("Mass", 0.0)
                                     if mass > 0:
-                                        duplicant_items.append({
-                                            "duplicant": minion_name,
-                                            "prefab": carried_obj.get("name", "Unknown"),
-                                            "mass": mass,
-                                            "position": (obj.position.x, obj.position.y)
-                                        })
+                                        duplicant_items.append(
+                                            {
+                                                "duplicant": minion_name,
+                                                "prefab": carried_obj.get("name", "Unknown"),
+                                                "mass": mass,
+                                                "position": (obj.position.x, obj.position.y),
+                                            }
+                                        )
 
     return duplicant_items
 
@@ -174,8 +183,9 @@ def apply_filters(
     return filtered_containers, filtered_debris, filtered_duplicants
 
 
-def get_all_element_names(containers: list[dict[str, Any]],
-                         debris: list[dict[str, Any]]) -> set[str]:
+def get_all_element_names(
+    containers: list[dict[str, Any]], debris: list[dict[str, Any]]
+) -> set[str]:
     """Get all unique prefab names from containers and debris."""
     element_names = set()
     for item in containers:
@@ -185,9 +195,9 @@ def get_all_element_names(containers: list[dict[str, Any]],
     return element_names
 
 
-def format_table_output(containers: list[dict[str, Any]],
-                       debris: list[dict[str, Any]],
-                       duplicants: list[dict[str, Any]]) -> str:
+def format_table_output(
+    containers: list[dict[str, Any]], debris: list[dict[str, Any]], duplicants: list[dict[str, Any]]
+) -> str:
     """Format resources as ASCII table."""
     lines = []
 
@@ -200,9 +210,7 @@ def format_table_output(containers: list[dict[str, Any]],
             pos_str = f"({item['position'][0]:.1f}, {item['position'][1]:.1f})"
             lines.append(f"{item['prefab']:<20} {item['mass']:>12.1f} {pos_str:>20}")
         total_mass = sum(c["mass"] for c in containers)
-        lines.append(
-            f"\nTotal: {len(containers)} containers, {total_mass:.1f} kg"
-        )
+        lines.append(f"\nTotal: {len(containers)} containers, {total_mass:.1f} kg")
 
     # Debris section
     if debris:
@@ -221,15 +229,12 @@ def format_table_output(containers: list[dict[str, Any]],
         lines.append("-" * 73)
         for item in duplicants:
             pos_str = f"({item['position'][0]:.1f}, {item['position'][1]:.1f})"
-            prefab = item.get('prefab', 'Unknown')
+            prefab = item.get("prefab", "Unknown")
             lines.append(
-                f"{item['duplicant']:<20} {prefab:<20} "
-                f"{item['mass']:>12.1f} {pos_str:>20}"
+                f"{item['duplicant']:<20} {prefab:<20} {item['mass']:>12.1f} {pos_str:>20}"
             )
         total_mass = sum(d["mass"] for d in duplicants)
-        lines.append(
-            f"\nTotal: {len(duplicants)} items carried, {total_mass:.1f} kg"
-        )
+        lines.append(f"\nTotal: {len(duplicants)} items carried, {total_mass:.1f} kg")
 
     if not containers and not debris and not duplicants:
         lines.append("\nNo resources found")
@@ -237,9 +242,9 @@ def format_table_output(containers: list[dict[str, Any]],
     return "\n".join(lines)
 
 
-def format_json_output(containers: list[dict[str, Any]],
-                      debris: list[dict[str, Any]],
-                      duplicants: list[dict[str, Any]]) -> str:
+def format_json_output(
+    containers: list[dict[str, Any]], debris: list[dict[str, Any]], duplicants: list[dict[str, Any]]
+) -> str:
     """Format resources as JSON with comprehensive details."""
     output = {
         "storage": containers,
@@ -248,8 +253,8 @@ def format_json_output(containers: list[dict[str, Any]],
         "summary": {
             "total_storage_containers": len(containers),
             "total_debris_items": len(debris),
-            "total_duplicants_carrying": len(duplicants)
-        }
+            "total_duplicants_carrying": len(duplicants),
+        },
     }
     return json.dumps(output, indent=2)
 
@@ -303,9 +308,7 @@ def main() -> int:
 
         # Apply filters
         containers, debris, duplicants = apply_filters(
-            containers, debris, duplicants,
-            element_filter=args.element,
-            min_mass=args.min_mass
+            containers, debris, duplicants, element_filter=args.element, min_mass=args.min_mass
         )
 
         if args.json:

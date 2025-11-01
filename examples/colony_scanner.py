@@ -125,7 +125,7 @@ def scan_save_files(
 
             # Print immediately if streaming
             if stream_output:
-                path_display = colony_info['path'] if colony_info['path'] else "."
+                path_display = colony_info["path"] if colony_info["path"] else "."
                 # Fixed-width progress string: "   9/2804,  8/48" -> "1802/2804, 40/48"
                 colony_current = current_colony_counts[path_str]
                 colony_total = colony_file_counts[path_str]
@@ -166,14 +166,13 @@ def print_table(colonies: list[dict[str, Any]]) -> None:
 
     # Print header
     print(
-        f"{'Colony Name':<30} {'Cycle':>6} {'Dups':>5} "
-        f"{'Modified':<19} {'Path':<30} {'File':<30}"
+        f"{'Colony Name':<30} {'Cycle':>6} {'Dups':>5} {'Modified':<19} {'Path':<30} {'File':<30}"
     )
     print("-" * 130)
 
     # Print each colony
     for colony in colonies:
-        path_display = colony['path'] if colony['path'] else "."
+        path_display = colony["path"] if colony["path"] else "."
         print(
             f"{colony['colony_name']:<30} "
             f"{colony['cycle']:>6} "
