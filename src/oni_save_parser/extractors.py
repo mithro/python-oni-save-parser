@@ -9,6 +9,7 @@ from typing import Any
 
 # Geyser configuration mapping: prefab_name -> (element_id, temperature_k)
 # Temperature values from ONI Wiki (converted to Kelvin: °C + 273.15)
+# Covers base game + Spaced Out DLC as of January 2025
 GEYSER_CONFIG = {
     # Water/Liquid Geysers
     "GeyserGeneric_hot_water": ("Water", 368.15),  # 95°C
@@ -52,6 +53,14 @@ def get_geyser_config_from_prefab(prefab_name: str) -> tuple[str | None, float |
 
     Returns:
         Tuple of (element_id, temperature_k) or (None, None) if unknown
+
+    Example:
+        >>> get_geyser_config_from_prefab("GeyserGeneric_hot_water")
+        ('Water', 368.15)
+        >>> get_geyser_config_from_prefab("GeyserGeneric_chlorine_gas")
+        ('ChlorineGas', 333.15)
+        >>> get_geyser_config_from_prefab("UnknownGeyser")
+        (None, None)
     """
     config = GEYSER_CONFIG.get(prefab_name)
     if config:

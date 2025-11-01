@@ -207,3 +207,34 @@ def test_get_geyser_config_from_prefab_unknown():
     element_id, temp_k = get_geyser_config_from_prefab("UnknownGeyserType")
     assert element_id is None
     assert temp_k is None
+
+
+def test_geyser_config_element_ids_valid():
+    """Verify all element IDs in GEYSER_CONFIG exist in element loader."""
+    from oni_save_parser.element_loader import get_global_element_loader
+    from oni_save_parser.extractors import GEYSER_CONFIG
+
+    loader = get_global_element_loader()
+    if not loader:
+        pytest.skip("Element loader not available (ONI not installed)")
+
+    invalid_elements = []
+    for prefab, (element_id, temp_k) in GEYSER_CONFIG.items():
+        element = loader.get_element(element_id)
+        if element is None:
+            invalid_elements.append(f"{prefab}: '{element_id}' not found")
+
+    assert not invalid_elements, "Invalid element IDs found:\n" + "\n".join(invalid_elements)
+
+
+def test_geyser_config_temperature_ranges():
+    """Verify temperatures are within physically reasonable ranges."""
+    from oni_save_parser.extractors import GEYSER_CONFIG
+
+    for prefab, (element_id, temp_k) in GEYSER_CONFIG.items():
+        # Kelvin can't be below absolute zero
+        assert temp_k > 0, f"{prefab} has impossible temperature: {temp_k}K"
+        # Should be below 5000K (even metal volcanoes)
+        assert temp_k < 5000, f"{prefab} temperature seems too high: {temp_k}K"
+        # Should be reasonable for ONI game (above 200K, below 4500K)
+        assert 200 <= temp_k <= 4500, f"{prefab} temperature outside typical range: {temp_k}K"
