@@ -337,7 +337,14 @@ def test_resource_counter_element_filter_json(tmp_path: Path) -> None:
     create_save_with_resources(save_path)
 
     result = subprocess.run(
-        [sys.executable, "examples/resource_counter.py", str(save_path), "--element", "StorageLocker", "--json"],
+        [
+            sys.executable,
+            "examples/resource_counter.py",
+            str(save_path),
+            "--element",
+            "StorageLocker",
+            "--json",
+        ],
         capture_output=True,
         text=True,
     )
@@ -380,7 +387,14 @@ def test_resource_counter_min_mass_filter_json(tmp_path: Path) -> None:
     create_save_with_resources(save_path)
 
     result = subprocess.run(
-        [sys.executable, "examples/resource_counter.py", str(save_path), "--min-mass", "100", "--json"],
+        [
+            sys.executable,
+            "examples/resource_counter.py",
+            str(save_path),
+            "--min-mass",
+            "100",
+            "--json",
+        ],
         capture_output=True,
         text=True,
     )
@@ -411,7 +425,8 @@ def test_resource_counter_combined_filters(tmp_path: Path) -> None:
     # Should only find Water (1000kg in storage)
     assert "Water" in result.stdout
     # Should not find Iron (filtered by element) or IronOre (filtered by element)
-    assert "Iron" not in result.stdout or "Water" in result.stdout  # Allow Iron in "IronOre" but require Water
+    # Allow Iron in "IronOre" but require Water
+    assert "Iron" not in result.stdout or "Water" in result.stdout
     assert "IronOre" not in result.stdout
 
 

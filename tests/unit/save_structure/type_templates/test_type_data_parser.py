@@ -1,6 +1,7 @@
 """Tests for type data parsing."""
 
 import pytest
+
 from oni_save_parser.parser.errors import CorruptionError
 from oni_save_parser.parser.parse import BinaryParser
 from oni_save_parser.parser.unparse import BinaryWriter
@@ -558,7 +559,7 @@ def test_unparse_dictionary():
 
     # Verify format
     parser = BinaryParser(writer.data)
-    data_length = parser.read_int32()
+    _ = parser.read_int32()  # data_length (not used in assertion)
     count = parser.read_int32()
     assert count == 2
 

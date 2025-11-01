@@ -1,16 +1,15 @@
 """Tests for type template data structures."""
 
-import pytest
 from oni_save_parser.save_structure.type_templates.types import (
+    GENERIC_TYPES,
     SerializationTypeCode,
     SerializationTypeInfo,
     TypeInfo,
     TypeTemplate,
     TypeTemplateMember,
     get_type_code,
-    is_value_type,
     is_generic_type,
-    GENERIC_TYPES,
+    is_value_type,
 )
 
 

@@ -5,8 +5,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-
 from oni_save_parser import save_to_file
 from oni_save_parser.save_structure import (
     SaveGame,

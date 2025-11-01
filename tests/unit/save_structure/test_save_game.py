@@ -3,12 +3,11 @@
 import zlib
 
 import pytest
+
 from oni_save_parser.parser.errors import CorruptionError, VersionMismatchError
-from oni_save_parser.parser.parse import BinaryParser
 from oni_save_parser.parser.unparse import BinaryWriter
 from oni_save_parser.save_structure.header import SaveGameHeader, SaveGameInfo
 from oni_save_parser.save_structure.save_game import (
-    SAVE_HEADER,
     SaveGame,
     parse_save_game,
     unparse_save_game,
@@ -17,7 +16,6 @@ from oni_save_parser.save_structure.type_templates import (
     TypeInfo,
     TypeTemplate,
     TypeTemplateMember,
-    parse_templates,
     unparse_templates,
 )
 
@@ -142,7 +140,9 @@ def test_parse_save_game_version_mismatch_major():
     save_game.header.game_info.save_major_version = 6  # Wrong major version
     data = unparse_save_game(save_game)
 
-    with pytest.raises(VersionMismatchError, match="Save version 6.35 is incompatible. Expected 7.35"):
+    with pytest.raises(
+        VersionMismatchError, match="Save version 6.35 is incompatible. Expected 7.35"
+    ):
         parse_save_game(data, verify_version=True)
 
 
@@ -152,7 +152,9 @@ def test_parse_save_game_version_mismatch_minor():
     save_game.header.game_info.save_minor_version = 30  # Wrong minor version
     data = unparse_save_game(save_game)
 
-    with pytest.raises(VersionMismatchError, match="Save version 7.30 is incompatible. Expected 7.35"):
+    with pytest.raises(
+        VersionMismatchError, match="Save version 7.30 is incompatible. Expected 7.35"
+    ):
         parse_save_game(data, verify_version=True)
 
 

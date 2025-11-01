@@ -12,10 +12,10 @@ from typing import Any
 
 from oni_save_parser import get_game_objects_by_prefab, load_save_file
 from oni_save_parser.extractors import (
+    extract_attribute_levels,
     extract_duplicant_skills,
     extract_duplicant_traits,
     extract_health_status,
-    extract_attribute_levels,
 )
 from oni_save_parser.formatters import format_duplicant_compact
 

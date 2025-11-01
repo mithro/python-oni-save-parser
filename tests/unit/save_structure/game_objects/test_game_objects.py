@@ -1,6 +1,7 @@
 """Tests for game objects parsing."""
 
 import pytest
+
 from oni_save_parser.parser.errors import CorruptionError
 from oni_save_parser.parser.parse import BinaryParser
 from oni_save_parser.parser.unparse import BinaryWriter
@@ -13,7 +14,10 @@ from oni_save_parser.save_structure.game_objects import (
     parse_game_objects,
     unparse_game_objects,
 )
-from oni_save_parser.save_structure.game_objects.behavior_parser import parse_behavior, unparse_behavior
+from oni_save_parser.save_structure.game_objects.behavior_parser import (
+    parse_behavior,
+    unparse_behavior,
+)
 from oni_save_parser.save_structure.game_objects.group_parser import (
     parse_game_object_group,
     unparse_game_object_group,
@@ -293,7 +297,10 @@ def test_round_trip_game_object():
         folder=5,
         behaviors=[
             GameObjectBehavior(
-                name="MinionIdentity", template_data={"name": "Meep", "age": 50}, extra_data=None, extra_raw=b""
+                name="MinionIdentity",
+                template_data={"name": "Meep", "age": 50},
+                extra_data=None,
+                extra_raw=b"",
             )
         ],
     )

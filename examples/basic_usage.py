@@ -74,7 +74,8 @@ def example_analyze_duplicants(save_path: str) -> None:
 
     for i, minion in enumerate(minions, 1):
         print(f"\nDuplicant #{i}:")
-        print(f"  Position: ({minion.position.x:.1f}, {minion.position.y:.1f}, {minion.position.z:.1f})")
+        pos = minion.position
+        print(f"  Position: ({pos.x:.1f}, {pos.y:.1f}, {pos.z:.1f})")
 
         # Extract duplicant data using extractors module
         for behavior in minion.behaviors:

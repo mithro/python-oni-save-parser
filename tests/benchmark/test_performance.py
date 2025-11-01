@@ -7,10 +7,16 @@ Run with: pytest tests/benchmark --benchmark-only
 from pathlib import Path
 
 import pytest
+
 from oni_save_parser import get_colony_info, get_prefab_counts, load_save_file, save_to_file
 from oni_save_parser.parser import BinaryParser, BinaryWriter
 from oni_save_parser.save_structure import SaveGame, parse_save_game, unparse_save_game
-from oni_save_parser.save_structure.game_objects import GameObject, GameObjectGroup, Quaternion, Vector3
+from oni_save_parser.save_structure.game_objects import (
+    GameObject,
+    GameObjectGroup,
+    Quaternion,
+    Vector3,
+)
 from oni_save_parser.save_structure.header import SaveGameHeader, SaveGameInfo
 from oni_save_parser.save_structure.type_templates import TypeInfo, TypeTemplate, TypeTemplateMember
 

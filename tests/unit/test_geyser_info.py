@@ -5,8 +5,14 @@ import sys
 from pathlib import Path
 
 import pytest
+
 from oni_save_parser.save_structure import SaveGame, unparse_save_game
-from oni_save_parser.save_structure.game_objects import GameObject, GameObjectGroup, Quaternion, Vector3
+from oni_save_parser.save_structure.game_objects import (
+    GameObject,
+    GameObjectGroup,
+    Quaternion,
+    Vector3,
+)
 from oni_save_parser.save_structure.header import SaveGameHeader, SaveGameInfo
 from oni_save_parser.save_structure.type_templates import TypeInfo, TypeTemplate, TypeTemplateMember
 

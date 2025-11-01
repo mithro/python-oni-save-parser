@@ -1,6 +1,7 @@
 """Tests for TypeTemplate parsing."""
 
 import pytest
+
 from oni_save_parser.parser.errors import CorruptionError
 from oni_save_parser.parser.parse import BinaryParser
 from oni_save_parser.parser.unparse import BinaryWriter

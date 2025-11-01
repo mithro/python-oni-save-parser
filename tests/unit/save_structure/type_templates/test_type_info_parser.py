@@ -7,8 +7,6 @@ from oni_save_parser.save_structure.type_templates.type_info_parser import (
     unparse_type_info,
 )
 from oni_save_parser.save_structure.type_templates.types import (
-    SerializationTypeCode,
-    SerializationTypeInfo,
     TypeInfo,
 )
 

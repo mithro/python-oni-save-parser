@@ -222,7 +222,10 @@ def format_table_output(containers: list[dict[str, Any]],
         for item in duplicants:
             pos_str = f"({item['position'][0]:.1f}, {item['position'][1]:.1f})"
             prefab = item.get('prefab', 'Unknown')
-            lines.append(f"{item['duplicant']:<20} {prefab:<20} {item['mass']:>12.1f} {pos_str:>20}")
+            lines.append(
+                f"{item['duplicant']:<20} {prefab:<20} "
+                f"{item['mass']:>12.1f} {pos_str:>20}"
+            )
         total_mass = sum(d["mass"] for d in duplicants)
         lines.append(
             f"\nTotal: {len(duplicants)} items carried, {total_mass:.1f} kg"

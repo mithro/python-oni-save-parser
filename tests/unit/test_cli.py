@@ -2,14 +2,19 @@
 
 import json
 import sys
-from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+
 from oni_save_parser.__main__ import cmd_info, cmd_prefabs, main
 from oni_save_parser.save_structure import SaveGame
-from oni_save_parser.save_structure.game_objects import GameObject, GameObjectGroup, Quaternion, Vector3
+from oni_save_parser.save_structure.game_objects import (
+    GameObject,
+    GameObjectGroup,
+    Quaternion,
+    Vector3,
+)
 from oni_save_parser.save_structure.header import SaveGameHeader, SaveGameInfo
 from oni_save_parser.save_structure.type_templates import TypeInfo, TypeTemplate, TypeTemplateMember
 

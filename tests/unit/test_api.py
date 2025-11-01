@@ -1,9 +1,9 @@
 """Tests for high-level API functions."""
 
-import tempfile
 from pathlib import Path
 
 import pytest
+
 from oni_save_parser import (
     get_colony_info,
     get_game_objects_by_prefab,
@@ -12,9 +12,14 @@ from oni_save_parser import (
     load_save_file,
     save_to_file,
 )
-from oni_save_parser.parser.errors import CorruptionError, VersionMismatchError
+from oni_save_parser.parser.errors import VersionMismatchError
 from oni_save_parser.save_structure import SaveGame
-from oni_save_parser.save_structure.game_objects import GameObject, GameObjectGroup, Quaternion, Vector3
+from oni_save_parser.save_structure.game_objects import (
+    GameObject,
+    GameObjectGroup,
+    Quaternion,
+    Vector3,
+)
 from oni_save_parser.save_structure.header import SaveGameHeader, SaveGameInfo
 from oni_save_parser.save_structure.type_templates import TypeInfo, TypeTemplate, TypeTemplateMember
 
