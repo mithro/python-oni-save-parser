@@ -2,14 +2,19 @@
 
 import json
 import sys
-from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+
 from oni_save_parser.__main__ import cmd_info, cmd_prefabs, main
 from oni_save_parser.save_structure import SaveGame
-from oni_save_parser.save_structure.game_objects import GameObject, GameObjectGroup, Quaternion, Vector3
+from oni_save_parser.save_structure.game_objects import (
+    GameObject,
+    GameObjectGroup,
+    Quaternion,
+    Vector3,
+)
 from oni_save_parser.save_structure.header import SaveGameHeader, SaveGameInfo
 from oni_save_parser.save_structure.type_templates import TypeInfo, TypeTemplate, TypeTemplateMember
 
@@ -85,7 +90,7 @@ def create_test_save_file(path: Path) -> None:
     path.write_bytes(data)
 
 
-def test_cmd_info_text_output(tmp_path: Path, capsys):
+def test_cmd_info_text_output(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """Should display colony info in text format."""
     save_path = tmp_path / "test.sav"
     create_test_save_file(save_path)
@@ -105,7 +110,7 @@ def test_cmd_info_text_output(tmp_path: Path, capsys):
     assert "Sandbox: True" in captured.out
 
 
-def test_cmd_info_json_output(tmp_path: Path, capsys):
+def test_cmd_info_json_output(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """Should display colony info in JSON format."""
     save_path = tmp_path / "test.sav"
     create_test_save_file(save_path)
@@ -127,7 +132,7 @@ def test_cmd_info_json_output(tmp_path: Path, capsys):
     assert data["sandbox_enabled"] is True
 
 
-def test_cmd_info_file_not_found(tmp_path: Path, capsys):
+def test_cmd_info_file_not_found(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """Should handle missing file gracefully."""
     import argparse
 
@@ -143,16 +148,14 @@ def test_cmd_info_file_not_found(tmp_path: Path, capsys):
     assert "Error:" in captured.err
 
 
-def test_cmd_prefabs_list(tmp_path: Path, capsys):
+def test_cmd_prefabs_list(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """Should list prefab types."""
     save_path = tmp_path / "test.sav"
     create_test_save_file(save_path)
 
     import argparse
 
-    args = argparse.Namespace(
-        file=save_path, counts=False, json=False, allow_minor_mismatch=True
-    )
+    args = argparse.Namespace(file=save_path, counts=False, json=False, allow_minor_mismatch=True)
 
     result = cmd_prefabs(args)
 
@@ -164,16 +167,14 @@ def test_cmd_prefabs_list(tmp_path: Path, capsys):
     assert "Tile" in captured.out
 
 
-def test_cmd_prefabs_with_counts(tmp_path: Path, capsys):
+def test_cmd_prefabs_with_counts(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """Should show prefab counts."""
     save_path = tmp_path / "test.sav"
     create_test_save_file(save_path)
 
     import argparse
 
-    args = argparse.Namespace(
-        file=save_path, counts=True, json=False, allow_minor_mismatch=True
-    )
+    args = argparse.Namespace(file=save_path, counts=True, json=False, allow_minor_mismatch=True)
 
     result = cmd_prefabs(args)
 
@@ -185,16 +186,14 @@ def test_cmd_prefabs_with_counts(tmp_path: Path, capsys):
     assert "Tile: 500" in captured.out
 
 
-def test_cmd_prefabs_json_list(tmp_path: Path, capsys):
+def test_cmd_prefabs_json_list(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """Should output prefab list as JSON."""
     save_path = tmp_path / "test.sav"
     create_test_save_file(save_path)
 
     import argparse
 
-    args = argparse.Namespace(
-        file=save_path, counts=False, json=True, allow_minor_mismatch=True
-    )
+    args = argparse.Namespace(file=save_path, counts=False, json=True, allow_minor_mismatch=True)
 
     result = cmd_prefabs(args)
 
@@ -209,7 +208,7 @@ def test_cmd_prefabs_json_list(tmp_path: Path, capsys):
     assert "Door" in data
 
 
-def test_cmd_prefabs_json_counts(tmp_path: Path, capsys):
+def test_cmd_prefabs_json_counts(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """Should output prefab counts as JSON."""
     save_path = tmp_path / "test.sav"
     create_test_save_file(save_path)
@@ -231,7 +230,7 @@ def test_cmd_prefabs_json_counts(tmp_path: Path, capsys):
     assert data["Door"] == 20
 
 
-def test_main_no_command(capsys):
+def test_main_no_command(capsys: pytest.CaptureFixture[str]) -> None:
     """Should show help when no command given."""
     with patch.object(sys, "argv", ["oni-save-parser"]):
         result = main()
@@ -242,7 +241,7 @@ def test_main_no_command(capsys):
     assert "usage:" in captured.out
 
 
-def test_main_info_command(tmp_path: Path, capsys):
+def test_main_info_command(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """Should execute info command."""
     save_path = tmp_path / "test.sav"
     create_test_save_file(save_path)
@@ -256,7 +255,7 @@ def test_main_info_command(tmp_path: Path, capsys):
     assert "CLI Test Base" in captured.out
 
 
-def test_main_prefabs_command(tmp_path: Path, capsys):
+def test_main_prefabs_command(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """Should execute prefabs command."""
     save_path = tmp_path / "test.sav"
     create_test_save_file(save_path)
@@ -270,7 +269,7 @@ def test_main_prefabs_command(tmp_path: Path, capsys):
     assert "Minion" in captured.out
 
 
-def test_main_version(capsys):
+def test_main_version(capsys: pytest.CaptureFixture[str]) -> None:
     """Should show version."""
     with patch.object(sys, "argv", ["oni-save-parser", "--version"]):
         with pytest.raises(SystemExit) as exc_info:
@@ -282,7 +281,7 @@ def test_main_version(capsys):
     assert "1.0.0" in captured.out
 
 
-def test_main_help(capsys):
+def test_main_help(capsys: pytest.CaptureFixture[str]) -> None:
     """Should show help."""
     with patch.object(sys, "argv", ["oni-save-parser", "--help"]):
         with pytest.raises(SystemExit) as exc_info:
@@ -294,7 +293,7 @@ def test_main_help(capsys):
     assert "Parse and analyze Oxygen Not Included save files" in captured.out
 
 
-def test_cmd_prefabs_error_handling(tmp_path: Path, capsys):
+def test_cmd_prefabs_error_handling(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """Should handle errors gracefully."""
     import argparse
 

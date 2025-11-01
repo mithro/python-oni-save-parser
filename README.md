@@ -82,23 +82,26 @@ uv run python -m oni_save_parser prefabs MyBase.sav --counts
 
 Additional analysis tools in the `examples/` directory:
 
-#### Geyser Information Tool (`geyser_info.py`)
+#### Geyser Information
 
-Extract and display detailed geyser information including positions, emission rates, and dormancy cycles.
+Extract detailed geyser statistics including output rates, timing, storage requirements, and thermal loads:
 
 ```bash
-# List all geyser types in save
-uv run python examples/geyser_info.py MyBase.sav --list-prefabs
+# Detailed format with all planning information
+python examples/geyser_info.py save.sav
 
-# Show all geysers with details
-uv run python examples/geyser_info.py MyBase.sav
+# Compact one-line summaries
+python examples/geyser_info.py save.sav --format compact
 
-# Filter to specific geyser type
-uv run python examples/geyser_info.py MyBase.sav --prefab GeyserGeneric_steam
-
-# JSON output
-uv run python examples/geyser_info.py MyBase.sav --json
+# Skip vents, show only actual geysers
+python examples/geyser_info.py save.sav --skip-vents
 ```
+
+The detailed format includes:
+- Output rates (peak, active average, lifetime average)
+- Eruption and dormancy cycle timing
+- Storage requirements for idle and dormant periods
+- Thermal output calculations (requires ONI installation)
 
 #### Duplicant Analyzer (`duplicant_info.py`)
 

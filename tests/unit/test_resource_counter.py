@@ -172,13 +172,19 @@ def create_save_with_resources(path: Path) -> None:
         GameObjectGroup(prefab_name="StorageLocker", objects=[storage_locker]),
         GameObjectGroup(prefab_name="LiquidReservoir", objects=[liquid_reservoir]),
         GameObjectGroup(prefab_name="IronOre", objects=[iron_ore]),
-        GameObjectGroup(prefab_name="Tile", objects=[GameObject(
-            position=Vector3(x=0.0, y=0.0, z=0.0),
-            rotation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
-            scale=Vector3(x=1.0, y=1.0, z=1.0),
-            folder=0,
-            behaviors=[],
-        )] * 10),
+        GameObjectGroup(
+            prefab_name="Tile",
+            objects=[
+                GameObject(
+                    position=Vector3(x=0.0, y=0.0, z=0.0),
+                    rotation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
+                    scale=Vector3(x=1.0, y=1.0, z=1.0),
+                    folder=0,
+                    behaviors=[],
+                )
+            ]
+            * 10,
+        ),
     ]
 
     save_game = SaveGame(
@@ -195,7 +201,6 @@ def create_save_with_resources(path: Path) -> None:
 
     data = unparse_save_game(save_game)
     path.write_bytes(data)
-
 
 
 def test_create_save_with_resources_fixture(tmp_path: Path) -> None:
@@ -337,7 +342,14 @@ def test_resource_counter_element_filter_json(tmp_path: Path) -> None:
     create_save_with_resources(save_path)
 
     result = subprocess.run(
-        [sys.executable, "examples/resource_counter.py", str(save_path), "--element", "StorageLocker", "--json"],
+        [
+            sys.executable,
+            "examples/resource_counter.py",
+            str(save_path),
+            "--element",
+            "StorageLocker",
+            "--json",
+        ],
         capture_output=True,
         text=True,
     )
@@ -380,7 +392,14 @@ def test_resource_counter_min_mass_filter_json(tmp_path: Path) -> None:
     create_save_with_resources(save_path)
 
     result = subprocess.run(
-        [sys.executable, "examples/resource_counter.py", str(save_path), "--min-mass", "100", "--json"],
+        [
+            sys.executable,
+            "examples/resource_counter.py",
+            str(save_path),
+            "--min-mass",
+            "100",
+            "--json",
+        ],
         capture_output=True,
         text=True,
     )
@@ -401,8 +420,15 @@ def test_resource_counter_combined_filters(tmp_path: Path) -> None:
 
     # Filter by stored item "Water" (1000kg) with min mass 100kg
     result = subprocess.run(
-        [sys.executable, "examples/resource_counter.py", str(save_path),
-         "--element", "Water", "--min-mass", "100"],
+        [
+            sys.executable,
+            "examples/resource_counter.py",
+            str(save_path),
+            "--element",
+            "Water",
+            "--min-mass",
+            "100",
+        ],
         capture_output=True,
         text=True,
     )
@@ -411,7 +437,8 @@ def test_resource_counter_combined_filters(tmp_path: Path) -> None:
     # Should only find Water (1000kg in storage)
     assert "Water" in result.stdout
     # Should not find Iron (filtered by element) or IronOre (filtered by element)
-    assert "Iron" not in result.stdout or "Water" in result.stdout  # Allow Iron in "IronOre" but require Water
+    # Allow Iron in "IronOre" but require Water
+    assert "Iron" not in result.stdout or "Water" in result.stdout
     assert "IronOre" not in result.stdout
 
 
@@ -487,7 +514,7 @@ def create_empty_save(path: Path) -> None:
     settings = {"difficulty": 2}
 
     # No game objects
-    game_objects = []
+    game_objects: list[GameObjectGroup] = []
 
     save_game = SaveGame(
         header=header,

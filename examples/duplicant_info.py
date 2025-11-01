@@ -12,10 +12,10 @@ from typing import Any
 
 from oni_save_parser import get_game_objects_by_prefab, load_save_file
 from oni_save_parser.extractors import (
+    extract_attribute_levels,
     extract_duplicant_skills,
     extract_duplicant_traits,
     extract_health_status,
-    extract_attribute_levels,
 )
 from oni_save_parser.formatters import format_duplicant_compact
 
@@ -77,13 +77,9 @@ def main() -> int:
         "--format",
         choices=["compact", "detailed", "json"],
         default="compact",
-        help="Output format (default: compact)"
+        help="Output format (default: compact)",
     )
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Show internal behavior lists"
-    )
+    parser.add_argument("--debug", action="store_true", help="Show internal behavior lists")
 
     args = parser.parse_args()
 
@@ -125,6 +121,7 @@ def main() -> int:
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc()
         return 1
 

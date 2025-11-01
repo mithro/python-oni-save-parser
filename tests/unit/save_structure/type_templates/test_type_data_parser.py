@@ -1,6 +1,7 @@
 """Tests for type data parsing."""
 
 import pytest
+
 from oni_save_parser.parser.errors import CorruptionError
 from oni_save_parser.parser.parse import BinaryParser
 from oni_save_parser.parser.unparse import BinaryWriter
@@ -18,7 +19,7 @@ from oni_save_parser.save_structure.type_templates.types import (
 )
 
 
-def test_parse_boolean_true():
+def test_parse_boolean_true() -> None:
     """Should parse boolean true."""
     writer = BinaryWriter()
     writer.write_byte(1)
@@ -30,7 +31,7 @@ def test_parse_boolean_true():
     assert value is True
 
 
-def test_parse_boolean_false():
+def test_parse_boolean_false() -> None:
     """Should parse boolean false."""
     writer = BinaryWriter()
     writer.write_byte(0)
@@ -42,7 +43,7 @@ def test_parse_boolean_false():
     assert value is False
 
 
-def test_parse_int32():
+def test_parse_int32() -> None:
     """Should parse Int32."""
     writer = BinaryWriter()
     writer.write_int32(12345)
@@ -54,7 +55,7 @@ def test_parse_int32():
     assert value == 12345
 
 
-def test_parse_string():
+def test_parse_string() -> None:
     """Should parse String."""
     writer = BinaryWriter()
     writer.write_klei_string("Hello World")
@@ -66,7 +67,7 @@ def test_parse_string():
     assert value == "Hello World"
 
 
-def test_parse_string_null():
+def test_parse_string_null() -> None:
     """Should parse null String."""
     writer = BinaryWriter()
     writer.write_klei_string(None)
@@ -78,7 +79,7 @@ def test_parse_string_null():
     assert value is None
 
 
-def test_parse_vector2():
+def test_parse_vector2() -> None:
     """Should parse Vector2."""
     writer = BinaryWriter()
     writer.write_single(1.5)
@@ -91,7 +92,7 @@ def test_parse_vector2():
     assert value == {"x": pytest.approx(1.5), "y": pytest.approx(2.5)}
 
 
-def test_parse_vector2i():
+def test_parse_vector2i() -> None:
     """Should parse Vector2I."""
     writer = BinaryWriter()
     writer.write_int32(10)
@@ -104,7 +105,7 @@ def test_parse_vector2i():
     assert value == {"x": 10, "y": 20}
 
 
-def test_parse_vector3():
+def test_parse_vector3() -> None:
     """Should parse Vector3."""
     writer = BinaryWriter()
     writer.write_single(1.5)
@@ -118,7 +119,7 @@ def test_parse_vector3():
     assert value == {"x": pytest.approx(1.5), "y": pytest.approx(2.5), "z": pytest.approx(3.5)}
 
 
-def test_parse_colour():
+def test_parse_colour() -> None:
     """Should parse Colour."""
     writer = BinaryWriter()
     writer.write_byte(255)  # r
@@ -136,7 +137,7 @@ def test_parse_colour():
     assert value["a"] == pytest.approx(1.0, abs=0.01)
 
 
-def test_parse_array_int32():
+def test_parse_array_int32() -> None:
     """Should parse Array<Int32>."""
     writer = BinaryWriter()
     writer.write_int32(12)  # data-length (3 ints * 4 bytes)
@@ -153,7 +154,7 @@ def test_parse_array_int32():
     assert value == [10, 20, 30]
 
 
-def test_parse_array_null():
+def test_parse_array_null() -> None:
     """Should parse null Array."""
     writer = BinaryWriter()
     writer.write_int32(4)  # data-length
@@ -167,7 +168,7 @@ def test_parse_array_null():
     assert value is None
 
 
-def test_parse_list_string():
+def test_parse_list_string() -> None:
     """Should parse List<String>."""
     writer = BinaryWriter()
     # Data length calculation:
@@ -187,7 +188,7 @@ def test_parse_list_string():
     assert value == ["Hello", "World"]
 
 
-def test_parse_dictionary_string_int32():
+def test_parse_dictionary_string_int32() -> None:
     """Should parse Dictionary<String, Int32>."""
     writer = BinaryWriter()
     # Values first, then keys
@@ -210,7 +211,7 @@ def test_parse_dictionary_string_int32():
     assert value == [("a", 100), ("b", 200)]
 
 
-def test_parse_pair():
+def test_parse_pair() -> None:
     """Should parse Pair<String, Int32>."""
     writer = BinaryWriter()
     # Data: string (4+5) + int32 (4) = 13
@@ -227,7 +228,7 @@ def test_parse_pair():
     assert value == {"key": "Hello", "value": 42}
 
 
-def test_parse_user_defined():
+def test_parse_user_defined() -> None:
     """Should parse UserDefined type."""
     # Create a simple template
     field1 = TypeTemplateMember(name="field1", type=TypeInfo(info=SerializationTypeCode.Int32))
@@ -248,7 +249,7 @@ def test_parse_user_defined():
     assert value == {"field1": 123, "field2": ""}
 
 
-def test_parse_by_template():
+def test_parse_by_template() -> None:
     """Should parse object using template."""
     field1 = TypeTemplateMember(name="x", type=TypeInfo(info=SerializationTypeCode.Int32))
     field2 = TypeTemplateMember(name="y", type=TypeInfo(info=SerializationTypeCode.String))
@@ -265,7 +266,7 @@ def test_parse_by_template():
     assert obj == {"x": 10, "y": "test"}
 
 
-def test_unparse_int32():
+def test_unparse_int32() -> None:
     """Should write Int32."""
     writer = BinaryWriter()
     type_info = TypeInfo(info=SerializationTypeCode.Int32)
@@ -275,7 +276,7 @@ def test_unparse_int32():
     assert parser.read_int32() == 12345
 
 
-def test_unparse_vector2():
+def test_unparse_vector2() -> None:
     """Should write Vector2."""
     writer = BinaryWriter()
     type_info = TypeInfo(info=SerializationTypeCode.Vector2)
@@ -286,7 +287,7 @@ def test_unparse_vector2():
     assert parser.read_single() == pytest.approx(2.5)
 
 
-def test_unparse_array_int32():
+def test_unparse_array_int32() -> None:
     """Should write Array<Int32>."""
     writer = BinaryWriter()
     element_type = TypeInfo(info=SerializationTypeCode.Int32)
@@ -301,7 +302,7 @@ def test_unparse_array_int32():
     assert parser.read_int32() == 30
 
 
-def test_round_trip_complex_structure():
+def test_round_trip_complex_structure() -> None:
     """Should round-trip complex nested structure."""
     # Create templates
     inner_field = TypeTemplateMember(name="value", type=TypeInfo(info=SerializationTypeCode.Int32))
@@ -327,7 +328,7 @@ def test_round_trip_complex_structure():
     assert parsed == original
 
 
-def test_template_not_found():
+def test_template_not_found() -> None:
     """Should raise error when template not found."""
     writer = BinaryWriter()
     parser = BinaryParser(writer.data)
@@ -336,7 +337,7 @@ def test_template_not_found():
         parse_by_template(parser, [], "NonExistent")
 
 
-def test_parse_sbyte():
+def test_parse_sbyte() -> None:
     """Should parse SByte."""
     writer = BinaryWriter()
     writer.write_sbyte(-42)
@@ -348,7 +349,7 @@ def test_parse_sbyte():
     assert value == -42
 
 
-def test_parse_int16():
+def test_parse_int16() -> None:
     """Should parse Int16."""
     writer = BinaryWriter()
     writer.write_int16(-1000)
@@ -360,7 +361,7 @@ def test_parse_int16():
     assert value == -1000
 
 
-def test_parse_uint16():
+def test_parse_uint16() -> None:
     """Should parse UInt16."""
     writer = BinaryWriter()
     writer.write_uint16(50000)
@@ -372,7 +373,7 @@ def test_parse_uint16():
     assert value == 50000
 
 
-def test_parse_uint32():
+def test_parse_uint32() -> None:
     """Should parse UInt32."""
     writer = BinaryWriter()
     writer.write_uint32(3000000000)
@@ -384,7 +385,7 @@ def test_parse_uint32():
     assert value == 3000000000
 
 
-def test_parse_int64():
+def test_parse_int64() -> None:
     """Should parse Int64."""
     writer = BinaryWriter()
     writer.write_int64(-9000000000000)
@@ -396,7 +397,7 @@ def test_parse_int64():
     assert value == -9000000000000
 
 
-def test_parse_uint64():
+def test_parse_uint64() -> None:
     """Should parse UInt64."""
     writer = BinaryWriter()
     writer.write_uint64(18000000000000000000)
@@ -408,7 +409,7 @@ def test_parse_uint64():
     assert value == 18000000000000000000
 
 
-def test_parse_single():
+def test_parse_single() -> None:
     """Should parse Single (float)."""
     writer = BinaryWriter()
     writer.write_single(3.14159)
@@ -420,7 +421,7 @@ def test_parse_single():
     assert value == pytest.approx(3.14159, rel=1e-5)
 
 
-def test_parse_double():
+def test_parse_double() -> None:
     """Should parse Double."""
     writer = BinaryWriter()
     writer.write_double(2.718281828459045)
@@ -432,7 +433,7 @@ def test_parse_double():
     assert value == pytest.approx(2.718281828459045)
 
 
-def test_parse_enumeration():
+def test_parse_enumeration() -> None:
     """Should parse Enumeration."""
     writer = BinaryWriter()
     writer.write_int32(42)
@@ -444,7 +445,7 @@ def test_parse_enumeration():
     assert value == 42
 
 
-def test_parse_byte():
+def test_parse_byte() -> None:
     """Should parse Byte."""
     writer = BinaryWriter()
     writer.write_byte(255)
@@ -456,7 +457,7 @@ def test_parse_byte():
     assert value == 255
 
 
-def test_parse_array_bytes():
+def test_parse_array_bytes() -> None:
     """Should parse byte array as bytes."""
     writer = BinaryWriter()
     writer.write_int32(3)  # data-length
@@ -471,7 +472,7 @@ def test_parse_array_bytes():
     assert value == b"\x01\x02\x03"
 
 
-def test_parse_dictionary_null():
+def test_parse_dictionary_null() -> None:
     """Should parse null Dictionary."""
     writer = BinaryWriter()
     writer.write_int32(4)  # data-length
@@ -486,7 +487,7 @@ def test_parse_dictionary_null():
     assert value is None
 
 
-def test_parse_pair_null():
+def test_parse_pair_null() -> None:
     """Should parse null Pair."""
     writer = BinaryWriter()
     writer.write_int32(-1)  # null marker
@@ -500,7 +501,7 @@ def test_parse_pair_null():
     assert value is None
 
 
-def test_parse_user_defined_null():
+def test_parse_user_defined_null() -> None:
     """Should parse null UserDefined."""
     writer = BinaryWriter()
     writer.write_int32(-1)  # null marker
@@ -512,7 +513,7 @@ def test_parse_user_defined_null():
     assert value is None
 
 
-def test_unparse_all_primitives():
+def test_unparse_all_primitives() -> None:
     """Should write all primitive types."""
     writer = BinaryWriter()
 
@@ -535,7 +536,7 @@ def test_unparse_all_primitives():
     assert len(writer.data) > 0
 
 
-def test_unparse_colour():
+def test_unparse_colour() -> None:
     """Should write Colour."""
     writer = BinaryWriter()
     type_info = TypeInfo(info=SerializationTypeCode.Colour)
@@ -548,7 +549,7 @@ def test_unparse_colour():
     assert parser.read_byte() == 191  # a (rounded)
 
 
-def test_unparse_dictionary():
+def test_unparse_dictionary() -> None:
     """Should write Dictionary."""
     writer = BinaryWriter()
     key_type = TypeInfo(info=SerializationTypeCode.String)
@@ -558,12 +559,12 @@ def test_unparse_dictionary():
 
     # Verify format
     parser = BinaryParser(writer.data)
-    data_length = parser.read_int32()
+    _ = parser.read_int32()  # data_length (not used in assertion)
     count = parser.read_int32()
     assert count == 2
 
 
-def test_unparse_pair():
+def test_unparse_pair() -> None:
     """Should write Pair."""
     writer = BinaryWriter()
     key_type = TypeInfo(info=SerializationTypeCode.String)
@@ -577,7 +578,7 @@ def test_unparse_pair():
     assert data_length > 0
 
 
-def test_unparse_user_defined_null():
+def test_unparse_user_defined_null() -> None:
     """Should write null UserDefined."""
     writer = BinaryWriter()
     type_info = TypeInfo(info=SerializationTypeCode.UserDefined, template_name="TestClass")

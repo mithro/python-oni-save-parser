@@ -1,7 +1,31 @@
 """Extract and display geyser information from ONI save files.
 
 This script loads a save file and prints detailed information about all geysers,
-including their type, state, emission rates, and dormancy cycles.
+including:
+- Output rates (peak, active average, lifetime average)
+- Eruption and dormancy cycle timing
+- Storage requirements for idle and dormant periods
+- Thermal output (if ONI element data available)
+
+Supports two output formats:
+- Compact: One-line summary per geyser
+- Detailed: Full breakdown with all planning information
+
+Usage:
+    python geyser_info.py SAVE_PATH [--format compact|detailed] [--skip-vents] [--debug]
+
+Examples:
+    # Detailed format (default)
+    python geyser_info.py save.sav
+
+    # Compact one-line summaries
+    python geyser_info.py save.sav --format compact
+
+    # Skip vents, show only geysers
+    python geyser_info.py save.sav --skip-vents
+
+    # Show raw debug data
+    python geyser_info.py save.sav --debug
 """
 
 import argparse
@@ -9,8 +33,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from oni_save_parser import load_save_file, get_game_objects_by_prefab, list_prefab_types
+from oni_save_parser import get_game_objects_by_prefab, list_prefab_types, load_save_file
 from oni_save_parser.element_loader import get_global_element_loader
+from oni_save_parser.extractors import extract_geyser_stats, get_geyser_config_from_prefab
+from oni_save_parser.formatters import format_geyser_compact, format_geyser_detailed
 
 
 def find_geyser_prefabs(save_file_path: Path) -> list[str]:
@@ -69,7 +95,9 @@ def extract_geyser_info(geyser_object: Any) -> dict[str, Any]:
     return info
 
 
-def format_geyser_output(prefab_name: str, index: int, info: dict[str, Any], debug: bool = False) -> str:
+def format_geyser_output(
+    prefab_name: str, index: int, info: dict[str, Any], debug: bool = False
+) -> str:
     """Format geyser information for display.
 
     Args:
@@ -110,9 +138,7 @@ def format_geyser_output(prefab_name: str, index: int, info: dict[str, Any], deb
 
 def main() -> int:
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Extract geyser information from ONI save files"
-    )
+    parser = argparse.ArgumentParser(description="Extract geyser information from ONI save files")
     parser.add_argument("save_file", type=Path, help="Path to .sav file")
     parser.add_argument(
         "--list-prefabs",
@@ -139,13 +165,20 @@ def main() -> int:
         action="store_true",
         help="Only show actual geysers, not vents",
     )
+    parser.add_argument(
+        "--format",
+        choices=["compact", "detailed"],
+        default="detailed",
+        help="Output format (default: detailed)",
+    )
 
     args = parser.parse_args()
 
     # Initialize element loader
     element_loader = get_global_element_loader()
     if element_loader is None and not args.debug:
-        print("Warning: Could not find ONI element data. Thermal calculations unavailable.", file=sys.stderr)
+        msg = "Warning: Could not find ONI element data. Thermal calculations unavailable."
+        print(msg, file=sys.stderr)
 
     if not args.save_file.exists():
         print(f"Error: File not found: {args.save_file}", file=sys.stderr)
@@ -189,23 +222,125 @@ def main() -> int:
 
             print(json.dumps(all_geysers, indent=2, default=str))
         else:
-            # Text output
+            # Text output - process each geyser prefab type
             total_count = 0
-            for prefab in sorted(geyser_prefabs):
-                objects = get_game_objects_by_prefab(save, prefab)
-                if not objects:
-                    continue
+            for prefab_name in sorted(geyser_prefabs):
+                geysers = get_game_objects_by_prefab(save, prefab_name)
 
                 print(f"\n{'=' * 60}")
-                print(f"{prefab}: {len(objects)} found")
-                print('=' * 60)
+                print(f"{prefab_name}: {len(geysers)} found")
+                print("=" * 60)
 
-                for idx, obj in enumerate(objects):
-                    info = extract_geyser_info(obj)
-                    print(format_geyser_output(prefab, idx, info, debug=args.debug))
+                total_count += len(geysers)
 
-                total_count += len(objects)
+                for i, geyser in enumerate(geysers):
+                    position = (geyser.position.x, geyser.position.y)
 
+                    # Find geyser configuration and element info
+                    config = None
+                    element_id = None
+                    temperature_k = None
+
+                    for behavior in geyser.behaviors:
+                        if behavior.name == "Geyser" and behavior.template_data:
+                            config_dict = behavior.template_data.get("configuration", {})
+                            if isinstance(config_dict, dict):
+                                config = config_dict
+
+                        if behavior.name == "ElementEmitter" and behavior.template_data:
+                            element_id = behavior.template_data.get("emittedElement")
+
+                        if behavior.name == "Temperature" and behavior.template_data:
+                            temperature_k = behavior.template_data.get("value")
+
+                    # Skip if no geyser configuration
+                    if not config:
+                        if args.debug:
+                            print(f"\n=== {prefab_name} #{i + 1} ===")
+                            print(f"Position: {position}")
+                            print("Status: Not analyzed or no Geyser behavior")
+                        continue
+
+                    # Check if geyser has been analyzed (has actual data vs defaults)
+                    analyzed = element_id is not None and temperature_k is not None
+
+                    # Use prefab config as fallback if not analyzed
+                    if not analyzed:
+                        fallback_element, fallback_temp = get_geyser_config_from_prefab(prefab_name)
+                        if fallback_element:
+                            element_id = fallback_element
+                            temperature_k = fallback_temp
+
+                    # Debug element extraction
+                    if args.debug:
+                        print(f"\nDEBUG - Element extraction for {prefab_name} #{i + 1}:")
+                        print(f"  analyzed: {analyzed}")
+                        print(f"  element_id: {element_id}")
+                        print(f"  temperature_k: {temperature_k}")
+                        print(f"  element_loader available: {element_loader is not None}")
+
+                    # Extract statistics
+                    element_data = None
+                    if element_loader and element_id:
+                        element_data = element_loader.get_element(element_id)
+                        if args.debug and element_data is None:
+                            print(f"  WARNING: Could not find element data for '{element_id}'")
+
+                    stats = extract_geyser_stats(config, element_data, temperature_k)
+
+                    # Get element info for formatting
+                    element_name = element_id or "Unknown"
+                    element_state = "Gas"
+                    element_max_mass = None
+                    temperature_c = (temperature_k - 273.15) if temperature_k else 0
+
+                    if element_data:
+                        element_state = element_data.get("state", "Gas")
+                        element_max_mass = element_data.get("max_mass")
+
+                    # Format output
+                    if args.format == "compact":
+                        output = format_geyser_compact(
+                            prefab_name=prefab_name,
+                            index=i,
+                            position=position,
+                            element=element_name,
+                            temperature_c=temperature_c,
+                            stats=stats,
+                        )
+                        print(output)
+                    else:  # detailed
+                        # Extract thermal stats if available
+                        thermal_stats = {}
+                        if "peak_thermal_power_kdtu_s" in stats:
+                            thermal_stats = {
+                                "peak_thermal_power_kdtu_s": stats["peak_thermal_power_kdtu_s"],
+                                "average_thermal_power_kdtu_s": stats[
+                                    "average_thermal_power_kdtu_s"
+                                ],
+                                "thermal_per_eruption_kdtu": stats["thermal_per_eruption_kdtu"],
+                            }
+
+                        output = format_geyser_detailed(
+                            prefab_name=prefab_name,
+                            index=i,
+                            position=position,
+                            element=element_name,
+                            element_state=element_state,
+                            temperature_c=temperature_c,
+                            stats=stats,
+                            thermal_stats=thermal_stats if thermal_stats else None,
+                            element_max_mass=element_max_mass,
+                            analyzed=analyzed,
+                        )
+                        print(output)
+
+                    # Show debug info if requested
+                    if args.debug:
+                        print("\nDEBUG - Raw Configuration:")
+                        print(f"  {config}")
+
+            # Print total count
             print(f"\n{'=' * 60}")
             print(f"Total geysers: {total_count}")
 

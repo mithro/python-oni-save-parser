@@ -6,12 +6,11 @@ from oni_save_parser.parser.parse import BinaryParser
 from oni_save_parser.parser.unparse import BinaryWriter
 from oni_save_parser.save_structure.game_objects.behavior_parser import (
     parse_behavior,
-    unparse_behavior,
 )
 from oni_save_parser.save_structure.type_templates import (
+    TypeInfo,
     TypeTemplate,
     TypeTemplateMember,
-    TypeInfo,
 )
 
 

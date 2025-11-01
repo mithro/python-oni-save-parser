@@ -1,6 +1,7 @@
 """Tests for TypeTemplate parsing."""
 
 import pytest
+
 from oni_save_parser.parser.errors import CorruptionError
 from oni_save_parser.parser.parse import BinaryParser
 from oni_save_parser.parser.unparse import BinaryWriter
@@ -18,40 +19,40 @@ from oni_save_parser.save_structure.type_templates.types import (
 )
 
 
-def test_validate_dotnet_identifier_name_valid():
+def test_validate_dotnet_identifier_name_valid() -> None:
     """Should accept valid identifier names."""
     assert validate_dotnet_identifier_name("TestClass") == "TestClass"
     assert validate_dotnet_identifier_name("_field") == "_field"
     assert validate_dotnet_identifier_name("prop123") == "prop123"
 
 
-def test_validate_dotnet_identifier_name_null():
+def test_validate_dotnet_identifier_name_null() -> None:
     """Should reject null/empty names."""
     with pytest.raises(CorruptionError, match="must not be null or zero length"):
         validate_dotnet_identifier_name(None)
 
 
-def test_validate_dotnet_identifier_name_empty():
+def test_validate_dotnet_identifier_name_empty() -> None:
     """Should reject empty names."""
     with pytest.raises(CorruptionError, match="must not be null or zero length"):
         validate_dotnet_identifier_name("")
 
 
-def test_validate_dotnet_identifier_name_too_long():
+def test_validate_dotnet_identifier_name_too_long() -> None:
     """Should reject names >= 512 chars."""
     long_name = "a" * 512
     with pytest.raises(CorruptionError, match="exceeded 511 characters"):
         validate_dotnet_identifier_name(long_name)
 
 
-def test_validate_dotnet_identifier_name_non_printable():
+def test_validate_dotnet_identifier_name_non_printable() -> None:
     """Should reject names with non-printable characters."""
     invalid_name = "Test\x00Class"
     with pytest.raises(CorruptionError, match="non-printable characters"):
         validate_dotnet_identifier_name(invalid_name)
 
 
-def test_parse_simple_template():
+def test_parse_simple_template() -> None:
     """Should parse template with fields and properties."""
     # Template: name="TestClass", 2 fields, 1 property
     writer = BinaryWriter()
@@ -88,7 +89,7 @@ def test_parse_simple_template():
     assert template.properties[0].type.info == 3
 
 
-def test_parse_template_no_members():
+def test_parse_template_no_members() -> None:
     """Should parse template with no fields or properties."""
     writer = BinaryWriter()
     writer.write_klei_string("EmptyClass")
@@ -103,7 +104,7 @@ def test_parse_template_no_members():
     assert len(template.properties) == 0
 
 
-def test_parse_templates():
+def test_parse_templates() -> None:
     """Should parse multiple templates."""
     writer = BinaryWriter()
     writer.write_int32(2)  # template count
@@ -132,15 +133,13 @@ def test_parse_templates():
     assert len(templates[1].properties) == 1
 
 
-def test_unparse_simple_template():
+def test_unparse_simple_template() -> None:
     """Should write template with fields and properties."""
     field1 = TypeTemplateMember(name="field1", type=TypeInfo(info=6))
     field2 = TypeTemplateMember(name="field2", type=TypeInfo(info=12))
     prop1 = TypeTemplateMember(name="prop1", type=TypeInfo(info=3))
 
-    template = TypeTemplate(
-        name="TestClass", fields=[field1, field2], properties=[prop1]
-    )
+    template = TypeTemplate(name="TestClass", fields=[field1, field2], properties=[prop1])
 
     writer = BinaryWriter()
     unparse_template(writer, template)
@@ -154,7 +153,7 @@ def test_unparse_simple_template():
     assert len(parsed.properties) == 1
 
 
-def test_unparse_templates():
+def test_unparse_templates() -> None:
     """Should write multiple templates."""
     template1 = TypeTemplate(
         name="Class1",
@@ -181,7 +180,7 @@ def test_unparse_templates():
     assert parsed[1].name == "Class2"
 
 
-def test_round_trip_complex_template():
+def test_round_trip_complex_template() -> None:
     """Should round-trip template with complex types."""
     # Create a template with array and generic types
     array_field = TypeTemplateMember(
@@ -207,9 +206,11 @@ def test_round_trip_complex_template():
     assert len(parsed.fields) == 1
     assert parsed.fields[0].name == "arrayField"
     assert parsed.fields[0].type.info == 17
+    assert parsed.fields[0].type.sub_types is not None
     assert parsed.fields[0].type.sub_types[0].info == 6
 
     assert len(parsed.properties) == 1
     assert parsed.properties[0].name == "listProp"
     assert parsed.properties[0].type.info == 148
+    assert parsed.properties[0].type.sub_types is not None
     assert parsed.properties[0].type.sub_types[0].info == 12

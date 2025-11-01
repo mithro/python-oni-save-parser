@@ -28,7 +28,12 @@ def get_default_save_directory() -> Path:
     return Path.home() / ".config/unity3d/Klei/Oxygen Not Included/cloud_save_files"
 
 
-def scan_save_files(directory: Path, recursive: bool = True, stream_output: bool = False, limit: int | None = None) -> list[dict[str, Any]]:
+def scan_save_files(
+    directory: Path,
+    recursive: bool = True,
+    stream_output: bool = False,
+    limit: int | None = None,
+) -> list[dict[str, Any]]:
     """Scan directory for save files and extract colony info.
 
     Args:
@@ -76,7 +81,10 @@ def scan_save_files(directory: Path, recursive: bool = True, stream_output: bool
     # Print header if streaming
     if stream_output:
         print(f"Found {total_files} save files to scan...\n")
-        print(f"{'Colony Name':<30} {'Cycle':>6} {'Dups':>5} {'Time':>6} {'Progress':<20} {'Path':<25} {'File':<25}")
+        print(
+            f"{'Colony Name':<30} {'Cycle':>6} {'Dups':>5} {'Time':>6} "
+            f"{'Progress':<20} {'Path':<25} {'File':<25}"
+        )
         print("-" * 140)
         sys.stdout.flush()
 
@@ -117,11 +125,14 @@ def scan_save_files(directory: Path, recursive: bool = True, stream_output: bool
 
             # Print immediately if streaming
             if stream_output:
-                path_display = colony_info['path'] if colony_info['path'] else "."
+                path_display = colony_info["path"] if colony_info["path"] else "."
                 # Fixed-width progress string: "   9/2804,  8/48" -> "1802/2804, 40/48"
                 colony_current = current_colony_counts[path_str]
                 colony_total = colony_file_counts[path_str]
-                progress_str = f"{idx:>{total_width}}/{total_files}, {colony_current:>{colony_width}}/{colony_total}"
+                progress_str = (
+                    f"{idx:>{total_width}}/{total_files}, "
+                    f"{colony_current:>{colony_width}}/{colony_total}"
+                )
 
                 print(
                     f"{colony_info['colony_name']:<30} "
@@ -154,12 +165,14 @@ def print_table(colonies: list[dict[str, Any]]) -> None:
         return
 
     # Print header
-    print(f"{'Colony Name':<30} {'Cycle':>6} {'Dups':>5} {'Modified':<19} {'Path':<30} {'File':<30}")
+    print(
+        f"{'Colony Name':<30} {'Cycle':>6} {'Dups':>5} {'Modified':<19} {'Path':<30} {'File':<30}"
+    )
     print("-" * 130)
 
     # Print each colony
     for colony in colonies:
-        path_display = colony['path'] if colony['path'] else "."
+        path_display = colony["path"] if colony["path"] else "."
         print(
             f"{colony['colony_name']:<30} "
             f"{colony['cycle']:>6} "
@@ -215,10 +228,14 @@ def main() -> int:
 
     # Use streaming output for text mode, buffered for JSON
     if args.json:
-        colonies = scan_save_files(save_dir, recursive=recursive, stream_output=False, limit=args.limit)
+        colonies = scan_save_files(
+            save_dir, recursive=recursive, stream_output=False, limit=args.limit
+        )
         print(json.dumps(colonies, indent=2))
     else:
-        colonies = scan_save_files(save_dir, recursive=recursive, stream_output=True, limit=args.limit)
+        colonies = scan_save_files(
+            save_dir, recursive=recursive, stream_output=True, limit=args.limit
+        )
         print(f"\nTotal: {len(colonies)} save files")
 
     return 0

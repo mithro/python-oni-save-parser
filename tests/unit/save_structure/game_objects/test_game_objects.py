@@ -1,6 +1,7 @@
 """Tests for game objects parsing."""
 
 import pytest
+
 from oni_save_parser.parser.errors import CorruptionError
 from oni_save_parser.parser.parse import BinaryParser
 from oni_save_parser.parser.unparse import BinaryWriter
@@ -13,7 +14,10 @@ from oni_save_parser.save_structure.game_objects import (
     parse_game_objects,
     unparse_game_objects,
 )
-from oni_save_parser.save_structure.game_objects.behavior_parser import parse_behavior, unparse_behavior
+from oni_save_parser.save_structure.game_objects.behavior_parser import (
+    parse_behavior,
+    unparse_behavior,
+)
 from oni_save_parser.save_structure.game_objects.group_parser import (
     parse_game_object_group,
     unparse_game_object_group,
@@ -54,7 +58,7 @@ def create_test_templates() -> list[TypeTemplate]:
     return [minion_template, health_template]
 
 
-def test_parse_vector3():
+def test_parse_vector3() -> None:
     """Should parse Vector3."""
     writer = BinaryWriter()
     writer.write_single(1.0)
@@ -69,7 +73,7 @@ def test_parse_vector3():
     assert vector.z == 3.0
 
 
-def test_parse_quaternion():
+def test_parse_quaternion() -> None:
     """Should parse Quaternion."""
     writer = BinaryWriter()
     writer.write_single(0.0)
@@ -86,7 +90,7 @@ def test_parse_quaternion():
     assert quat.w == 1.0
 
 
-def test_round_trip_vector3():
+def test_round_trip_vector3() -> None:
     """Should round-trip Vector3."""
     original = Vector3(x=1.5, y=2.5, z=3.5)
 
@@ -101,7 +105,7 @@ def test_round_trip_vector3():
     assert parsed.z == original.z
 
 
-def test_round_trip_quaternion():
+def test_round_trip_quaternion() -> None:
     """Should round-trip Quaternion."""
     original = Quaternion(x=0.1, y=0.2, z=0.3, w=0.4)
 
@@ -118,7 +122,7 @@ def test_round_trip_quaternion():
     assert parsed.w == pytest.approx(original.w, rel=1e-6)
 
 
-def test_parse_behavior_simple():
+def test_parse_behavior_simple() -> None:
     """Should parse simple behavior with template data."""
     templates = create_test_templates()
 
@@ -144,7 +148,7 @@ def test_parse_behavior_simple():
     assert behavior.extra_raw == b""
 
 
-def test_parse_behavior_with_extra_raw():
+def test_parse_behavior_with_extra_raw() -> None:
     """Should parse behavior with extra raw data."""
     templates = create_test_templates()
 
@@ -169,7 +173,7 @@ def test_parse_behavior_with_extra_raw():
     assert behavior.extra_raw == b"\x01\x02\x03"
 
 
-def test_parse_behavior_template_not_found():
+def test_parse_behavior_template_not_found() -> None:
     """Should handle behavior with template not found."""
     templates = create_test_templates()
 
@@ -186,7 +190,7 @@ def test_parse_behavior_template_not_found():
     assert len(behavior.extra_raw) == 10
 
 
-def test_round_trip_behavior():
+def test_round_trip_behavior() -> None:
     """Should round-trip behavior."""
     templates = create_test_templates()
     original = GameObjectBehavior(
@@ -207,7 +211,7 @@ def test_round_trip_behavior():
     assert parsed.extra_raw == original.extra_raw
 
 
-def test_parse_game_object():
+def test_parse_game_object() -> None:
     """Should parse game object."""
     templates = create_test_templates()
 
@@ -242,7 +246,7 @@ def test_parse_game_object():
     assert len(obj.behaviors) == 0
 
 
-def test_parse_game_object_with_behaviors():
+def test_parse_game_object_with_behaviors() -> None:
     """Should parse game object with behaviors."""
     templates = create_test_templates()
 
@@ -283,7 +287,7 @@ def test_parse_game_object_with_behaviors():
     assert obj.behaviors[1].name == "Health"
 
 
-def test_round_trip_game_object():
+def test_round_trip_game_object() -> None:
     """Should round-trip game object."""
     templates = create_test_templates()
     original = GameObject(
@@ -293,7 +297,10 @@ def test_round_trip_game_object():
         folder=5,
         behaviors=[
             GameObjectBehavior(
-                name="MinionIdentity", template_data={"name": "Meep", "age": 50}, extra_data=None, extra_raw=b""
+                name="MinionIdentity",
+                template_data={"name": "Meep", "age": 50},
+                extra_data=None,
+                extra_raw=b"",
             )
         ],
     )
@@ -309,7 +316,7 @@ def test_round_trip_game_object():
     assert len(parsed.behaviors) == len(original.behaviors)
 
 
-def test_parse_game_object_group():
+def test_parse_game_object_group() -> None:
     """Should parse game object group."""
     templates = create_test_templates()
 
@@ -339,7 +346,7 @@ def test_parse_game_object_group():
     assert len(group.objects) == 1
 
 
-def test_parse_game_object_group_multiple_objects():
+def test_parse_game_object_group_multiple_objects() -> None:
     """Should parse game object group with multiple objects."""
     templates = create_test_templates()
 
@@ -369,7 +376,7 @@ def test_parse_game_object_group_multiple_objects():
     assert len(group.objects) == 3
 
 
-def test_round_trip_game_object_group():
+def test_round_trip_game_object_group() -> None:
     """Should round-trip game object group."""
     templates = create_test_templates()
     original = GameObjectGroup(
@@ -395,7 +402,7 @@ def test_round_trip_game_object_group():
     assert len(parsed.objects) == len(original.objects)
 
 
-def test_parse_game_objects():
+def test_parse_game_objects() -> None:
     """Should parse game objects (top level)."""
     templates = create_test_templates()
 
@@ -440,7 +447,7 @@ def test_parse_game_objects():
     assert groups[1].prefab_name == "Tile"
 
 
-def test_round_trip_game_objects():
+def test_round_trip_game_objects() -> None:
     """Should round-trip game objects."""
     templates = create_test_templates()
     original = [
@@ -468,7 +475,7 @@ def test_round_trip_game_objects():
     assert parsed[0].prefab_name == original[0].prefab_name
 
 
-def test_parse_game_object_invalid_behavior_count():
+def test_parse_game_object_invalid_behavior_count() -> None:
     """Should raise error on invalid behavior count."""
     templates = create_test_templates()
 
@@ -488,7 +495,7 @@ def test_parse_game_object_invalid_behavior_count():
         parse_game_object(parser, templates)
 
 
-def test_parse_game_object_group_invalid_instance_count():
+def test_parse_game_object_group_invalid_instance_count() -> None:
     """Should raise error on invalid instance count."""
     templates = create_test_templates()
 
@@ -502,7 +509,7 @@ def test_parse_game_object_group_invalid_instance_count():
         parse_game_object_group(parser, templates)
 
 
-def test_parse_game_objects_invalid_group_count():
+def test_parse_game_objects_invalid_group_count() -> None:
     """Should raise error on invalid group count."""
     templates = create_test_templates()
 

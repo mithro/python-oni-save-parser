@@ -3,10 +3,15 @@
 from oni_save_parser.parser.errors import CorruptionError
 from oni_save_parser.parser.parse import BinaryParser
 from oni_save_parser.parser.unparse import BinaryWriter
-from oni_save_parser.save_structure.game_objects.object_parser import parse_game_object, unparse_game_object
+from oni_save_parser.save_structure.game_objects.object_parser import (
+    parse_game_object,
+    unparse_game_object,
+)
 from oni_save_parser.save_structure.game_objects.types import GameObjectGroup
 from oni_save_parser.save_structure.type_templates import TypeTemplate
-from oni_save_parser.save_structure.type_templates.template_parser import validate_dotnet_identifier_name
+from oni_save_parser.save_structure.type_templates.template_parser import (
+    validate_dotnet_identifier_name,
+)
 
 
 def parse_game_object_group(parser: BinaryParser, templates: list[TypeTemplate]) -> GameObjectGroup:
@@ -33,9 +38,8 @@ def parse_game_object_group(parser: BinaryParser, templates: list[TypeTemplate])
     # Read instance count
     instance_count = parser.read_int32()
     if instance_count < 0:
-        raise CorruptionError(
-            f"Invalid instance count for prefab {prefab_name}: {instance_count}", offset=parser.offset
-        )
+        msg = f"Invalid instance count for prefab {prefab_name}: {instance_count}"
+        raise CorruptionError(msg, offset=parser.offset)
 
     # Read data length (for validation)
     data_length = parser.read_int32()
