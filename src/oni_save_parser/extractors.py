@@ -255,7 +255,8 @@ def extract_geyser_stats(
         }
     """
     # Extract raw values
-    emission_rate = config.get("scaledRate", 0.0)
+    # scaledRate is in g/s in save files, convert to kg/s
+    emission_rate = config.get("scaledRate", 0.0) / 1000.0
     iteration_length = config.get("scaledIterationLength", 0.0)
     iteration_percent = config.get("scaledIterationPercent", 0.0)
     year_length = config.get("scaledYearLength", 0.0)

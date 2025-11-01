@@ -154,7 +154,7 @@ def test_extract_geyser_stats_calculates_rates() -> None:
     """Test geyser statistics extraction."""
     # Mock geyser configuration data
     config = {
-        "scaledRate": 5.4,  # kg/s when erupting
+        "scaledRate": 5400.0,  # g/s when erupting (5.4 kg/s after conversion)
         "scaledIterationLength": 401.1,  # total eruption cycle (s)
         "scaledIterationPercent": 0.582,  # fraction erupting
         "scaledYearLength": 81800.0,  # total dormancy cycle (s)
@@ -171,7 +171,7 @@ def test_extract_geyser_stats_calculates_rates() -> None:
 def test_extract_geyser_stats_with_thermal() -> None:
     """Test geyser thermal calculations with element data."""
     config = {
-        "scaledRate": 5.4,
+        "scaledRate": 5400.0,  # g/s (5.4 kg/s after conversion)
         "scaledIterationLength": 401.1,
         "scaledIterationPercent": 0.582,
         "scaledYearLength": 81800.0,
@@ -246,3 +246,41 @@ def test_geyser_config_temperature_ranges() -> None:
             f"{prefab} temperature outside typical range: {temp_k}K "
             f"(expected {MIN_GAME_TEMP_K}-{MAX_GAME_TEMP_K}K)"
         )
+
+
+def test_extract_geyser_stats_converts_grams_to_kg() -> None:
+    """Test that scaledRate (in g/s from save file) is converted to kg/s.
+
+    ONI save files store scaledRate in grams/second, but output should be kg/s.
+    Example: scaledRate=2693.44 g/s → emission_rate_kg_s=2.69344 kg/s
+    """
+    # Real value from save file - Cool Steam Vent
+    config = {
+        "scaledRate": 2693.44,  # g/s from save file
+        "scaledIterationLength": 353.0,
+        "scaledIterationPercent": 0.659,
+        "scaledYearLength": 77100.0,
+        "scaledYearPercent": 0.526,
+    }
+
+    stats = extract_geyser_stats(config)
+
+    # Should convert g/s to kg/s
+    expected_kg_s = 2693.44 / 1000  # ~2.69 kg/s
+    assert abs(stats["emission_rate_kg_s"] - expected_kg_s) < 0.01, (
+        f"Expected ~{expected_kg_s:.2f} kg/s, got {stats['emission_rate_kg_s']:.2f} kg/s. "
+        "scaledRate appears to be in g/s and needs conversion to kg/s."
+    )
+
+    # Derived rates should also use kg/s
+    expected_active_avg = expected_kg_s * 0.659  # ~1.77 kg/s
+    assert abs(stats["average_output_active_kg_s"] - expected_active_avg) < 0.01, (
+        f"Expected ~{expected_active_avg:.2f} kg/s when active, "
+        f"got {stats['average_output_active_kg_s']:.2f} kg/s"
+    )
+
+    # Sanity check: Steam vents should output 1-5 kg/s, not 100s or 1000s
+    assert stats["emission_rate_kg_s"] < 10, (
+        f"Peak rate {stats['emission_rate_kg_s']:.1f} kg/s is unrealistic. "
+        "ONI geysers typically output 1-10 kg/s, not hundreds or thousands."
+    )
