@@ -130,3 +130,47 @@ def format_mass(kg: float) -> str:
         return f"{kg / 1000:.1f} t"
     else:
         return f"{kg:.1f} kg"
+
+
+def format_geyser_detailed(
+    prefab_name: str,
+    index: int,
+    position: tuple[float, float],
+    element: str,
+    element_state: str,
+    temperature_c: float,
+    stats: dict[str, Any],
+    thermal_stats: dict[str, Any] | None = None,
+) -> str:
+    """Format geyser information in detailed multi-line format.
+
+    Args:
+        prefab_name: Geyser type name
+        index: Geyser index (0-based)
+        position: (x, y) coordinates
+        element: Element type (e.g., "Steam", "Natural Gas")
+        element_state: "Gas" or "Liquid"
+        temperature_c: Output temperature in Celsius
+        stats: Statistics from extract_geyser_stats
+        thermal_stats: Optional thermal statistics
+
+    Returns:
+        Formatted multi-line string
+    """
+    lines = []
+
+    # Header
+    lines.append(f"=== {prefab_name} #{index + 1} ===")
+    lines.append(f"Position:         ({position[0]}, {position[1]})")
+    lines.append(f"Output Element:   {element} ({element_state})")
+    lines.append(f"Output Temp:      {temperature_c:.1f}°C")
+    lines.append("")
+
+    # Output Rates
+    lines.append("Output Rates:")
+    lines.append(f"  Average (lifetime):        {stats['average_output_lifetime_kg_s']:.1f} kg/s  (accounts for all downtime)")
+    lines.append(f"  Average (when active):     {stats['average_output_active_kg_s']:.1f} kg/s  (during active period only)")
+    lines.append(f"  Peak (when erupting):      {stats['emission_rate_kg_s']:.1f} kg/s  (maximum output rate)")
+    lines.append("")
+
+    return "\n".join(lines)

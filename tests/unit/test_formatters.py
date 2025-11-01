@@ -3,6 +3,7 @@ from oni_save_parser.formatters import (
     format_duplicant_compact,
     format_duration,
     format_geyser_compact,
+    format_geyser_detailed,
     format_mass,
 )
 
@@ -73,3 +74,44 @@ def test_format_mass_kg():
 def test_format_mass_tons():
     """Test mass formatting in tons."""
     assert format_mass(48100.0) == "48.1 t"
+
+
+def test_format_geyser_detailed_header():
+    """Test detailed format header section."""
+    stats = {
+        "average_output_lifetime_kg_s": 2.1,
+        "average_output_active_kg_s": 2.9,
+        "emission_rate_kg_s": 5.4,
+        "eruption_uptime_percent": 58.2,
+        "active_uptime_percent": 72.0,
+        "overall_uptime_percent": 41.9,
+        "eruption_duration_s": 233.4,
+        "idle_duration_s": 167.7,
+        "eruption_cycle_s": 401.1,
+        "active_duration_s": 58896.1,
+        "dormant_duration_s": 22903.9,
+        "dormancy_cycle_s": 81800.0,
+        "kg_per_eruption": 1260.0,
+        "kg_per_active_period": 170800.0,
+        "storage_for_idle_kg": 486.0,
+        "storage_for_dormancy_kg": 48100.0,
+        "recommended_storage_kg": 48100.0,
+    }
+
+    result = format_geyser_detailed(
+        prefab_name="Cool Steam Vent",
+        index=0,
+        position=(127.5, 147.0),
+        element="Steam",
+        element_state="Gas",
+        temperature_c=136.9,
+        stats=stats,
+    )
+
+    assert "=== Cool Steam Vent #1 ===" in result
+    assert "Position:" in result
+    assert "(127.5, 147.0)" in result
+    assert "Output Element:" in result
+    assert "Steam (Gas)" in result
+    assert "Output Temp:" in result
+    assert "136.9°C" in result
