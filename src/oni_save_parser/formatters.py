@@ -94,12 +94,12 @@ def format_geyser_compact(
     Returns:
         Formatted one-line string
     """
-    avg_output = stats["average_output_lifetime_kg_s"]
+    avg_output = format_rate(stats["average_output_lifetime_kg_s"])
     eruption_percent = stats["eruption_uptime_percent"]
     active_percent = stats["active_uptime_percent"]
 
     return (
-        f"{prefab_name} #{index + 1}: {avg_output:.1f} kg/s avg @ "
+        f"{prefab_name} #{index + 1}: {avg_output} avg @ "
         f"({position[0]}, {position[1]}) | "
         f"{eruption_percent:.0f}% erupting, {active_percent:.0f}% active | "
         f"{temperature_c:.1f}°C {element}"
@@ -136,6 +136,21 @@ def format_mass(kg: float) -> str:
         return f"{kg / 1000:.1f} t"
     else:
         return f"{kg:.1f} kg"
+
+
+def format_rate(kg_s: float) -> str:
+    """Format mass flow rate in g/s or kg/s.
+
+    Args:
+        kg_s: Mass flow rate in kg/s
+
+    Returns:
+        Formatted string with appropriate unit (g/s for < 1 kg/s, kg/s for >= 1 kg/s)
+    """
+    if kg_s < 1.0:
+        return f"{kg_s * 1000:.1f} g/s"
+    else:
+        return f"{kg_s:.1f} kg/s"
 
 
 def format_geyser_detailed(
@@ -177,20 +192,14 @@ def format_geyser_detailed(
     lines.append(f"Analyzed:         {'Yes' if analyzed else 'No (estimated from prefab)'}")
     lines.append("")
 
-    # Output Rates
+    # Output Rates (use appropriate units: g/s for small, kg/s for large)
     lines.append("Output Rates:")
-    lines.append(
-        f"  Average (lifetime):        {stats['average_output_lifetime_kg_s']:>7.1f} kg/s  "
-        f"(accounts for all downtime)"
-    )
-    lines.append(
-        f"  Average (when active):     {stats['average_output_active_kg_s']:>7.1f} kg/s  "
-        f"(during active period only)"
-    )
-    lines.append(
-        f"  Peak (when erupting):      {stats['emission_rate_kg_s']:>7.1f} kg/s  "
-        f"(maximum output rate)"
-    )
+    lifetime_rate = format_rate(stats["average_output_lifetime_kg_s"])
+    active_rate = format_rate(stats["average_output_active_kg_s"])
+    peak_rate = format_rate(stats["emission_rate_kg_s"])
+    lines.append(f"  Average (lifetime):        {lifetime_rate:>12}  (accounts for all downtime)")
+    lines.append(f"  Average (when active):     {active_rate:>12}  (during active period only)")
+    lines.append(f"  Peak (when erupting):      {peak_rate:>12}  (maximum output rate)")
     lines.append("")
 
     # Thermal Output (if available)

@@ -222,5 +222,6 @@ def test_geyser_info_compact_format() -> None:
     )
 
     assert result.returncode == 0
-    assert "kg/s avg" in result.stdout
+    # Output can be in kg/s or g/s depending on geyser size
+    assert "kg/s avg" in result.stdout or "g/s avg" in result.stdout
     assert "erupting" in result.stdout

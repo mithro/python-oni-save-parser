@@ -6,6 +6,7 @@ from oni_save_parser.formatters import (
     format_geyser_compact,
     format_geyser_detailed,
     format_mass,
+    format_rate,
 )
 
 
@@ -32,7 +33,7 @@ def test_format_duplicant_compact_basic_info() -> None:
 
 
 def test_format_geyser_compact() -> None:
-    """Test compact geyser format."""
+    """Test compact geyser format with kg/s (large value)."""
     stats = {
         "average_output_lifetime_kg_s": 2.1,
         "eruption_uptime_percent": 58.2,
@@ -48,9 +49,35 @@ def test_format_geyser_compact() -> None:
         stats=stats,
     )
 
+    # >= 1 kg/s displays as kg/s
     expected = (
         "Cool Steam Vent #1: 2.1 kg/s avg @ (127.5, 147.0) | "
         "58% erupting, 72% active | 136.9°C Steam"
+    )
+    assert result == expected
+
+
+def test_format_geyser_compact_small_rate() -> None:
+    """Test compact geyser format with g/s (small value)."""
+    stats = {
+        "average_output_lifetime_kg_s": 0.085,  # 85 g/s
+        "eruption_uptime_percent": 48.0,
+        "active_uptime_percent": 60.0,
+    }
+
+    result = format_geyser_compact(
+        prefab_name="Methane Vent",
+        index=1,
+        position=(165.5, 135.0),
+        element="Methane",
+        temperature_c=150.0,
+        stats=stats,
+    )
+
+    # < 1 kg/s displays as g/s
+    expected = (
+        "Methane Vent #2: 85.0 g/s avg @ (165.5, 135.0) | "
+        "48% erupting, 60% active | 150.0°C Methane"
     )
     assert result == expected
 
@@ -75,6 +102,20 @@ def test_format_mass_kg() -> None:
 def test_format_mass_tons() -> None:
     """Test mass formatting in tons."""
     assert format_mass(48100.0) == "48.1 t"
+
+
+def test_format_rate_small_gs() -> None:
+    """Test rate formatting in g/s for small values."""
+    assert format_rate(0.085) == "85.0 g/s"
+    assert format_rate(0.5) == "500.0 g/s"
+    assert format_rate(0.042) == "42.0 g/s"
+
+
+def test_format_rate_large_kgs() -> None:
+    """Test rate formatting in kg/s for large values."""
+    assert format_rate(1.0) == "1.0 kg/s"
+    assert format_rate(2.7) == "2.7 kg/s"
+    assert format_rate(10.5) == "10.5 kg/s"
 
 
 def test_format_geyser_detailed_header() -> None:
