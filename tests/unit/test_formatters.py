@@ -32,6 +32,32 @@ def test_format_duplicant_compact_basic_info() -> None:
     assert "12" in result  # stress value
 
 
+def test_format_duplicant_trait_formatting() -> None:
+    """Test that special traits are formatted correctly."""
+    duplicant_data = {
+        "name": "Nails",
+        "gender": "NB",
+        "position": (121.5, 195.0),
+        "skills": {"Farming": 2},
+        "traits": [
+            "CantDig",
+            "Grant Skill_ Suits1",
+            "GrantSkill_Mining2",
+            "EarlyBird",
+        ],
+        "health": {"current": 100.0, "max": 100.0},
+        "stress": {"current": 0.0, "max": 100.0},
+    }
+
+    result = format_duplicant_compact(duplicant_data)
+
+    # Check trait formatting
+    assert "Can't Dig" in result  # CantDig → Can't Dig
+    assert "Grants Skill: Suits 1" in result  # Grant Skill_ Suits1 → Grants Skill: Suits 1
+    assert "Grants Skill: Mining 2" in result  # GrantSkill_Mining2 → Grants Skill: Mining 2
+    assert "Early Bird" in result  # EarlyBird → Early Bird
+
+
 def test_format_geyser_compact() -> None:
     """Test compact geyser format with kg/s (large value)."""
     stats = {

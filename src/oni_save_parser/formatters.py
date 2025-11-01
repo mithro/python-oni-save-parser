@@ -7,6 +7,7 @@ This module provides formatters for different output modes:
 """
 
 import math
+import re
 from typing import Any
 
 # ONI game constants
@@ -46,14 +47,37 @@ def format_duplicant_compact(duplicant_data: dict[str, Any]) -> str:
     # Traits
     traits = duplicant_data.get("traits", [])
     if traits:
-        # Convert camelCase to Title Case
         formatted_traits = []
         for trait in traits:
-            # Simple camelCase split: insert space before capitals
-            spaced = "".join([f" {c}" if c.isupper() else c for c in trait]).strip()
-            formatted_traits.append(spaced)
-        traits_str = ", ".join(formatted_traits)
-        lines.append(f"Traits: {traits_str}")
+            # Handle "Grant Skill_" traits specially
+            if trait.startswith("GrantSkill_") or trait.startswith("Grant Skill_"):
+                # Extract skill name after the prefix
+                skill_part = trait.replace("GrantSkill_", "").replace("Grant Skill_", "").strip()
+                # Split skill name and level (e.g., "Mining2" → "Mining 2")
+                match = re.match(r"([A-Za-z]+)(\d+)", skill_part)
+                if match:
+                    skill_name = match.group(1)
+                    skill_level = match.group(2)
+                    formatted_traits.append(f"Grants Skill: {skill_name} {skill_level}")
+                else:
+                    formatted_traits.append(f"Grants Skill: {skill_part}")
+            # Apply manual overrides for known trait names
+            elif trait == "CantDig":
+                formatted_traits.append("Can't Dig")
+            elif trait == "CantBuild":
+                formatted_traits.append("Can't Build")
+            elif trait == "CantCook":
+                formatted_traits.append("Can't Cook")
+            elif trait == "CantResearch":
+                formatted_traits.append("Can't Research")
+            else:
+                # Convert camelCase to Title Case: insert space before capitals
+                spaced = "".join([f" {c}" if c.isupper() else c for c in trait]).strip()
+                formatted_traits.append(spaced)
+
+        if formatted_traits:
+            traits_str = ", ".join(formatted_traits)
+            lines.append(f"Traits: {traits_str}")
 
     # Health and Stress
     health = duplicant_data.get("health", {})
