@@ -229,12 +229,15 @@ def test_geyser_config_element_ids_valid():
 
 def test_geyser_config_temperature_ranges():
     """Verify temperatures are within physically reasonable ranges."""
-    from oni_save_parser.extractors import GEYSER_CONFIG
+    from oni_save_parser.extractors import GEYSER_CONFIG, MAX_GAME_TEMP_K, MIN_GAME_TEMP_K
 
     for prefab, (element_id, temp_k) in GEYSER_CONFIG.items():
         # Kelvin can't be below absolute zero
         assert temp_k > 0, f"{prefab} has impossible temperature: {temp_k}K"
         # Should be below 5000K (even metal volcanoes)
         assert temp_k < 5000, f"{prefab} temperature seems too high: {temp_k}K"
-        # Should be reasonable for ONI game (above 200K, below 4500K)
-        assert 200 <= temp_k <= 4500, f"{prefab} temperature outside typical range: {temp_k}K"
+        # Should be reasonable for ONI game (typical gameplay range)
+        assert MIN_GAME_TEMP_K <= temp_k <= MAX_GAME_TEMP_K, (
+            f"{prefab} temperature outside typical range: {temp_k}K "
+            f"(expected {MIN_GAME_TEMP_K}-{MAX_GAME_TEMP_K}K)"
+        )

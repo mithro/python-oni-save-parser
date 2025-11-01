@@ -7,6 +7,11 @@ information from ONI save file game object behaviors.
 import re
 from typing import Any
 
+# Temperature range constants for data validation
+# These represent the typical gameplay range in ONI (not absolute physical limits)
+MIN_GAME_TEMP_K = 200.0  # Below this is extremely cold (colder than liquid oxygen)
+MAX_GAME_TEMP_K = 4500.0  # Above this exceeds even tungsten volcano temps
+
 # Geyser configuration mapping: prefab_name -> (element_id, temperature_k)
 # Temperature values from ONI Wiki (converted to Kelvin: °C + 273.15)
 # Covers base game + Spaced Out DLC as of January 2025
@@ -54,13 +59,15 @@ def get_geyser_config_from_prefab(prefab_name: str) -> tuple[str | None, float |
     Returns:
         Tuple of (element_id, temperature_k) or (None, None) if unknown
 
-    Example:
-        >>> get_geyser_config_from_prefab("GeyserGeneric_hot_water")
-        ('Water', 368.15)
-        >>> get_geyser_config_from_prefab("GeyserGeneric_chlorine_gas")
-        ('ChlorineGas', 333.15)
-        >>> get_geyser_config_from_prefab("UnknownGeyser")
-        (None, None)
+    Examples:
+        get_geyser_config_from_prefab("GeyserGeneric_hot_water")
+        # Returns: ('Water', 368.15)
+
+        get_geyser_config_from_prefab("GeyserGeneric_chlorine_gas")
+        # Returns: ('ChlorineGas', 333.15)
+
+        get_geyser_config_from_prefab("UnknownGeyser")
+        # Returns: (None, None)
     """
     config = GEYSER_CONFIG.get(prefab_name)
     if config:
