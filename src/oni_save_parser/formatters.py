@@ -171,18 +171,15 @@ def format_geyser_detailed(
     # Output Rates
     lines.append("Output Rates:")
     lines.append(
-        f"  Average (lifetime):        "
-        f"{stats['average_output_lifetime_kg_s']:.1f} kg/s  "
+        f"  Average (lifetime):        {stats['average_output_lifetime_kg_s']:>7.1f} kg/s  "
         f"(accounts for all downtime)"
     )
     lines.append(
-        f"  Average (when active):     "
-        f"{stats['average_output_active_kg_s']:.1f} kg/s  "
+        f"  Average (when active):     {stats['average_output_active_kg_s']:>7.1f} kg/s  "
         f"(during active period only)"
     )
     lines.append(
-        f"  Peak (when erupting):      "
-        f"{stats['emission_rate_kg_s']:.1f} kg/s  "
+        f"  Peak (when erupting):      {stats['emission_rate_kg_s']:>7.1f} kg/s  "
         f"(maximum output rate)"
     )
     lines.append("")
@@ -216,15 +213,19 @@ def format_geyser_detailed(
     idle_dur = format_duration(stats["idle_duration_s"])
     cycle_dur = format_duration(stats["eruption_cycle_s"])
 
-    kg_eruption = format_mass(stats["kg_per_eruption"])
+    kg_eruption_raw = stats["kg_per_eruption"]
+    if kg_eruption_raw >= 1000:
+        kg_eruption_str = f"{kg_eruption_raw / 1000:>7.1f} t"
+    else:
+        kg_eruption_str = f"{kg_eruption_raw:>7.1f} kg"
+    
     thermal_eruption_str = ""
     if thermal_stats:
         thermal_value = thermal_stats.get("thermal_per_eruption_kdtu", 0)
         thermal_eruption_str = f" @ {thermal_value:>11,.0f} kDTU"
 
     lines.append(
-        f"  Erupting:    {erupting_dur:>20}  → Produces "
-        f"{kg_eruption:>8}{thermal_eruption_str}"
+        f"  Erupting:    {erupting_dur:>20}  → Produces {kg_eruption_str}{thermal_eruption_str}"
     )
     lines.append(f"  Idle:        {idle_dur:>20}  → Produces    0.0 kg")
     lines.append(f"  Total cycle: {cycle_dur:>20}")
@@ -255,7 +256,12 @@ def format_geyser_detailed(
     dormant_dur = format_duration(stats["dormant_duration_s"])
     dormancy_cycle_dur = format_duration(stats["dormancy_cycle_s"])
 
-    kg_active = format_mass(stats["kg_per_active_period"])
+    kg_active_raw = stats["kg_per_active_period"]
+    if kg_active_raw >= 1000:
+        kg_active_str = f"{kg_active_raw / 1000:>7.1f} t"
+    else:
+        kg_active_str = f"{kg_active_raw:>7.1f} kg"
+    
     thermal_active_str = ""
     if thermal_stats and "thermal_per_eruption_kdtu" in thermal_stats:
         # Total thermal during active period
@@ -268,8 +274,7 @@ def format_geyser_detailed(
         thermal_active_str = f" @ {total_thermal_active:>11,.0f} kDTU"
 
     lines.append(
-        f"  Active:      {active_dur:>28}  → Produces "
-        f"{kg_active:>8}{thermal_active_str}"
+        f"  Active:      {active_dur:>28}  → Produces {kg_active_str}{thermal_active_str}"
     )
     lines.append(f"  Dormant:     {dormant_dur:>28}  → Produces    0.0 kg")
     lines.append(f"  Total cycle: {dormancy_cycle_dur:>28}")
