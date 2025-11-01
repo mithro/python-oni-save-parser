@@ -173,4 +173,46 @@ def format_geyser_detailed(
     lines.append(f"  Peak (when erupting):      {stats['emission_rate_kg_s']:.1f} kg/s  (maximum output rate)")
     lines.append("")
 
+    # Thermal Output (if available)
+    if thermal_stats:
+        peak_thermal = thermal_stats.get("peak_thermal_power_kdtu_s", 0)
+        avg_thermal = thermal_stats.get("average_thermal_power_kdtu_s", 0)
+        thermal_eruption = thermal_stats.get("thermal_per_eruption_kdtu", 0)
+
+        lines.append("Thermal Output:")
+        lines.append(f"  Peak thermal power:          {peak_thermal:>7.1f} kDTU/s  (when erupting)")
+        lines.append(f"  Average thermal power:       {avg_thermal:>7.1f} kDTU/s  (lifetime average)")
+        lines.append(f"  Total heat per eruption: {thermal_eruption:>11,.1f} kDTU    (over {format_duration(stats['eruption_duration_s'])})")
+        lines.append("")
+
+    # Eruption Cycle
+    lines.append("Eruption Cycle (short-term):")
+
+    erupting_dur = format_duration(stats["eruption_duration_s"])
+    idle_dur = format_duration(stats["idle_duration_s"])
+    cycle_dur = format_duration(stats["eruption_cycle_s"])
+
+    kg_eruption = format_mass(stats["kg_per_eruption"])
+    thermal_eruption_str = ""
+    if thermal_stats:
+        thermal_eruption_str = f" @ {thermal_stats.get('thermal_per_eruption_kdtu', 0):>11,.0f} kDTU"
+
+    lines.append(f"  Erupting:    {erupting_dur:>20}  → Produces {kg_eruption:>8}{thermal_eruption_str}")
+    lines.append(f"  Idle:        {idle_dur:>20}  → Produces    0.0 kg")
+    lines.append(f"  Total cycle: {cycle_dur:>20}")
+    lines.append(f"  Uptime:      {stats['eruption_uptime_percent']:>6.1f}%")
+    lines.append("")
+
+    # Storage for idle
+    storage_idle = format_mass(stats["storage_for_idle_kg"])
+    lines.append(f"  Storage for idle period: {storage_idle}")
+
+    # Calculate reservoir count
+    if element_state == "Gas":
+        reservoir_capacity = 1000  # Gas Reservoir
+        reservoir_count = int(stats["storage_for_idle_kg"] / reservoir_capacity) + (1 if stats["storage_for_idle_kg"] % reservoir_capacity > 0 else 0)
+        lines.append(f"    - {reservoir_count} Gas Reservoir{'s' if reservoir_count != 1 else ''} (1,000 kg each)")
+
+    lines.append("")
+
     return "\n".join(lines)
